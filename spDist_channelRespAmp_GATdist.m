@@ -8,7 +8,7 @@
 %
 % TCS 8/19/2019
 %
-function spDist_channelRespAmp_GATdist(subj,sess,ROIs,which_vox,trn_tpts)
+function spDist_channelRespAmp_GATdist(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
