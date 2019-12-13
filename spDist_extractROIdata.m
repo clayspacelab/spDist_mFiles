@@ -49,15 +49,14 @@ root_ROI = root;
 %root_ROI = '/deathstar/data/wmChoose_scanner/';
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
-    % ROIs = {{'V1','V2','V3'},{'V3AB'},{'IPS0','IPS1'},{'IPS2','IPS3'},{'sPCS'}};
+    ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS', {'V1','V2','V3'},{'TO1','TO2'},{'LO1','LO2'},{'VO1','VO2'},{'IPS0','IPS1'},{'IPS2','IPS3'}};
 
 end
 
 roi_str = cell(size(ROIs));
 
 
-task_TRs = 372;  % number of TRs in 'choose' task
+%task_TRs = 372;  % number of TRs in 'choose' task
 
 % which functional files do we want? func or surf
 func_type = 'surf'; % 'surf' or 'func'
@@ -162,6 +161,14 @@ for ss = 1:length(subj)
             sess_nii{ff} = niftiRead(thisfn);
             clear thisfn;
         end
+
+	% handle _Long mode...
+	if strfind(sess{ss}{sess_idx},'Long')
+		task_TRs = 432;
+	else
+		task_TRs = 372;
+	end
+
         
         % get # of TRs from each run this session
         nTRs = cellfun(@(x) x.dim(4),sess_nii);

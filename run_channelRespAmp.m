@@ -40,7 +40,7 @@ end
 % 2) SESS 
 % 3) ROI
 % 4) ANALYSIS
-n_threads_per_core = 6;
+n_threads_per_core = 4;
 ncores = floor(feature('numcores')/n_threads_per_core);
 mypool = parpool(ncores); % use all possible cores
 
