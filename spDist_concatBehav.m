@@ -35,8 +35,11 @@ for ss = 1:length(subj)
         
         this_subjID = sprintf('%s_%s',subj{ss},sess{ss}{sess_idx});
         
-
-        expt_name = 'spDist_scanner';
+%	if strfind(sess{ss}{sess_idx},'Long')
+%		expt_name = '';
+%	else
+        	expt_name = 'spDist_scanner';
+%	end
         
         % look for all behavioral files (not saccades yet) 20171213T103006
         fnm_b = sprintf('%s/%s_behav/%s_r*_%s_*.mat',root_raw,this_subjID,this_subjID,expt_name); % because of datestr(now,30), there's a T in the behav files, but not in the saccade files
@@ -87,7 +90,7 @@ for ss = 1:length(subj)
             % col 3: onset of MGS cue
             t_tmp = nan(ntrials,3);
             t_tmp(:,1) = bdata.delay_start;%-bdata.raw_t.startExperimentTime;
-            t_tmp(:,2) = bdata.dist_start;%raw_t.distractorStartTime-bdata.raw_t.startExperimentTime;
+            t_tmp(:,2) = bdata.dist_start(:,1);%raw_t.distractorStartTime-bdata.raw_t.startExperimentTime;
             t_tmp(:,3) = bdata.MGS_start;%raw_t.respStartTime-bdata.raw_t.startExperimentTime-0.25; % NOTE: 0.25 offset here is due to double-marking of events for some reason, go cue occurred 0.25 s before this...
             
             t_all = [t_all;t_tmp-bdata.expt_start];
