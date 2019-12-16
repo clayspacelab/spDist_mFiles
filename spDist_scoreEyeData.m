@@ -19,19 +19,19 @@ function spDist_scoreEyeData(subj,sess,WHICH_EXCL)
 close all;
 root = spDist_loadRoot;
 %root = sprintf('/d/DATA/data/spDist/')
-%ifg_fn = '~/Documents/MATLAB/toolboxes_dev/iEye_ts/examples/p_500hz.ifg';
-ifg_fn = '/Volumes/home/grace/iEye/examples/p_500hz.ifg';
+ifg_fn = '~/Documents/MATLAB/toolboxes_dev/iEye_ts/examples/p_500hz.ifg';
+%ifg_fn = '/Volumes/home/grace/iEye/examples/p_500hz.ifg';
 %ifg_fn = '~/d/data/home/grace/iEye_ts-master/examples/p_500hz.ifg';
 
 task_dir = 'spDist';
 
 if nargin < 1
     %subj = {'AY','CC','KD','MR','XL'};
-    subj = {'SF'}
+    subj = {'CC'}
 end
 
 if nargin < 2
-    sess = {{'spDist2'}};
+    sess = {{'spDistLong1'}};
     
 end
 
@@ -98,14 +98,17 @@ for ss = 1:length(subj)
             % 8: correct? (0 or 1; NaN)
             % 9: RT
             
+            % NOTE: for spDistLong? files, only takes the first value of
+            % direction, RT
+            
             trialinfo = nan(thisbehav.ntrials,9);
             trialinfo(:,1) = thisbehav.conditions(:,1);
             trialinfo(:,[2 3]) = thisbehav.wm_coords;
             trialinfo(:,[4 5]) = thisbehav.dist_coords;
             trialinfo(:,6) = thisbehav.conditions(:,2);
-            trialinfo(:,7) = thisbehav.dist_dir;
+            trialinfo(:,7) = thisbehav.dist_dir(:,1);
             trialinfo(trialinfo(:,1)==1,8) = thisbehav.correct(trialinfo(:,1)==1);
-            trialinfo(:,9) = thisbehav.dist_RT;
+            trialinfo(:,9) = thisbehav.dist_RT(:,1);
             
             % custom for each expt
             block_num = str2double(matf(strfind(matf,'_r')+[2 3]));

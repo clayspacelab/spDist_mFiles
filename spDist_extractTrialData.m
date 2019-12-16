@@ -39,7 +39,7 @@ func_suffix = 'surf'; % which func files?
 % [1] is DELAY, [2] is distractor, [3] is RESPONSE START!!!!!!
 locked_to_event = 1; % which event to lock to (1 = pre-cue, 2 = targets, 3 = delay [TR], 4 = response cue, 5 = feedback, 6 = ITI start
 
-which_TRs = -3:26; % 0 is timepoint closest to start of trial, 1 is 1 TR after, etc (0:18; 0:28)
+%which_TRs = -3:26; % 0 is timepoint closest to start of trial, 1 is 1 TR after, etc (0:18; 0:28)
 
 
 for ss = 1:length(subj)
@@ -53,6 +53,12 @@ for ss = 1:length(subj)
         behav = load(fnb);
         
         %figure;
+
+	if strfind(sess{ss}{sess_idx},'Long')
+		which_TRs = -3:34;
+	else
+		which_TRs = -3:26;
+	end
         
         
         for vv = 1:length(ROIs)
