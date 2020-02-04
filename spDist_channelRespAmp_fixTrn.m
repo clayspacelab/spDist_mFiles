@@ -20,7 +20,10 @@ trn_dir = 'wmChoose';
 trn_sess = 'MGSMap'; % files to load for training
 
 root =  spDist_loadRoot;
-trn_root = sprintf('%s/../wmChoose_scanner/',root);
+%trn_root = sprintf('%s/../wmChoose_scanner/',root);
+%trn_root = sprintf('%s/../../datb/wmChoose_scanner/',root)
+% FUCKING datb/data makes this not work...just use super-absolute path here
+trn_root = '/deathstar/datb/wmChoose_scanner';
 
 if nargin < 1
     subj = {'AY','CC','EK','KD','MR','SF','XL'};
@@ -54,7 +57,7 @@ end
 align_to = {'targ_ang_all','dist_ang_all'};
 
 func_suffix = 'surf';
-delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
+%delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
 
 
 % loop over subj, ROIs and load each session, concatenate, and process
@@ -74,6 +77,9 @@ for ss = 1:length(subj)
             thisdata.sess = sess_idx*ones(size(thisdata.r_all));
             
             data_tst = cat_struct(data_tst,thisdata,{'rf','TR','which_TRs'}); % skip 'rf', these will be the same
+		
+	    % slightly hacky way to dynamically set delay_tpts...though note that this won't work if mismatched sessions submitted
+	    delay_tpts = thisdata.which_TRs;
             
         end
         
