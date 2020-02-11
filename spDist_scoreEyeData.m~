@@ -22,7 +22,7 @@ root = '/share/data/spDist/'
 %root = sprintf('/d/DATA/data/spDist/')
 %ifg_fn = '~/Documents/MATLAB/toolboxes_dev/iEye_ts/examples/p_500hz.ifg';
 %ifg_fn = '/Volumes/home/grace/iEye/examples/p_500hz.ifg';
-ifg_fn = '/share/home/grace/iEye/examples/p_500hz.ifg';
+ifg_fn = 'share/data/home/grace/iEye/examples/p_500hz.ifg';
 
 task_dir = 'spDist';
 
