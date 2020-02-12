@@ -358,7 +358,7 @@ end
 set(gcf,'Renderer','painters')
 match_ylim(get(gcf,'Children'))
 
-%% Figure 1D
+%% Figure 1D : Precision
 % directly compare error for no distractor, near distractor, far distractor
 % trials (subplot for each param); averaged over radial/tang...
 
