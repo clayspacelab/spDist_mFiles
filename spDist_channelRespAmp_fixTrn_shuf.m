@@ -21,7 +21,7 @@
        % for reference: 
        % (saved from spDist_scoreEyeData.m; via eyeData)
        
-       % 1: distractor condition (1 = no, 2 = distractor)
+       % 1: distractor condition (1 = no, 2 = distractor)       
        % 2,3: target position X, Y (dva)
        % 4,5: distractor position X,Y (or NaN; dva)
        % 6: distractor bin (-3:3; NaN); Cartesian, so + is CCW
@@ -39,8 +39,9 @@ trn_dir = 'wmChoose';
 trn_sess = 'MGSMap'; % files to load for training
 
 root =  spDist_loadRoot;
-trn_root = sprintf('%s/../wmChoose_scanner/',root);
-
+%trn_root = sprintf('%s/../wmChoose_scanner/',root); geh getting rid of
+%this 02-14-20
+trn_root = '/deathstar/datb/wmChoose_scanner';
 if nargin < 1
     subj = {'AY','CC','EK','KD','MR','SF','XL'};
         

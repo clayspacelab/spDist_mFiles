@@ -473,6 +473,6 @@ for pp = 1:length(params_of_interest)
 end
 xlabel('Near Distractor');
 
-[h_bias_near p_bias_near] = ttest(thism_near(1,:)') %t-test to determine if bias is different than zero
+[h_bias_near p_bias_near,CI,STATS] = ttest(thism_near(1,:)') %t-test to determine if bias is different than zero
 
 match_ylim(get(gcf,'Children'));

@@ -284,25 +284,34 @@ to_plot =[1 2];
 store_b = nan(length(to_plot),length(ROIs),length(subj));
 
 figure
-for ff = 1 %:length(to_plot)
+for ff = 1:length(to_plot)
     for vv = 1:length(ROIs)
         subplot(length(to_plot),length(ROIs),(ff-1)*length(ROIs)+vv);hold on;
-        bias = nan(size(all_recons{1},3),size(all_recons_flipped,2),length(subj));
+        store_bias = nan(2,length(ROIs),length(subj));
         thisd = nan(size(all_recons{1},3),size(all_recons_flipped,2),length(subj));
         thisb = nan(1,length(subj));
         for ss = 1:length(subj)
             if ff ==1
             thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2 & all_conds(:,6)==0; 
             thisd(:,:,ss) = squeeze(mean(all_recons_flipped(thisidx,:,:),1)).';
-            bias(:,:,ss)  = atan2d(squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*sind(angs),squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*cosd(angs));
+            %bias(:,:,ss)  = atan2d(squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*sind(angs),squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*cosd(angs));
             thisb(ss) = atan2d(sum(mean(mean(all_recons_flipped(thisidx,:,tpts_to_plot),1),3).*sind(angs)),sum(mean(mean(all_recons_flipped(thisidx,:,tpts_to_plot),1),3).*cosd(angs)));
             store_b(ff,vv,ss) = thisb(ss);
+            if ss == 7
+            store_mean(ff,vv,ss) = mean(store_b(ff,vv,:),3);
+            else
+            end
             else
             thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2 & all_conds(:,6)~=0; 
             thisd(:,:,ss) = squeeze(mean(all_recons_flipped(thisidx,:,:),1)).';
-            bias(:,:,ss)  = atan2d(squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*sind(angs),squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*cosd(angs));
+            %bias(:,:,ss)  = atan2d(squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*sind(angs),squeeze(mean(all_recons_flipped(thisidx,:,:),1)).'.*cosd(angs));
             thisb(ss) = atan2d(sum(mean(mean(all_recons_flipped(thisidx,:,tpts_to_plot),1),3).*sind(angs)),sum(mean(mean(all_recons_flipped(thisidx,:,tpts_to_plot),1),3).*cosd(angs)));
             store_b(ff,vv,ss) = thisb(ss);
+            if ss == 7
+            store_mean(ff,vv,ss) = mean(store_b(ff,vv,:),3);
+            else
+            end
+            
             end
         end
        hold on
@@ -355,13 +364,13 @@ end
 % 2: ROI
 % 3: subj
 
-for tt =1:size(store_b,1)
+for tt =1:size(store_b,1) %condition = 1, near; 2, far
 for rr =1:length(ROIs)
-[H(tt,rr) P(tt,rr)] =  ttest(store_b(tt,rr,:));
-
+[H(tt,rr), P(tt,rr), CI, STATS] =  ttest(store_b(tt,rr,:));
+%store_mean(tt,rr) = mean(store_b(tt,rr,:),3);
+sprintf('%s p=%i, t-score =%i, df=%i,sd=%i,mean =', ROIs{rr}, P(tt,rr),STATS.tstat,STATS.df,STATS.sd,mean(store_b(tt,rr,:),3))
+clear STATS
 end 
-
-
 end
 
 sprintf('P-values = %s',P) 
