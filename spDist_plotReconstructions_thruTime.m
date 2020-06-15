@@ -19,14 +19,14 @@ root = spDist_loadRoot;
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
-    subj = {'CC','KD','AY','MR','XL','SF'};
+    subj = {'CC','KD','AY','MR','XL','SF','EK'};
     %subj = {'XL'};
 end
 
 if nargin < 2 || isempty(sess)
     % each subj gets one cell, with strings for each sess
     % TODO: automate...
-    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
     %sess = {{'spDist1','spDist2'},}
 end
 
@@ -101,142 +101,73 @@ for ss = 1:length(subj)
     
     for vv = 1:length(ROIs)
         
-        if cat_mode == 1
-            % just one file to load
-            fn = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_thruTime1.mat',root,task_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
+        % just one file to load
+        fn = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_thruTime1.mat',root,task_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
+        
+        fprintf('loading %s...\n',fn);
+        data = load(fn);
+        
+        
+        if vv == 1 && ss == 1
+            % initialize variables...
             
-            fprintf('loading %s...\n',fn);
-            data = load(fn);
             
-            
-            if vv == 1 && ss == 1
-                % initialize variables...
-                
-                
-                nblankt = length(ROIs)*size(data.recons{1},1);
-                all_recons = cell(size(data.recons));
-                for aa = 1:length(data.recons)
-                    all_recons{aa} = nan(nblankt,size(data.recons{aa},2),size(data.recons{aa},3));
-                end
-                
-                all_recons_nodist = nan(nblankt,size(data.recons_nodist,2),size(data.recons_nodist,3));
-                
-                all_conds = nan(nblankt,size(data.c_all,2));
-                all_angs = nan(nblankt,size(data.a_all,2));
-                
-                all_fidelity = nan(nblankt,size(data.recons{1},3),length(data.recons)); % timecoruse of fidelity for each alignment condition
-                all_fidelity_nodist = nan(nblankt,size(data.recons_nodist,3));
-                
-                all_subj = nan(nblankt,1);
-                all_ROIs = nan(nblankt,1);
-                all_sess = nan(nblankt,1);
-                
-                
-                angs = data.angs;
-                tpts = data.delay_tpts;
-                
-                % ugh have to do this in a multi-D array...
-                %all_r2 = nan(length(ROIs),length(tpts),length(subj));
-                
+            nblankt = length(ROIs)*size(data.recons{1},1);
+            all_recons = cell(size(data.recons));
+            for aa = 1:length(data.recons)
+                all_recons{aa} = nan(nblankt,size(data.recons{aa},2),size(data.recons{aa},3));
             end
             
+            all_recons_nodist = nan(nblankt,size(data.recons_nodist,2),size(data.recons_nodist,3));
+            
+            all_conds = nan(nblankt,size(data.c_all,2));
+            all_angs = nan(nblankt,size(data.a_all,2));
+            
+            all_fidelity = nan(nblankt,size(data.recons{1},3),length(data.recons)); % timecoruse of fidelity for each alignment condition
+            all_fidelity_nodist = nan(nblankt,size(data.recons_nodist,3));
+            
+            all_subj = nan(nblankt,1);
+            all_ROIs = nan(nblankt,1);
+            all_sess = nan(nblankt,1);
             
             
-            thisidx = startidx:(startidx+size(data.c_all,1)-1);
+            angs = data.angs;
+            tpts = data.delay_tpts;
             
-            for aa = 1:length(all_recons)
-                all_recons{aa}(thisidx,:,:) = data.recons{aa};
-                all_fidelity(thisidx,:,aa) = squeeze(mean(cosd(angs) .* data.recons{aa},2));
-            end
-            
-            all_recons_nodist(thisidx,:,:) = data.recons_nodist;
-            all_fidelity_nodist(thisidx,:) =  squeeze(mean(cosd(angs) .* data.recons_nodist,2));
-            
-            all_conds(thisidx,:) = data.c_all;
-            all_angs(thisidx,:) = data.a_all;
-            
-            
-            all_subj(thisidx) = ss;
-            
-            
-            all_ROIs(thisidx) = vv;
-            
-            all_sess(thisidx) = data.sess_all;
-            
-            
-            startidx = thisidx(end)+1;
-            
-            clear data;
-            
-        else
-            % NOT SUPPORTED YET!!!!
-            
-            for sess_idx = 1:length(sess{ss})
-                % build fn
-                fn = sprintf('%swmChoose_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_cv_thruTime1.mat',root,subj{ss},sess{ss}{sess_idx},ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
-                
-                fprintf('loading %s...\n',fn);
-                data = load(fn);
-                
-                
-                if vv == 1 && ss == 1
-                    % initialize variables...
-                    
-                    
-                    nblankt = length(ROIs)*numel(sess)*size(data.recons,1);
-                    
-                    all_recons = nan(nblankt,size(data.recons,2),size(data.recons,3));
-                    all_conds = nan(nblankt,size(data.c_map,2));
-                    
-                    all_fidelity = nan(nblankt,size(data.recons,3)); % timecoruse of fidelity
-                    
-                    
-                    all_subj = nan(nblankt,1);
-                    all_ROIs = nan(nblankt,1);
-                    all_sess = nan(nblankt,1);
-                    
-                    angs = data.angs;
-                    tpts = data.delay_tpts;
-                    
-                    all_r2 = nan(length(ROIs),length(tpts),length(subj));
-                    
-                end
-                
-                % set up our variable used to compute R2
-                if sess_idx == 1
-                    tmp_r2 = nan(length(tpts),length(sess{ss})); % average acorss sessions...
-                end
-                
-                thisidx = startidx:(startidx+size(data.c_map,1)-1);
-                
-                
-                all_recons(thisidx,:,:) = data.recons;
-                all_fidelity(thisidx,:) = squeeze(mean(cosd(angs) .* data.recons,2));
-                
-                all_conds(thisidx,:) = data.c_map;
-                
-                
-                
-                all_subj(thisidx) = ss;
-                
-                
-                all_ROIs(thisidx) = vv;
-                
-                all_sess(thisidx) = sess_idx;
-                
-                tmp_r2(:,sess_idx) = squeeze(mean(mean(data.r2_all,1),2));
-                
-                startidx = thisidx(end)+1;
-                
-                clear data;
-                
-            end
-            
-            %all_r2(vv,:,ss) = mean(tmp_r2,2);
-            %clear tmp_r2;
-            
+            % ugh have to do this in a multi-D array...
+            %all_r2 = nan(length(ROIs),length(tpts),length(subj));
             
         end
+        
+        
+        
+        thisidx = startidx:(startidx+size(data.c_all,1)-1);
+        
+        for aa = 1:length(all_recons)
+            all_recons{aa}(thisidx,:,:) = data.recons{aa};
+            all_fidelity(thisidx,:,aa) = squeeze(mean(cosd(angs) .* data.recons{aa},2));
+        end
+        
+        all_recons_nodist(thisidx,:,:) = data.recons_nodist;
+        all_fidelity_nodist(thisidx,:) =  squeeze(mean(cosd(angs) .* data.recons_nodist,2));
+        
+        all_conds(thisidx,:) = data.c_all;
+        all_angs(thisidx,:) = data.a_all;
+        
+        
+        all_subj(thisidx) = ss;
+        
+        
+        all_ROIs(thisidx) = vv;
+        
+        all_sess(thisidx) = data.sess_all;
+        
+        
+        startidx = thisidx(end)+1;
+        
+        clear data;
+        
+        
     end
     
 end
