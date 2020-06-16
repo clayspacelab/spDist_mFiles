@@ -366,7 +366,15 @@ for aa = 1:length(all_recons)
             end
             imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
             colormap viridis;
-            plot(step_size*du(dd),dist_time,'rv','LineWidth',2,'MarkerSize',3);
+            
+            % if distractor-aligned, relative positions are flipped
+            if aa == 1
+                plot(0,                  0        ,'cv','LineWidth',2,'MarkerSize',3);
+                plot(   step_size*du(dd),dist_time,'rv','LineWidth',2,'MarkerSize',3);
+            else
+                plot(0,                  dist_time,'rv','LineWidth',2,'MarkerSize',3);
+                plot(-1*step_size*du(dd),0        ,'cv','LineWidth',2,'MarkerSize',3);
+            end
             
             if dd == 1
                 title(ROIs{vv});
@@ -374,10 +382,12 @@ for aa = 1:length(all_recons)
             axis ij tight
             set(gca,'XTick',-180:90:180);
             if vv == 1
-                xlabel('Polar angle (\circ)');
                 ylabel(sprintf('D %i - time (s)',du(dd)));
                 if dd == length(du)
                     set(gca,'XTickLabel',{'-180','','0','','180'});
+                    xlabel('Polar angle (\circ)');
+                else
+                    set(gca,'XTickLabel',[]);
                 end
                 
             else
