@@ -54,6 +54,8 @@ plot_tpts = 7:15; % for a plot where we average reconstructions over a fixed tim
 
 dist_time = 4.5; % onset at 4 s
 
+yticks = [0 4.5 12];
+
 
 % set up file loading strings for below
 if smooth_by == 1
@@ -206,7 +208,7 @@ for cc = 1:length(cu)
             title(ROIs{vv});
         end
         axis ij tight
-        set(gca,'XTick',-180:90:180);
+        set(gca,'XTick',-180:90:180,'YTick',yticks);
         if vv == 1
             xlabel('Polar angle (\circ)');
             ylabel(sprintf('%s - time (s)',cond_str{cc}));
@@ -284,7 +286,7 @@ for vv = 1:length(ROIs)
     title(ROIs{vv});
     
     axis ij tight
-    set(gca,'XTick',-180:90:180);
+    set(gca,'XTick',-180:90:180,'YTick',yticks);
     if vv == 1
         xlabel('Polar angle (\circ)');
         ylabel(sprintf('%s - time (s)',cond_str{cc}));
@@ -322,7 +324,7 @@ for vv = 1:length(ROIs)
     title(ROIs{vv});
     
     axis ij tight
-    set(gca,'XTick',-180:90:180);
+    set(gca,'XTick',-180:90:180,'YTick',yticks);
     if vv == 1
         xlabel('Polar angle (\circ)');
         ylabel(sprintf('%s - time (s)',cond_str{cc}));
