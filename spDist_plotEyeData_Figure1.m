@@ -3,14 +3,15 @@
 % in the actual task, cyan = distractor, magenta = no distractor 
 % dependencies: misc_util, RMAOV1 
 
-root = spDist_loadRoot;
+%root = spDist_loadRoot;
+root = '/share/data/spDist/';
 
 %load raw subject data 
 subj = {'KD','CC','AY','MR','XL','EK','SF'};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; %two sessions removed
 
 
-WHICH_EXCL = [13 20 22]; % see geh spDist_eyeDataNotes.txt on how/why these exclu criteria were chosen. 
+WHICH_EXCL = [13 20 21 22]; % see geh spDist_eyeDataNotes.txt on how/why these exclu criteria were chosen. 
 if ismember(WHICH_EXCL,13)
     which_excl_str ={'broken fix'};
 elseif ismember(WHICH_EXCL,[13 20])
@@ -152,7 +153,7 @@ for ss = 1:length(subj)
             tmpidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==(flip_bins(bb)*-1);
             orig_y =  all_data.s_all.(params_of_interest{pp})(tmpidx,2);
             orig_y_flip = orig_y*-1;
-            all_data.s_all.(params_of_interest{pp})(tmpidx,2) = orig_y_flip;  % here is where the actual y flip is inserted for CW bins.
+            all_data.s_all.(params_of_interest{pp})(tmpidx,2) = orig_y_flip;  % the y flip is inserted for CW bins.
             
             thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & (all_data.s_all.trialinfo(:,6)==flip_bins(bb) | all_data.s_all.trialinfo(:,6)==flip_bins(bb)*-1);
             % distractor bin x param x [radial; tangential] x subj
@@ -221,17 +222,23 @@ all_rt{3} = tmp_rt;
 dist_colors = [0.7100 0.2128 0.4772; 0 0 1;]; %1 is red, no distractor, 2 is blue (near distractor), 3 is green (far distractor)
 figure;
 hold on;
-xdat_to_plot = [1 2 3 4 5 6 7 8 9 10]; % these are the annotations from our eye-date marking the distinct epochs of the task
+xdat_to_plot = [1 2 3 4 5 6 7 8 9 10]; % these are the annotations from our eye-data marking the distinct epochs of the task
 dist_cond =[1 2];
 %use subj 6, trial # 23 no d and #12 d.
-for cc = 1:length(dist_cond)
-    thisidx = find(all_data.use_trial==1 & all_data.subj_all ==6 & all_data.s_all.trialinfo(:,1) == dist_cond(cc));
-    if cc ==1
-        which_tri = 23;
-    else
-        which_tri = 12;
-    end
-    for tt = which_tri
+%for cc = 1:length(dist_cond)
+    thisidx = find(all_data.use_trial==1 & all_data.subj_all ==2) %& all_data.s_all.trialinfo(:,1) == dist_cond(cc));
+    this_logidx = all_data.use_trial==1 & all_data.subj_all ==2;
+    %     if cc ==1
+%         which_tri = 23;
+%     else
+%         which_tri = 12;
+%     end
+
+      %shuff_idxtmp = randperm((size(find(thisidx_tmp),1)));
+      
+      %y_shuf(thisroiidx,:) = tmp_y(shuff_idx,:);
+      %thisidx = shuff_idxtmp(1:10);
+    for tt = 1:length(thisidx)
         figure(1)
         %transform the cartesian X,Y coords we have for the trace and put
         %it in polar
@@ -243,23 +250,46 @@ for cc = 1:length(dist_cond)
         [aligned_x,~] = pol2cart(tmpth-adjth,tmpr); % we're not using y here, just x
         
         aligned_x = aligned_x(ismember(all_data.s_all.XDAT{thisidx(tt)},xdat_to_plot));
-        if cc ==2
-            aligned_x = aligned_x.*-1; % for visualization purposes, flip the trace of the distractor condition to be mirrored over the x-axis
-        else
-        end
-        
+        if  all_data.s_all.trialinfo(thisidx(tt),1) ==1 
+            
         this_t = (1:length(aligned_x))/500; %Time in seconds (how many samples were taken / frequency of recording device)
         subplot(2,1,1)
-        plot(this_t,aligned_x,'-','LineWidth',2,'Color',dist_colors(cc,:));
+        plot(this_t,aligned_x,'-','LineWidth',0.3,'Color',[dist_colors(1,:)  0.5000]) %dist_colors(cc,:));
         ylim([-18 18]);
         xlim([0 15])
         xticks([0 1.5 6 13.5])
         xticklabels({'-1.5','0','4.5','12'})
-        set(gca,'YTick',[-18:3:18],'TickDir','out');
+        set(gca,'YTick',[-12 0 12],'TickDir','out');
         hold on;
+        set(gcf,'Renderer','painters')
+            
+        else
+         aligned_x = aligned_x.*-1; % for visualization purposes, flip the trace of the distractor condition to be mirrored over the x-axis
+        this_t = (1:length(aligned_x))/500; %Time in seconds (how many samples were taken / frequency of recording device)
+        subplot(2,1,1)
+        plot(this_t,aligned_x,'-','LineWidth',0.3,'Color',[dist_colors(2,:)  0.5000]) %dist_colors(cc,:));
+        ylim([-18 18]);
+        xlim([0 15])
+        xticks([0 1.5 6 13.5])
+        xticklabels({'-1.5','0','4.5','12'})
+        set(gca,'YTick',[-12 0 12],'TickDir','out');
+        hold on;
+        set(gcf,'Renderer','painters')
         
+        end
         
-        if cc ==1
+%         this_t = (1:length(aligned_x))/500; %Time in seconds (how many samples were taken / frequency of recording device)
+%         subplot(2,1,1)
+%         plot(this_t,aligned_x,'-','LineWidth',0.3,'Color',[dist_colors(cc,:)  0.1000]) %dist_colors(cc,:));
+%         ylim([-18 18]);
+%         xlim([0 15])
+%         xticks([0 1.5 6 13.5])
+%         xticklabels({'-1.5','0','4.5','12'})
+%         set(gca,'YTick',[-12 0 12],'TickDir','out');
+%         hold on;
+%         
+        
+        if tt ==1
             %for this subject, this trial, this epoch, turn XDAT marker on
             epoch_1_condc = all_data.s_all.XDAT{thisidx(tt)} ==1 ; % store the entire epoch in a variable 
             epoch_2_targ = all_data.s_all.XDAT{thisidx(tt)} ==2;
@@ -271,10 +301,10 @@ for cc = 1:length(dist_cond)
             epoch_8_iti = all_data.s_all.XDAT{thisidx(tt)}==8;
             subplot(2,1,2)
             hold on;
-            plot(this_t,epoch_1_condc+6,'k-','LineWidth',1);
-            plot(this_t,epoch_2_targ+4,'k-','LineWidth',1);
-            plot(this_t,epoch_4_dist+2,'k-','LineWidth',1);
-            plot(this_t,epoch_6_go,'k-','LineWidth',1);
+            plot(this_t,epoch_1_condc+6,'k-','LineWidth',3);
+            plot(this_t,epoch_2_targ+4,'k-','LineWidth',3);
+            plot(this_t,epoch_4_dist+2,'k-','LineWidth',3);
+            plot(this_t,epoch_6_go,'k-','LineWidth',3);
             xlim([0 15])
             xticks([0 1.5 6 13.5])
             xticklabels({'-1.5','0','4.5','12'})
@@ -282,12 +312,13 @@ for cc = 1:length(dist_cond)
             yticklabels({'Response','Distractor', 'Target','Condition Cue'})
             xlabel('Time relative to delay onset (s)');
             ylabel('Trial Epoch')
+            set(gcf,'Renderer','painters')
         else
         end     
     end
 
-end
-
+set(gcf,'Renderer','painters')
+%set(gcf,'position',[  1000         626        1147         712])
 xlabel('Time relative to delay onset (s)');
 ylabel('Eye position (DVA)');
 

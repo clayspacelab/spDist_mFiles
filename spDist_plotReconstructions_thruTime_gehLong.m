@@ -15,19 +15,20 @@
 function spDist_plotReconstructions_thruTime_gehLong(subj,sess,ROIs)
 
 root = spDist_loadRoot;
+root = '/share/data/spDist/';
 
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
-    subj = {'CC','KD','AY','MR','XL','SF','EK'};
-    %subj = {'XL'};
+    %subj = {'CC','KD','AY','MR','XL','SF','EK'};
+    subj = {'CC','AY','MR'};
 end
 
 if nargin < 2 || isempty(sess)
     % each subj gets one cell, with strings for each sess
     % TODO: automate...
-    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-    %sess = {{'spDist1','spDist2'},}
+    %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+    sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}}
 end
 
 if nargin < 3 || isempty(ROIs)
@@ -49,7 +50,7 @@ myTR = 0.75;
 t_range_to_plot = [-inf 12]; % plot b/w these (s)
 
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-   t_range_to_plot = [-inf 16];  
+   t_range_to_plot = [-inf 16.5];  
 else
 end
 
@@ -294,7 +295,7 @@ for cc = 1:length(cu)
 end
 
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:4.5:16);
+    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 10 16.5]);
 else
     set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
 end
@@ -379,7 +380,7 @@ for vv = 1:length(ROIs)
 end
 
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:4.5:16);
+    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 10 16.5]);
 else
     set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
 end
@@ -422,7 +423,7 @@ for vv = 1:length(ROIs)
 end
 
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:4.5:16);
+    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 10 16.5]);
 else
     set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
 end
@@ -479,7 +480,7 @@ for aa = 1:length(all_recons)
     end
     
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:4.5:16);
+    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 10 16.5]);
 else
     set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
 end
@@ -635,7 +636,7 @@ fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
 
 t_markers = [0 4.5 12]; % onset of delay, distractor, response
 if ismember(sess{1},{'spDistLong1','spDistLong2'})
-    t_markers = [0 4.5 9.5 16];
+    t_markers = [0 4.5 10 16]; %updated distractor off 
 else
 end
 mh1 = nan(length(ROIs),length(t_markers));

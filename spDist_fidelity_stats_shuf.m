@@ -24,12 +24,13 @@
 
 
 root = spDist_loadRoot;   % '/Volumes/data/wmChoose_scanner/';
+root = '/share/data/spDist/';
 
 subj = {'AY','CC','EK','KD','MR','XL','SF'};
-%subj = {'CC','AY'};
+%subj = {'CC','AY','MR'};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'}};
-
+%sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
 
 ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
 %ROIs = {'V1','V2','V3'};
@@ -170,9 +171,6 @@ end
 %% which tpts are we plotting throughout?
 tpts_to_plot = (tpts*myTR) >= t_range_to_plot(1) & (tpts*myTR) < t_range_to_plot(2);
 
-
-
-
 %% FIDELITY: compute mean for each subj
 
 %addpath /Volumes/home/tommy/Documents/MATLAB/toolboxes/resampling_statistical_toolkit/statistics; % make sure we're not using vista's FDR
@@ -222,7 +220,7 @@ for cc = 1:size(conds_of_interest,1)
             shuf_data = nan(length(subj),n_shuf_iter);
             real_data = nan(length(subj),1);
             for ss = 1:length(subj)
-                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==conds_of_interest(cc,1);
+                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==conds_of_interest(cc,1); %& all_conds(:,6)==0; %(all_conds(:,6)==1 | all_conds(:,6)==-1); %CATCH
                 shuf_data(ss,:) = squeeze(mean(all_fidelity_shuf{conds_of_interest(cc,2)}(thisidx,tpt_idx,:),1));
                 real_data(ss) = mean(all_fidelity{conds_of_interest(cc,2)}(thisidx,tpt_idx));
                 all_ci{cc}(vv,tpt_idx,ss) = prctile(squeeze(mean(all_fidelity_shuf{conds_of_interest(cc,2)}(thisidx,tpt_idx,:),1)),ci_level);
@@ -333,7 +331,7 @@ for cc = 1:size(conds_of_interest,1)
             clear this_crossing this_tpts;
         end
     end
-    sgtitle(cond_str{cc});
+%    sgtitle(cond_str{cc});
 end
 
 
@@ -352,6 +350,11 @@ cond_group = {[1 2], 3}; % what to put on same axes
 fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
 
 t_markers = [0 4.5 12]; % onset of delay, distractor, response
+
+if ismember(sess{1},{'spDistLong1','spDistLong2'})
+    t_markers = [0 4.5 10 16]; %updated distractor off 
+else
+end
 mh = nan(length(ROIs),length(t_markers),length(cond_group));
 
 sig_offset = 0.1; % how far to move significant points
@@ -394,9 +397,9 @@ for vv = 1:length(ROIs)
             end
             
             if gg ~= length(cond_group)
-                set(gca,'XTick',[0:6:24],'TickDir','out','XTickLabel',[]);
+                set(gca,'XTick',[0 4.5 12],'TickDir','out','XTickLabel',[]);
             else
-                set(gca,'XTick',[0:6:24],'TickDir','out');
+                set(gca,'XTick',[0 4.5 12],'TickDir','out');
             end
             
             

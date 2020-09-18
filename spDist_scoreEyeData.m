@@ -23,17 +23,22 @@ root = '/share/data/spDist/'
 %ifg_fn = '~/Documents/MATLAB/toolboxes_dev/iEye_ts/examples/p_500hz.ifg';
 %ifg_fn = '/Volumes/home/grace/iEye/examples/p_500hz.ifg';
 ifg_fn = '/share/home/grace/iEye/examples/p_500hz.ifg';
+%ifg_fn = '/d/DATA/home/grace/iEye/examples/p_500hz.ifg';
 
 task_dir = 'spDist';
 
 if nargin < 1
     %subj = {'AY','CC','KD','MR','XL'};
-    subj = {'CC'}
+    subj = {'CC','MR','AY'}
+    %  subj = {'KD','CC','AY','MR','XL','EK','SF'};
+
 end
 
 if nargin < 2
-    sess = {{'spDistLong1'}};
-    
+    sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
+ 
+    %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; %two sessions removed 
+  %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 end
 
 if nargin < 3 || iscell(WHICH_EXCL) && isempty(WHICH_EXCL)
@@ -44,7 +49,7 @@ end
 excl_criteria.drift_fix_thresh = 5; % how far a fixation can be from center to drop a trial
 
 
-QCdir = sprintf('%s/%s_iEye_scoreQC',root,task_dir);
+QCdir = sprintf('%s/%s_iEye_scoreQC_61520',root,task_dir);
 
 %QCdir = '/Volumes/data/wmPri/wmPri_iEye_score_QC';
 
@@ -60,6 +65,11 @@ ii_params.calibrate_select_mode = 'nearest';
 ii_params.blink_window = [200 200];
 ii_params.plot_epoch = [3 4 5 6 7];
 ii_params.calibrate_limits = 2.5; % original ecc b/w 9 and 16...
+excl_criteria.micro_dur_thresh = 150;
+excl_criteria.micro_amp_min = 0.5;
+excl_criteria.micro_amp_max = 2.0;
+ii_params.microsacc_amplitude_min =0.5;
+ii_params.microsacc_amplitude_max= 2.0;
 
 ii_params.ppd = 31.8578; % for scanner, 1280 x 1024
 
@@ -67,7 +77,9 @@ for ss = 1:length(subj)
     
     for sessidx = 1:length(sess{ss})
         
-        fns = sprintf('%s/raw/%s_%s_behav/%s_%s_r*_%s_multiDist_*.edf',root,subj{ss},sess{ss}{sessidx},subj{ss},sess{ss}{sessidx},fn_prefix);
+        %fns = sprintf('%s/raw/%s_%s_behav/%s_%s_r*_%s_multiDist_*.edf',root,subj{ss},sess{ss}{sessidx},subj{ss},sess{ss}{sessidx},fn_prefix);
+       fns = sprintf('%sraw/%s_%s_behav/%s_%s_r*_%s_*.edf',root,subj{ss},sess{ss}{sessidx},subj{ss},sess{ss}{sessidx},fn_prefix);
+
         thisf = dir(fns);
         clear fns;
         
@@ -97,7 +109,9 @@ for ss = 1:length(subj)
             % 6: distractor bin (-3:3; NaN); Cartesian, so + is CCW
             % 7: distractor direction (1 = CCW, 2 = CW, NaN = no dst)
             % 8: correct? (0 or 1; NaN)
-            % 9: RT
+            % 9: RT for mean dist 1
+            % 10: jitter amt 
+            
             
             % NOTE: for spDistLong? files, only takes the first value of
             % direction, RT
@@ -109,7 +123,14 @@ for ss = 1:length(subj)
             trialinfo(:,6) = thisbehav.conditions(:,2);
             trialinfo(:,7) = thisbehav.dist_dir(:,1);
             trialinfo(trialinfo(:,1)==1,8) = thisbehav.correct(trialinfo(:,1)==1);
-            trialinfo(:,9) = thisbehav.dist_RT(:,1);
+           trialinfo(:,9) = nanmean([thisbehav.dist_RT(:,2) thisbehav.dist_RT(:,4)],2);
+           %trialinfo(:,9) = thisbehav.dist_RT(:,1);
+            trialinfo(:,10) = thisbehav.jitter_amt;
+            %following acc and coh added 06/15/20 
+            trialinfo(:,11) = thisbehav.acc;
+          %  trialinfo(:,12) = thisbehav.task_coh;
+           trialinfo(:,12) = thisbehav.task_coh(2); %will be same in both dists 
+            %trialinfo(:,13) = thisbehav.dist_RT;
             
             % custom for each expt
             block_num = str2double(matf(strfind(matf,'_r')+[2 3]));
@@ -130,22 +151,23 @@ for ss = 1:length(subj)
             
             
             
-            preproc_fn = sprintf('%s/%s_iEye_preproc/%s_%s_r%02.f_preproc.mat',root,task_dir,subj{ss},sess{ss}{sessidx},block_num);
+            preproc_fn = sprintf('%s/%s_iEye_preproc_61520/%s_%s_r%02.f_preproc.mat',root,task_dir,subj{ss},sess{ss}{sessidx},block_num);
             
             % preprocess raw data and extract saccades
-            [ii_data,ii_cfg,ii_sacc] = ii_preproc(this_edf,ifg_fn,preproc_fn,ii_params,trialinfo);
+            [ii_data,ii_cfg,ii_sacc,ii_microsacc] = ii_preproc(this_edf,ifg_fn,preproc_fn,ii_params,trialinfo);
             
             % define resp epoch, fix epoch, etc. note that default behavior
             % of ii_scoreMGS will pick these up automatically
-            ii_trial{ff} = ii_scoreMGS(ii_data,ii_cfg,ii_sacc,[],ii_params.calibrate_epoch-1,ii_params.drift_epoch,excl_criteria);
-            
+            ii_trial{ff} = ii_scoreMGS(ii_data,ii_cfg,ii_sacc,{'TarX', 'TarY'},ii_params.calibrate_epoch-1,ii_params.drift_epoch,excl_criteria,[],'strict',[NaN 0],ii_microsacc);
+            %[ii_trial{ff},ii_cfg] = ii_scoreMGS(ii_data,ii_cfg,ii_sacc,{'TarX', 'TarY'},4,[1 2 3],excl_criteria,[],'lenient',[9 0],ii_microsacc); %added TargCoords, respEpoch
+
             close all;
             clear preproc_fn trial_info cond thisbehav matf fns block_num this_edf thisbehav;
         end
         
         ii_sess = ii_combineruns(ii_trial,run_labels);
         
-        save(sprintf('%s/%s_behav/%s_%s_scored.mat',root,task_dir,subj{ss},sess{ss}{sessidx}),'ii_sess','WHICH_EXCL');
+        save(sprintf('%s/%s_behav_61520/%s_%s_scored.mat',root,task_dir,subj{ss},sess{ss}{sessidx}),'ii_sess','WHICH_EXCL');
 
         
         % exclusion report

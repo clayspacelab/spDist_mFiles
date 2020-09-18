@@ -86,7 +86,7 @@ end
 align_to = {'targ_ang_all','dist_ang_all'};
 
 func_suffix = 'surf';
-delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
+%delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct geh 031320
 
 
 % loop over subj, ROIs and load each session, concatenate, and process
@@ -109,7 +109,7 @@ for ss = 1:length(subj)
             thisdata.sess = sess_idx*ones(size(thisdata.r_all));
             
             data_tst = cat_struct(data_tst,thisdata,{'rf','TR','which_TRs'}); % skip 'rf', these will be the same
-            
+            delay_tpts = thisdata.which_TRs;
         end
         
         
