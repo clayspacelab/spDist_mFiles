@@ -272,7 +272,7 @@ set(gcf,'position', [ 23         245        2386         453])
 %% fidelity line plot per ROI & true 2-way anova stat
 
 dist_colors = [0.7100 0.2128 0.4772; 0 0 1;];
-cond_colors = dist_colors;
+cond_colors = dist_colors; 
 
 thisd_store =[];
 
@@ -799,16 +799,7 @@ for vv = 1:length(ROIs)
         else
         end
         
-        
-        
-%         if exact_store(vv,ee) >0.01 && exact_store(vv,ee) <= 0.05 
-%             text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'*','color',sig_colors(ee,:),'fontsize',10)
-%         elseif exact_store(vv,ee) >0.001 && exact_store(vv,ee) <= 0.01
-%             text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'**','color',sig_colors(ee,:),'fontsize',10)
-%         elseif exact_store(vv,ee) <= 0.001
-%             text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'***','color',sig_colors(ee,:),'fontsize',10)
-%          
-%         end
+       
     end
     
 end

@@ -12,15 +12,14 @@ if nargin < 1 || isempty(subj)
 end
 
 if nargin < 2 || isempty(sess)
-    % each subj gets one cell, with strings for each sess
-    % TODO: automate...
+
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
     
     
 end
 
 if nargin < 3 || isempty(ROIs)
-    ROIs ={'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'}; %ORIG
+    ROIs ={'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'}; %ORIG
 end
 
 func_suffix = 'surf';
@@ -53,10 +52,6 @@ if which_vox < 1
 else
     vox_str = sprintf('_%ivox',which_vox);
 end
-
-
-% for fidelity timecourses
-tmpcolors = lines(7);
 
 
 n_files= [1 2]; % how many data files do we care about?
@@ -214,14 +209,16 @@ for yy = 1:length(n_files)
     
 end
 end
-%%
+%% plot only like trn/tst combindations 
 
 trn_epoch =[1 2 3];
 tst_epoch =[1 2 3];
 gat_align ={'trn/tst:target/target'};
 
-cond_colors =cbrewer('qual','Set1',3);
-%cond_mrkr = {'-','-.','--'};
+%cond_colors =cbrewer('qual','Set1',3);
+cond_colors = [ 0 0 1; 0 0 1; 0 0 1]; 
+
+
 
 
 for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2, targ aling and dist align. for now, need only target
@@ -232,8 +229,14 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
         thisd = nan(length(subj),size(all_recons_gat{1},2)); %recon data
         h=[];
         for aa =1:length(trn_epoch)
-            for ee =1:length(tst_epoch)
-                
+            %for ee =1:length(tst_epoch)
+                if aa==1
+                    ee =1;
+                elseif aa ==2
+                    ee =2;
+                elseif aa ==3
+                    ee=3;
+                end 
                 
                 thisd = nan(length(subj),size(all_recons_gat{1},2));
                 for ss = 1:length(subj)
@@ -245,27 +248,16 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
                   
                 end
                 
-                
                 my_sem = std(thisd,1)/(length(subj));
                 
                 h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),'-','LineWidth',1,'color',cond_colors(aa,:))% ,'LineWidth',2,'color',cond_colors(aa,:))
                 hold on;
-                plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
                 
-                plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
                 
-
-%  h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),sprintf('%s',cond_mrkr{aa}),'LineWidth',1,'color',dist_col,'LineWidth',1,'color',dist_col)
-%                 hold on;
-%                 plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,sprintf('%s',cond_mrkr{aa}),'LineWidth',.1,'color',dist_col,'LineWidth',.1,'color',dist_col,'HandleVisibility','off')
-%                 
-%                 plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,sprintf('%s',cond_mrkr{aa}),'LineWidth',.1,'color',dist_col,'LineWidth',.1,'color',dist_col,'HandleVisibility','off')
-%            
-
-
-               % line([0 0], [-1 1.75], 'color',[.2 .2 .2],'linewidth',0.5,'linestyle','-')
-              
-                line([0 0], [-0.5 1], 'color',[.2 .2 .2],'linewidth',0.5,'linestyle','-') %manually adjust this based on what we know is the max of the subplot
+                btwn_fill = [(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem fliplr((mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem)];     
+                fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
                             
                 hold on;
                 line([min(xlim) max(xlim)], [0 0], 'color',[.2 .2 .2],'linewidth',0.1,'linestyle','-')
@@ -279,20 +271,20 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
                     ylabel('Test Epoch 1')
                    set(gca,'XTick',-180:90:180,'Xticklabel', {'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
                     set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
-                elseif ee==2 && aa==1 && vv ==1
+                elseif ee==2 && aa==2 && vv ==1
                     ylabel('Test Epoch 2')
                      set(gca,'XTick',-180:90:180,'Xticklabel',{'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
-                    set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
-                elseif ee==3 && aa==1 && vv ==1
+                    set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
+                elseif ee==3 && aa==3 && vv ==1
                     ylabel('Test Epoch 3')
-                    set(gca,'XTick',-180:90:180,'Xticklabel', {'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
-                    set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
+                    set(gca,'XTick',-180:180:180,'Xticklabel', {'-180','0','180'},'Xticklabelrotation',45,'TickDir','out')
+                    set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
                     xlabel('Polar angle (\circ)');
                 else
-                 set(gca,'Xtick',-180:90:180,'TickDir','out');
+                 set(gca,'XTick',-180:180:180,'Xticklabel',{'','',''},'TickDir','out');
                 end
                 
-            end
+            %end
             
         end
         
@@ -356,13 +348,16 @@ for n_files =1:2
                     end
                 end
                 hold on;
-               h(n_files) = plot([1 2 3], [mean(thisd(1,1,:),3) mean(thisd(2,2,:),3) mean(thisd(3,3,:),3)],'k--','linewidth',.5)
-                
+             %  h(n_files) = plot([1 2 3], [mean(thisd(1,1,:),3) mean(thisd(2,2,:),3) mean(thisd(3,3,:),3)],'k-','linewidth',.5) % CHANGING THIS FROM -- black to - black, may be confuding w previous figs!!
+                               h(n_files) = plot([1 2 3], [mean(thisd(1,1,:),3) mean(thisd(2,2,:),3) mean(thisd(3,3,:),3)],'b-','linewidth',.5) % CHANGING THIS FROM -- black to - black, may be confuding w previous figs!!
+
                 for ii=1:3
                     my_sem = std(thisd(ii,ii,:),[],3)/(length(subj));
                     
                     hold on;
-                    plot([ii ii],[mean(thisd(ii,ii,:),3)+1.*my_sem mean(thisd(ii,ii,:),3)-1.*my_sem],'k-','linewidth',.5)
+                    %plot([ii ii],[mean(thisd(ii,ii,:),3)+1.*my_sem mean(thisd(ii,ii,:),3)-1.*my_sem],'k-','linewidth',.5)
+                     plot([ii ii],[mean(thisd(ii,ii,:),3)+1.*my_sem mean(thisd(ii,ii,:),3)-1.*my_sem],'b-','linewidth',.5)
+
                     clear my_sem
                 end
                 match_ylim(get(gcf,'Children'));
@@ -403,20 +398,21 @@ for n_files =1:2
                             
                         end
                 hold on;
-                  h(n_files) = plot([1 2 3], [mean(thisdata(1,:),2) mean(thisdata(2,:),2) mean(thisdata(3,:),2)],'k-','linewidth',.5) %collect n_files plot handle for legend use 
-                
+                 % h(n_files) = plot([1 2 3], [mean(thisdata(1,:),2) mean(thisdata(2,:),2) mean(thisdata(3,:),2)],'-','color', [0.5 0.5 0.5],'linewidth',.5) %collect n_files plot handle for legend use 
+                 h(n_files) = plot([1 2 3], [mean(thisdata(1,:),2) mean(thisdata(2,:),2) mean(thisdata(3,:),2)],'-.','color', [0 0 1],'linewidth',.5) %collect n_files plot handle for legend use 
+
                 for ii=1:3
                     my_sem = std(thisdata(ii,:),[],2)/(length(subj));
                     
                     hold on;
-                    plot([ii ii],[mean(thisdata(ii,:),2)+1.*my_sem mean(thisdata(ii,:),2)-1.*my_sem],'k-','linewidth',.5)
+                   % plot([ii ii],[mean(thisdata(ii,:),2)+1.*my_sem mean(thisdata(ii,:),2)-1.*my_sem],'-','color', [0.5 0.5 0.5],'linewidth',.5)
+                   plot([ii ii],[mean(thisdata(ii,:),2)+1.*my_sem mean(thisdata(ii,:),2)-1.*my_sem],'-','color', [0 0 1],'linewidth',.5)
                     clear my_sem
                 end   
                         
-                 ylim([-0.05 .6])
-                 title(ROIs{vv})
-                 xlim([0.5 3.4])
                     clear thisidx     
+                    xlim([0.5 3.5])
+                    ylim([-0.05 .6])
                     if vv ==1
                         
                         ylabel('WM target Fidelity')
@@ -509,10 +505,7 @@ thissubj=subj_var;
    [F_store_truth_1(vv,:)] = RMAOV1_gh([thisy,thisepoch,thissubj],0.05); 
 
    clear thisroiidx thisepoch thiscond thissubj thisy
-    
 
-%[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-%correct? confirm w/ TCS
 
 end 
 
@@ -526,7 +519,7 @@ thisy = y;
 thisepoch = epoch_var;
 thisroi= roi_var;
 thissubj=subj_var;
-iter = 1000;
+iter = 20;
 fprintf(sprintf('computing %i 1 & 2-way ANOVAs on _thruTime1',iter))
 
 T_iter_1 =cell(iter,1);
@@ -557,10 +550,7 @@ for xx=1:iter
         [F_store_iter_2(xx,:)] = RMAOV2_gh([y_shuf,thisepoch,thisroi,thissubj],0.05);
        
         clear thisidx thisy tmpy shuff_idx
-        
-        
-        %[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-        %correct?
+  
 
 end
 toc
@@ -655,10 +645,7 @@ for xx=1:iter
         [F_store_iter_1(vv,xx,:)] = RMAOV1_gh([y_shuf(thisroiidx),thisepoch,thissubj],0.05); 
 
         clear thisroiidx thisepoch thiscond thissubj thisy tmpy shuffidx
-        
-        
-        %[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-        %correct?
+  
         
     end
 end
@@ -676,9 +663,10 @@ col_idx = 6; % F val col
 %what factor do we care about? concurs w var_str(vs) 
 vs = [3]; %3 epoch 
 extract_store=[];
-
+% here, i want to see the results of the two anova functions, separately 
 %%%%%%%%%%%%%%%%%%%%%%%%% do for anovan
-which_effect = [3]; %3 epoch 4 cond 7epoch*cond 
+
+which_effect = [3]; %3 epoch
 exact_store_tmp=[];
 figure('name','1-way perm;anovan')
 for vv =1:length(ROIs)
@@ -696,7 +684,7 @@ line([T_truth_1{vv}{which_effect(ww),col_idx} T_truth_1{vv}{which_effect(ww),col
 title(iv_str{which_effect(ww)},'Interpreter','none');  
 exact_p = sum(extract_vals >= T_truth_1{vv}{which_effect(ww),col_idx})/iter;
 text(max(xlim)-(.5*max(xlim)),max(ylim)-(.25*max(ylim)),sprintf('%i',exact_p),'FontSize',9)
-exact_store(vv,ww) = [exact_store_tmp; exact_p];
+exact_store_1(vv,ww) = [exact_store_tmp; exact_p];
 clear exact_p
 
 if ww ==1
@@ -708,12 +696,15 @@ end
 end
 end
 
-ta_anovan1 = table(ROIs',exact_store(:,1));
+ta_anovan1 = table(ROIs',exact_store_1(:,1));
 ta_anovan1.Properties.VariableNames={'ROI','Epoch'}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% do for RMAOV1
-which_effect =1;
+
+which_effect =1; % col of main effect 
 exact_store_tmp=[];
 figure('name','1-way perm;RMAOV1')
+
 for vv =1:length(ROIs)
 
 for ww =1:length(which_effect)
@@ -741,28 +732,38 @@ end
 end
 end
 
-ta_rma1 = table(ROIs',exact_store(:,1));
+ta_rma1 = table(ROIs',exact_store_rma(:,1));
 ta_rma1.Properties.VariableNames={'ROI','Epoch'};
-%% plot sigs on the subplots
+%% plot sigs on the subplots - based on anovan output
 sig_colors = lines(3);
 y_mod =[.2];
 
+ 
+[p_fdr_perm, p_masked_perm] = fdr(exact_store_1,0.05); 
+     
+
+sig_mrkr ={'o'};
+y_mod = [.1];
 for vv = 1:length(ROIs)
-    for ee =1 % one factor 
+    for ee =1
         figure(modelcomp); hold on;
         subplot(1,length(ROIs),vv)
-        if exact_store(vv,ee) >0.01 && exact_store(vv,ee) <= 0.05 
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'*','color',sig_colors(ee,:))
-        elseif exact_store(vv,ee) >0.001 && exact_store(vv,ee) <= 0.01
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'**','color',sig_colors(ee,:))
-        elseif exact_store(vv,ee) <= 0.001
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'***','color',sig_colors(ee,:))
-
-            
+        
+        
+        if exact_store_1(vv,ee) > p_fdr_perm(ee) && exact_store_1(vv,ee) <= 0.05 
+            text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),sprintf('%s',sig_mrkr{ee}),'color',[.5 .5 .5],'fontsize',15) %unfilled grey for IND
+        elseif  exact_store_1(vv,ee) <= p_fdr_perm(ee) 
+            text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),sprintf('%s',sig_mrkr{ee}),'color','k','fontsize',15) %filled
+        else
         end
+        
+       
     end
     
 end
+
+
+
 fprintf('1 & 2-way ANOVA permutations on _thru data are complete. ')
 
 
@@ -837,10 +838,7 @@ F_store_truth_gat_2 = nan(1,3);
    [F_store_truth_gat_1(vv,:)] = RMAOV1_gh([thisy,thisepoch,thissubj],0.05); 
 
    clear thisroiidx thisepoch thiscond thissubj thisy
-    
 
-%[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-%correct? confirm w/ TCS
 
 end 
 
@@ -884,10 +882,7 @@ for xx=1:iter
 
 
         clear thisidx thisy tmpy shuff_idx
-        
-        
-        %[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-        %correct?
+
 
 end
 toc
@@ -933,6 +928,7 @@ end
 
 ta_gat_2 = table(exact_store(:,1),exact_store(:,2),exact_store(:,3));
 ta_gat_2.Properties.VariableNames={'Epoch','ROI','EpochROI'};
+
 % 1-way perm w _GAT 
 y = the_y_store(:,1);
 roi_var = the_y_store(:,2);
@@ -959,9 +955,6 @@ for xx=1:iter
 
         clear thisroiidx thisepoch thiscond thissubj thisy tmpy shuffidx
         
-        
-        %[p_fdr(tt,:) p_masked(tt,:)] = fdr(P_roi(vv,:),0.05); dont need to
-        %correct?
         
     end
 end
@@ -1050,22 +1043,29 @@ ta_gat_rma1.Properties.VariableNames={'ROI','Epoch'};
 sig_colors = lines(3);
 y_mod =[.3];
 
+[p_fdr_perm_gat, p_masked_perm_gat] = fdr(exact_store_gat_1,0.05); 
+     
+
+sig_mrkr ={'+'};
+y_mod = [.15];
 for vv = 1:length(ROIs)
-    for ee =1 % one factor 
+    for ee =1
         figure(modelcomp); hold on;
         subplot(1,length(ROIs),vv)
-        if exact_store_gat_1(vv,ee) >0.01 && exact_store_gat_1(vv,ee) <= 0.05 
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'*','color',sig_colors(2,:))
-        elseif exact_store_gat_1(vv,ee) >0.001 && exact_store_gat_1(vv,ee) <= 0.01
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'**','color',sig_colors(2,:))
-        elseif exact_store_gat_1(vv,ee) <= 0.001
-            text(max(xlim)-(.3*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),'***','color',sig_colors(2,:))
-
-            
+        
+        
+        if exact_store_gat_1(vv,ee) > p_fdr_perm_gat(ee) && exact_store_gat_1(vv,ee) <= 0.05 
+            text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),sprintf('%s',sig_mrkr{ee}),'color',[.5 .5 .5],'fontsize',15) %unfilled grey for IND
+        elseif  exact_store_gat_1(vv,ee) <= p_fdr_perm_gat(ee) 
+            text(max(xlim)-(.2*max(xlim)),max(ylim)-(y_mod(ee)*max(ylim)),sprintf('%s',sig_mrkr{ee}),'color','k','fontsize',15) %filled
+        else
         end
+        
+       
     end
     
 end
+
 
 fprintf('the end')
 end 
