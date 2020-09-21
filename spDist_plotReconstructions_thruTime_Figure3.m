@@ -12,24 +12,27 @@
 % sessions per subj, and will compare across sessions (and/or across sets
 % of tpts, etc... - only one set of comparisons at a time?)
 
-function spDist_plotReconstructions_thruTime(subj,sess,ROIs)
+function spDist_plotReconstructions_thruTime_Figure3(subj,sess,ROIs)
 
 root = spDist_loadRoot;
-
+root = '/share/data/spDist/';
 
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
     subj = {'CC','KD','AY','MR','XL','EK','SF'};
+    %subj = {'XL'};
 end
 
 if nargin < 2 || isempty(sess)
     % each subj gets one cell, with strings for each sess
+    % TODO: automate...
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+    %sess = {{'spDist1','spDist2'},}
 end
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1','V2','V3','V3AB','hV4','VO1','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS'};
+    ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
 end
 
 
@@ -51,8 +54,6 @@ trn_tpts = 7:15; % if blank, load files w/ no _trn%ito%i, otherwise,
 plot_tpts = 7:15; % for a plot where we average reconstructions over a fixed time window
 
 dist_time = 4.5; % onset at 4 s
-
-yticks = [0 4.5 12];
 
 
 % set up file loading strings for below
@@ -101,73 +102,142 @@ for ss = 1:length(subj)
     
     for vv = 1:length(ROIs)
         
-        % just one file to load
-        fn = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_thruTime1.mat',root,task_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
-        
-        fprintf('loading %s...\n',fn);
-        data = load(fn);
-        
-        
-        if vv == 1 && ss == 1
-            % initialize variables...
+        if cat_mode == 1
+            % just one file to load
+            fn = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_thruTime1.mat',root,task_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
+            
+            fprintf('loading %s...\n',fn);
+            data = load(fn);
             
             
-            nblankt = length(ROIs)*size(data.recons{1},1);
-            all_recons = cell(size(data.recons));
-            for aa = 1:length(data.recons)
-                all_recons{aa} = nan(nblankt,size(data.recons{aa},2),size(data.recons{aa},3));
+            if vv == 1 && ss == 1
+                % initialize variables...
+                
+                
+                nblankt = length(ROIs)*size(data.recons{1},1);
+                all_recons = cell(size(data.recons));
+                for aa = 1:length(data.recons)
+                    all_recons{aa} = nan(nblankt,size(data.recons{aa},2),size(data.recons{aa},3));
+                end
+                
+                all_recons_nodist = nan(nblankt,size(data.recons_nodist,2),size(data.recons_nodist,3));
+                
+                all_conds = nan(nblankt,size(data.c_all,2));
+                all_angs = nan(nblankt,size(data.a_all,2));
+                
+                all_fidelity = nan(nblankt,size(data.recons{1},3),length(data.recons)); % timecoruse of fidelity for each alignment condition
+                all_fidelity_nodist = nan(nblankt,size(data.recons_nodist,3));
+                
+                all_subj = nan(nblankt,1);
+                all_ROIs = nan(nblankt,1);
+                all_sess = nan(nblankt,1);
+                
+                
+                angs = data.angs;
+                tpts = data.delay_tpts;
+                
+                % ugh have to do this in a multi-D array...
+                %all_r2 = nan(length(ROIs),length(tpts),length(subj));
+                
             end
             
-            all_recons_nodist = nan(nblankt,size(data.recons_nodist,2),size(data.recons_nodist,3));
-            
-            all_conds = nan(nblankt,size(data.c_all,2));
-            all_angs = nan(nblankt,size(data.a_all,2));
-            
-            all_fidelity = nan(nblankt,size(data.recons{1},3),length(data.recons)); % timecoruse of fidelity for each alignment condition
-            all_fidelity_nodist = nan(nblankt,size(data.recons_nodist,3));
-            
-            all_subj = nan(nblankt,1);
-            all_ROIs = nan(nblankt,1);
-            all_sess = nan(nblankt,1);
             
             
-            angs = data.angs;
-            tpts = data.delay_tpts;
+            thisidx = startidx:(startidx+size(data.c_all,1)-1);
             
-            % ugh have to do this in a multi-D array...
-            %all_r2 = nan(length(ROIs),length(tpts),length(subj));
+            for aa = 1:length(all_recons)
+                all_recons{aa}(thisidx,:,:) = data.recons{aa};
+                all_fidelity(thisidx,:,aa) = squeeze(mean(cosd(angs) .* data.recons{aa},2));
+            end
+            
+            all_recons_nodist(thisidx,:,:) = data.recons_nodist;
+            all_fidelity_nodist(thisidx,:) =  squeeze(mean(cosd(angs) .* data.recons_nodist,2));
+            
+            all_conds(thisidx,:) = data.c_all;
+            all_angs(thisidx,:) = data.a_all;
+            
+            
+            all_subj(thisidx) = ss;
+            
+            
+            all_ROIs(thisidx) = vv;
+            
+            all_sess(thisidx) = data.sess_all;
+            
+            
+            startidx = thisidx(end)+1;
+            
+            clear data;
+            
+        else
+            % NOT SUPPORTED YET!!!!
+            
+            for sess_idx = 1:length(sess{ss})
+                % build fn
+                fn = sprintf('%swmChoose_reconstructions/%s_%s_%s_%s_%ichan%s%s%s_recon_cv_thruTime1.mat',root,subj{ss},sess{ss}{sess_idx},ROIs{vv},func_suffix,nchan,vox_str,smooth_str,trn_str);
+                
+                fprintf('loading %s...\n',fn);
+                data = load(fn);
+                
+                
+                if vv == 1 && ss == 1
+                    % initialize variables...
+                    
+                    
+                    nblankt = length(ROIs)*numel(sess)*size(data.recons,1);
+                    
+                    all_recons = nan(nblankt,size(data.recons,2),size(data.recons,3));
+                    all_conds = nan(nblankt,size(data.c_map,2));
+                    
+                    all_fidelity = nan(nblankt,size(data.recons,3)); % timecoruse of fidelity
+                    
+                    
+                    all_subj = nan(nblankt,1);
+                    all_ROIs = nan(nblankt,1);
+                    all_sess = nan(nblankt,1);
+                    
+                    angs = data.angs;
+                    tpts = data.delay_tpts;
+                    
+                    all_r2 = nan(length(ROIs),length(tpts),length(subj));
+                    
+                end
+                
+                % set up our variable used to compute R2
+                if sess_idx == 1
+                    tmp_r2 = nan(length(tpts),length(sess{ss})); % average acorss sessions...
+                end
+                
+                thisidx = startidx:(startidx+size(data.c_map,1)-1);
+                
+                
+                all_recons(thisidx,:,:) = data.recons;
+                all_fidelity(thisidx,:) = squeeze(mean(cosd(angs) .* data.recons,2));
+                
+                all_conds(thisidx,:) = data.c_map;
+                
+                
+                
+                all_subj(thisidx) = ss;
+                
+                
+                all_ROIs(thisidx) = vv;
+                
+                all_sess(thisidx) = sess_idx;
+                
+                tmp_r2(:,sess_idx) = squeeze(mean(mean(data.r2_all,1),2));
+                
+                startidx = thisidx(end)+1;
+                
+                clear data;
+                
+            end
+            
+            %all_r2(vv,:,ss) = mean(tmp_r2,2);
+            %clear tmp_r2;
+            
             
         end
-        
-        
-        
-        thisidx = startidx:(startidx+size(data.c_all,1)-1);
-        
-        for aa = 1:length(all_recons)
-            all_recons{aa}(thisidx,:,:) = data.recons{aa};
-            all_fidelity(thisidx,:,aa) = squeeze(mean(cosd(angs) .* data.recons{aa},2));
-        end
-        
-        all_recons_nodist(thisidx,:,:) = data.recons_nodist;
-        all_fidelity_nodist(thisidx,:) =  squeeze(mean(cosd(angs) .* data.recons_nodist,2));
-        
-        all_conds(thisidx,:) = data.c_all;
-        all_angs(thisidx,:) = data.a_all;
-        
-        
-        all_subj(thisidx) = ss;
-        
-        
-        all_ROIs(thisidx) = vv;
-        
-        all_sess(thisidx) = data.sess_all;
-        
-        
-        startidx = thisidx(end)+1;
-        
-        clear data;
-        
-        
     end
     
 end
@@ -185,8 +255,8 @@ end
 %% plot each condition (target-locked) (average over subj)
 % length(cu) x n_rois
 
-cu = unique(all_conds(:,1));
-cond_str = {'No distractor','Distractor'};
+cu = 1;
+cond_str = {'No distractor trials'};
 
 figure;
 for cc = 1:length(cu)
@@ -206,7 +276,7 @@ for cc = 1:length(cu)
             title(ROIs{vv});
         end
         axis ij tight
-        set(gca,'XTick',-180:90:180,'YTick',yticks);
+        set(gca,'XTick',-180:90:180);
         if vv == 1
             xlabel('Polar angle (\circ)');
             ylabel(sprintf('%s - time (s)',cond_str{cc}));
@@ -216,55 +286,59 @@ for cc = 1:length(cu)
             set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
         end
         xlim([-180 180]);
+        caxis([-1.4808 1.7960])
     end
 end
 
-set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-set(gcf,'Position',[ 220        1058        1760         194]);
+set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
+set(gcf,'Position',[102         405        1353         174]);
 match_clim(get(gcf,'Children'));
+%c_lim = [ -1.1876    1.7960];
+%% plot each condition (target-locked) (average over subj)
+% length(cu) x n_rois
 
-
-
-
-
-%% do this, over average delay epochs, for each condition
-
-cond_colors = lines(2);
+cu = 2;
+cond_str = {'Distractor trials'};
 
 figure;
-for dd = 1:length(delay_tpts)
+for cc = 1:length(cu)
     for vv = 1:length(ROIs)
-        subplot(length(delay_tpts),length(ROIs),(dd-1)*length(ROIs)+vv); hold on;
         
-        for cc = 1:length(cu)
-            thisdata = nan(length(subj),length(angs));
-            for ss = 1:length(subj)
-                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
-                thisdata(ss,:) = mean(mean(all_recons{1}(thisidx,:,delay_tpts{dd}),3),1);
-            end
-            
-            plot(angs,mean(thisdata,1),'-','LineWidth',2,'Color',cond_colors(cc,:));
-            
-        end
+        subplot(length(cu),length(ROIs),(cc-1)*length(ROIs)+vv);hold on;
         
-        if vv == 1
-            ylabel(sprintf('%0.01f to %0.01f s',delay_tpt_range(dd,1),delay_tpt_range(dd,2)));
-            if dd == length(delay_tpts)
-                xlabel('Position (\circ)');
-            end
+        
+        thisd = nan(size(all_recons{1},3),size(all_recons{1},2),length(subj));
+        for ss = 1:length(subj)
+            thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
+            thisd(:,:,ss) = squeeze(mean(all_recons{1}(thisidx,:,:),1)).';
         end
-        if dd == 1
+        imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
+        colormap viridis
+        if cc == 1
             title(ROIs{vv});
         end
-        
-        hold off;
+        axis ij tight
+        set(gca,'XTick',-180:90:180);
+        if vv == 1
+            xlabel('Polar angle (\circ)');
+            ylabel(sprintf('%s - time (s)',cond_str{cc}));
+            set(gca,'XTickLabel',{'-180','','0','','180'});
+            
+        else
+            set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
+        end
+        xlim([-180 180]);
+        caxis([-1.4808 1.7960])
     end
 end
-match_ylim(get(gcf,'Children'));
 
+set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
+set(gcf,'Position',[102         405        1353         174]);
+match_clim(get(gcf,'Children'));
+%c_limdist = [ -1.1702    1.3151];
 
 %% plot distractor-locked (for distractor)
-
+cond_str ={'Distractor locked'};
 
 figure;
 for vv = 1:length(ROIs)
@@ -284,7 +358,7 @@ for vv = 1:length(ROIs)
     title(ROIs{vv});
     
     axis ij tight
-    set(gca,'XTick',-180:90:180,'YTick',yticks);
+    set(gca,'XTick',-180:90:180);
     if vv == 1
         xlabel('Polar angle (\circ)');
         ylabel(sprintf('%s - time (s)',cond_str{cc}));
@@ -294,17 +368,18 @@ for vv = 1:length(ROIs)
         set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
     end
     xlim([-180 180]);
-    
+    caxis([-1.4808 1.7960])
 end
 
-set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-set(gcf,'Position',[ 220        1058        1760         194]);
+set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
+set(gcf,'Position',[102         405        1353         174]);
 match_clim(get(gcf,'Children'));
-
+%c_lim_distlock =[-1.4808    1.4039];
 
 %% plot distractor-removed target representation (all positions)
-
+cond_str ={'Target, dist removed'};
 figure;
+
 for vv = 1:length(ROIs)
     
     subplot(1,length(ROIs),vv);hold on;
@@ -322,7 +397,7 @@ for vv = 1:length(ROIs)
     title(ROIs{vv});
     
     axis ij tight
-    set(gca,'XTick',-180:90:180,'YTick',yticks);
+    set(gca,'XTick',-180:90:180);
     if vv == 1
         xlabel('Polar angle (\circ)');
         ylabel(sprintf('%s - time (s)',cond_str{cc}));
@@ -332,200 +407,15 @@ for vv = 1:length(ROIs)
         set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
     end
     xlim([-180 180]);
-    
+    caxis([-1.4808 1.7960])
 end
 
-set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-set(gcf,'Position',[ 220        1058        1760         194]);
+set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
+set(gcf,'Position',[102         405        1353         174]);
+
 match_clim(get(gcf,'Children'));
-sgtitle('Distractor trials; distractor representation removed');
-
-
-%% sort by relative distractor position
-% to start with, keep it simple and sort by all 7 bins
-% and plot one figure for target-aligned and one for distractor-aligned
-%
-
-% here, we're only looking at distractor+ trials
-du = unique(all_conds(all_conds(:,1)==2,6));
-
-step_size = 360/length(du);
-
-for aa = 1:length(all_recons)
-    figure;
-    for dd = 1:length(du)
-        for vv = 1:length(ROIs)
-            
-            subplot(length(du),length(ROIs),(dd-1)*length(ROIs)+vv);hold on;
-            
-            
-            thisd = nan(size(all_recons{aa},3),size(all_recons{aa},2),length(subj));
-            for ss = 1:length(subj)
-                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,6)==du(dd) & all_conds(:,1)==2;
-                thisd(:,:,ss) = squeeze(mean(all_recons{aa}(thisidx,:,:),1)).';
-            end
-            imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
-            colormap viridis;
-            
-            % if distractor-aligned, relative positions are flipped
-            if aa == 1
-                plot(0,                  0        ,'cv','LineWidth',2,'MarkerSize',3);
-                plot(   step_size*du(dd),dist_time,'rv','LineWidth',2,'MarkerSize',3);
-            else
-                plot(0,                  dist_time,'rv','LineWidth',2,'MarkerSize',3);
-                plot(-1*step_size*du(dd),0        ,'cv','LineWidth',2,'MarkerSize',3);
-            end
-            
-            if dd == 1
-                title(ROIs{vv});
-            end
-            axis ij tight
-            set(gca,'XTick',-180:90:180);
-            if vv == 1
-                ylabel(sprintf('D %i - time (s)',du(dd)));
-                if dd == length(du)
-                    set(gca,'XTickLabel',{'-180','','0','','180'});
-                    xlabel('Polar angle (\circ)');
-                else
-                    set(gca,'XTickLabel',[]);
-                end
-                
-            else
-                set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
-            end
-            xlim([-180 180]);
-        end
-    end
-    
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-    set(gcf,'Position',[ 220        1058        1760         194]);
-    match_clim(get(gcf,'Children'));
-end
-
-%% align like distractor bins (and flip/average)
-% goal here is to align cw/ccw distractor bins and flip one set to match
-% - for 0-bin, need to determine which trials are CW/CCW and flip
-%   accordingly
-
-% flip negative angles
-
-% look for all trials where <> is < 0, flipLR the reconstruction
-
-tmprel =  all_angs(:,2) - all_angs(:,1);
-this_rel = mod((tmprel+180), 360)-180;
-% sign of this matches all_conds(:,6) (relative distractor angle bin)
-
-flipidx = this_rel<0;
-
-all_recons_flipped = all_recons{1};
-all_recons_flipped(flipidx,:) = fliplr(all_recons_flipped(flipidx,:));
-
-dau = unique(abs(all_conds(all_conds(:,1)==2,6)));
-
-
-figure;
-for dd = 1:length(dau)
-    for vv = 1:length(ROIs)
-        
-        subplot(length(dau),length(ROIs),(dd-1)*length(ROIs)+vv);hold on;
-        
-        
-        thisd = nan(size(all_recons{1},3),size(all_recons_flipped,2),length(subj));
-        for ss = 1:length(subj)
-            thisidx = all_subj==ss & all_ROIs==vv & abs(all_conds(:,6))==dau(dd) & all_conds(:,1)==2;
-            thisd(:,:,ss) = squeeze(mean(all_recons_flipped(thisidx,:,:),1)).';
-        end
-        imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
-        colormap viridis;
-        plot(step_size*dau(dd),dist_time,'rv','LineWidth',2,'MarkerSize',3);
-        
-        if dd == 1
-            title(ROIs{vv});
-        end
-        axis ij tight
-        set(gca,'XTick',-180:90:180);
-        if vv == 1
-            xlabel('Polar angle (\circ)');
-            ylabel(sprintf('D %i - time (s)',dau(dd)));
-            if dd == length(dau)
-                set(gca,'XTickLabel',{'-180','','0','','180'});
-            end
-            
-        else
-            set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
-        end
-        xlim([-180 180]);
-    end
-end
-
-set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-set(gcf,'Position',[ 220        1058        1760         194]);
-match_clim(get(gcf,'Children'));
-
-
-%% align like distractor bins (and flip/average) - distractor-removed
-% goal here is to align cw/ccw distractor bins and flip one set to match
-% - for 0-bin, need to determine which trials are CW/CCW and flip
-%   accordingly
-% (like above, but using the _nodist reconstructions)
-
-% flip negative angles
-
-% look for all trials where <> is < 0, flipLR the reconstruction
-
-tmprel =  all_angs(:,2) - all_angs(:,1);
-this_rel = mod((tmprel+180), 360)-180;
-% sign of this matches all_conds(:,6) (relative distractor angle bin)
-
-flipidx = this_rel<0;
-
-all_recons_flipped_nodist = all_recons_nodist;
-all_recons_flipped_nodist(flipidx,:) = fliplr(all_recons_flipped_nodist(flipidx,:));
-
-dau = unique(abs(all_conds(all_conds(:,1)==2,6)));
-
-
-figure;
-for dd = 1:length(dau)
-    for vv = 1:length(ROIs)
-        
-        subplot(length(dau),length(ROIs),(dd-1)*length(ROIs)+vv);hold on;
-        
-        
-        thisd = nan(size(all_recons{1},3),size(all_recons_flipped_nodist,2),length(subj));
-        for ss = 1:length(subj)
-            thisidx = all_subj==ss & all_ROIs==vv & abs(all_conds(:,6))==dau(dd) & all_conds(:,1)==2;
-            thisd(:,:,ss) = squeeze(mean(all_recons_flipped_nodist(thisidx,:,:),1)).';
-        end
-        imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
-        colormap viridis;
-        plot(step_size*dau(dd),dist_time,'rv','LineWidth',2,'MarkerSize',3);
-        
-        if dd == 1
-            title(ROIs{vv});
-        end
-        axis ij tight
-        set(gca,'XTick',-180:90:180);
-        if vv == 1
-            xlabel('Polar angle (\circ)');
-            ylabel(sprintf('D %i - time (s)',dau(dd)));
-            if dd == length(dau)
-                set(gca,'XTickLabel',{'-180','','0','','180'});
-            end
-            
-        else
-            set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
-        end
-        xlim([-180 180]);
-    end
-end
-
-set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-set(gcf,'Position',[ 220        1058        1760         194]);
-match_clim(get(gcf,'Children'));
-sgtitle('Distractor trials; distractor representation removed');
-
-%% plot average over early, middle, late delay for these
+%sgtitle('Distractor trials; distractor representation removed');
+%c_lim_distrem =[-0.8197    1.1589];
 
 
 

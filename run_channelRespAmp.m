@@ -4,8 +4,11 @@
 % analyses to run, and assigns them in whatever order parfor decides.
 % should be ~2x as quick, if not faster (no bottleneck on some subj, etc)
 
-subj = {'AY','CC','EK','KD','MR','XL','SF'};
-sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; % the set of sessions to be run on EVERYONE in subj...
+%subj = {'AY','CC','EK','KD','MR','XL','SF'};
+subj = {'AY','CC','MR'};
+%sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; % the set of sessions to be run on EVERYONE in subj...
+sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}}; % the set of sessions to be run on EVERYONE in subj...
+
 ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
 
 
@@ -40,11 +43,11 @@ end
 % 2) SESS 
 % 3) ROI
 % 4) ANALYSIS
-n_threads_per_core = 4;
+n_threads_per_core = 18;
 ncores = floor(feature('numcores')/n_threads_per_core);
 mypool = parpool(ncores); % use all possible cores
 
-parfor ii = 1:size(to_run,1)
+parfor ii = 2  %1:size(to_run,1)
     
     maxNumCompThreads(n_threads_per_core);
     

@@ -5,10 +5,10 @@
 
 
 root = spDist_loadRoot;
+root = '/share/data/spDist/';
 
 subj = {'AY','CC','EK','KD','MR','XL','SF'};
-
-
+%sess= {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
 
@@ -128,7 +128,7 @@ for aa = 1:length(all_fidelity)
         
         title(ROIs{vv});
         axis tight square
-        set(gca,'XTick',0:4:16,'YTick',0:4:16,'TickDir','out');
+        set(gca,'XTick',0:4:24,'YTick',0:4:24,'TickDir','out');
         if vv == 1
             xlabel('Test time (s)');
             ylabel('Train time (s)');

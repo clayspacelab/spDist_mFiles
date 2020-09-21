@@ -21,7 +21,7 @@
        % for reference: 
        % (saved from spDist_scoreEyeData.m; via eyeData)
        
-       % 1: distractor condition (1 = no, 2 = distractor)
+       % 1: distractor condition (1 = no, 2 = distractor)       
        % 2,3: target position X, Y (dva)
        % 4,5: distractor position X,Y (or NaN; dva)
        % 6: distractor bin (-3:3; NaN); Cartesian, so + is CCW
@@ -39,8 +39,9 @@ trn_dir = 'wmChoose';
 trn_sess = 'MGSMap'; % files to load for training
 
 root =  spDist_loadRoot;
-trn_root = sprintf('%s/../wmChoose_scanner/',root);
-
+%trn_root = sprintf('%s/../wmChoose_scanner/',root); geh getting rid of
+%this 02-14-20
+trn_root = '/deathstar/datb/wmChoose_scanner';
 if nargin < 1
     subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
@@ -85,7 +86,7 @@ end
 align_to = {'targ_ang_all','dist_ang_all'};
 
 func_suffix = 'surf';
-delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
+%delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct geh 031320
 
 
 % loop over subj, ROIs and load each session, concatenate, and process
@@ -108,7 +109,7 @@ for ss = 1:length(subj)
             thisdata.sess = sess_idx*ones(size(thisdata.r_all));
             
             data_tst = cat_struct(data_tst,thisdata,{'rf','TR','which_TRs'}); % skip 'rf', these will be the same
-            
+            delay_tpts = thisdata.which_TRs;
         end
         
         

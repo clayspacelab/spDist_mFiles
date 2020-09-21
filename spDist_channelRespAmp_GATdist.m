@@ -12,15 +12,15 @@ function spDist_channelRespAmp_GATdist(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
-
-root =  spDist_loadRoot;
+root = '/share/data/spDist/'
+%root =  spDist_loadRoot;
 
 if nargin < 1
-    subj = {'AY','CC','EK','KD','MR','SF','XL'};
+    subj = {'CC'};
         
 end
 if nargin < 2
-    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+    sess = {{'spDist1','spDist2'}};
     
 end
 
@@ -47,7 +47,7 @@ end
 align_to = {'targ_ang_all','dist_ang_all'};
 
 func_suffix = 'surf';
-delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
+%delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
 
 
 % loop over subj, ROIs and load each session, concatenate, and process
@@ -67,7 +67,7 @@ for ss = 1:length(subj)
             thisdata.sess = sess_idx*ones(size(thisdata.r_all));
             
             data = cat_struct(data,thisdata,{'rf','TR','which_TRs'}); % skip 'rf', these will be the same
-            
+            delay_tpts = thisdata.which_TRs;
         end
         
         
