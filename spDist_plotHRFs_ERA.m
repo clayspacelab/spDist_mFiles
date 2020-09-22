@@ -344,7 +344,7 @@ for ss = 1:length(subj)
                 data_all(idx)     = mean(all_mean_hrf{cc}(vv,this_TR_range,ss));
                 
                 
-                labels_all(idx,:) = [ss vv cc tt];
+                labels_all(idx,:) = [vv cc tt ss];
                 idx = idx+1;
             end
         end
@@ -354,15 +354,81 @@ end
 % real ANOVAs
 
 % 3-way with interaction
-
+% returns: IV1, IV2, IV3, IV1xIV2, IV1xIV3, IV2xIV3, IV1xIV2xIV3
+% subj must be last column of X
+epoch_3way_realF = RMAOV33_gh([data_all labels_all]);
 
 % 2-way for each ROI
-
+epoch_2way_realF = nan(length(ROIs),3);
+for vv = 1:length(ROIs)
+    thisidx = labels_all(:,1)==vv;
+    epoch_2way_realF(vv,:) = RMAOV2_gh([data_all(thisidx) labels_all(thisidx,2:end)]);
+end
 
 
 % seed RNG
 rng(spDist_randSeed);
 
+niter = 1000;
 
+% do shuffled 3-way ANOVA (shuffle labels w/in subj 1000x)
+
+epoch_3way_shufF = nan(7,niter);
+fprintf('Shuffling (3-way ANOVA...\n');
+tic;
+for ii = 1:niter
+    
+    data_shuf = nan(size(data_all));
+    
+    for ss = 1:length(subj)
+        subjidx = labels_all(:,4)==ss;
+        thisidx = find(subjidx);
+        shufidx = randperm(length(thisidx));
+        
+        
+        data_shuf(subjidx) = data_all(thisidx(shufidx));
+        
+        clear thisidx subjidx shufidx;
+    end
+    
+    epoch_3way_shufF(:,ii) = RMAOV33_gh([data_shuf labels_all]);
+    
+end
+toc;
+
+
+
+% do shuffled 2-way ANOVA for each ROI
+
+epoch_2way_shufF = cell(length(ROIs),1);
+fprintf('Shuffling - 2 way ANOVAs\n');
+for vv = 1:length(ROIs)
+    
+    fprintf('ROI %s\n',ROIs{vv});
+    
+    % get data for this ROI
+    thisdata   = data_all(labels_all(:,1)==vv);
+    thislabels = labels_all(labels_all(:,1)==vv,[2 3 4]); % cond, epoch, subj
+
+    epoch_2way_shufF{vv} = nan(3,niter);
+    tic;
+    for ii = 1:niter
+        
+        data_shuf = nan(size(thisdata));
+        
+        for ss = 1:length(subj)
+            
+            subjidx = thislabels(:,3)==ss;
+            thisidx = find(subjidx0);
+            shufidx = randperm(length(thisidx));
+            
+            data_shuf(subjidx) = thisdata(thisidx(shufidx));
+            
+            epoch_2way_shufF{vv}(:,ii) = RMAOV2_gh([data_shuf thislabels]);
+            
+        end
+    end
+    toc;
+end
 
 return
