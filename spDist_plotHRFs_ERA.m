@@ -3,13 +3,16 @@
 % loads trialData files & plots HRFs for distractor/no-distractor trials
 % (Note: different # of trials...)
 %
+% like fidelity, compares matched trial epochs
+%
+% stats: 3-way shuffled ANOVA, then 2-way shuffled ANOVAs per ROI
+%
 
 function spDist_plotHRFs_ERA(subj,sess,ROIs)
 
 
 task_dir = 'spDist';
 
-%root = sprintf('/Volumes/data/%s/',task_dir);
 root = spDist_loadRoot;
 
 if nargin < 1 || isempty(subj)
@@ -17,7 +20,6 @@ if nargin < 1 || isempty(subj)
 end
 
 if nargin < 2 || isempty(sess)
-    %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1'}};    % TODO: if no defined sessions, use all....
     sess_template = {'spDist1','spDist2'};
     sess = cell(length(subj),1); for ss = 1:length(subj); sess{ss} = sess_template; end 
     clear sess_template
@@ -25,7 +27,11 @@ end
 
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1','V2','V3','V3AB','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS'};
+    % all ROIs
+    % ROIs = {'V1','V2','V3','V3AB','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS'};
+    
+    % for manuscript
+    ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
 end
 
 
@@ -33,8 +39,18 @@ func_suffix = 'surf';
 
 ve_thresh = 0.1; 
 
-delay_range = [7 15]; % TR beginning at 7, ending at 15, to match IEM training
+% 'overall' delay-period (maximizes difference between distractor
+% present/absent
+% (because we use less than/equal to for tpt selection...)
+% (this is based on tr - we want to INCLUDE TRs that span this range)
+delay_range = [9 15]; % TR beginning at 7, ending at 15, to match IEM training
 
+% these are based on *time*, not TR...
+% as in Fig. 1, 4, 5 - 3 epochs for comparing before/during/after distractor
+delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12]; %for stats - up for discussion?
+% >= n,1 and < n,2
+
+epoch_str = {'Pre-distractor','Distractor','Post-distractor'};
 
 t_markers = [0 4.5 12]; % beginning of delay, beginning of distractor, beginning of response
 
@@ -103,19 +119,9 @@ all_hrfs = all_hrfs - mean(all_hrfs(:,baseline_TRs),2);
 
 %% plot data
 
-% which conditions do we care about right now? just the first digit of
-% c_task(:,1)
-%which_conds = [1 2 3];
-
-% when TR = 2.5, use [2 3 4] or [3 4]
-%delay_tpts = find(ismember(which_TRs,[3 4]));
 
 
-%condstr = {'100%/0%','50%/50%','75%/25%'};
-
-
-cond_colors = lines(2); %cond_colors = cond_colors([2 3],:); % red and yellow
-
+cond_colors = spDist_condColors; %[0.7100 0.2128 0.4772; 0 0 1;];
 
 % store something that's ROI x time x subj for each condition
 cu = unique(all_conds(:,1));
@@ -124,10 +130,6 @@ all_mean_hrf = cell(length(cu),1); % mapping, cued, chooose
 axhrf = nan(1,length(ROIs));
 mh = nan(length(ROIs),length(t_markers));
 
-
-% all_mean_hrf{1} = nan(length(ROIs),length(which_TRs),length(subj));
-% all_mean_hrf{2} = nan(length(ROIs),length(which_TRs_choose),length(subj));
-% all_mean_hrf{3} = nan(length(ROIs),length(which_TRs_choose),length(subj));
 
 
 % start with just subplots of timeseries (w/ errorbars?)
@@ -176,7 +178,7 @@ myy = cell2mat(get(axhrf,'YLim'));
 set(axhrf,'YLim',[min(myy(:,1)) max(myy(:,2))],'XLim',[which_TRs(1) which_TRs(end)]*TR,'TickDir','out');
 set(mh,'YData',[min(myy(:,1)) max(myy(:,2))]);
 
-set(gcf,'Position',[ 66        1180        2279         158])
+%set(gcf,'Position',[ 66        1180        2279         158])
 %legend(condstr,'location','best');
 
 
@@ -242,6 +244,7 @@ plot([0 length(ROIs)+1],[0 0],'k--');
 offsets = linspace(-0.15,0.15,length(all_mean_hrf));
 
 for cc = 1:length(all_mean_hrf)
+    % NOTE: here, we use lte rather than lt...
     this_TR_range = which_TRs>=delay_range(1)&which_TRs<=delay_range(2);
     
     all_mean_delay = squeeze(mean(all_mean_hrf{cc}(:,this_TR_range,:),2)); % ROI x subj
@@ -261,5 +264,105 @@ end
 set(gca,'XTick',1:length(ROIs),'XTickLabel',ROIs,'XTickLabelRotation',-45,'FontSize',14,'TickDir','out','Box','off');
 title('Mean delay period activation');
 ylabel('BOLD Z-score');
+
+
+%% bar graph of mean activation during each epoch
+figure;
+
+
+for vv = 1:length(ROIs)
+    
+    subplot(1,length(ROIs),vv); hold on;
+    
+    % plot a zero line
+    plot([0 size(delay_tpt_range,1)+1],[0 0],'k--');
+    
+    
+    
+    
+    for cc = 1:length(all_mean_hrf)
+        
+        % epoch x subj
+        thisd = nan(size(delay_tpt_range,1),length(subj));
+        
+        for tt = 1:size(delay_tpt_range,1)
+        
+            this_TR_range = (which_TRs*TR)>=delay_tpt_range(tt,1) & (which_TRs*TR)<delay_tpt_range(tt,2);
+            
+            thisd(tt,:) = mean(all_mean_hrf{cc}(vv,this_TR_range,:),2);
+            
+            % all_mean_hrf: ROIs x tpts x subj
+            %all_mean_delay = squeeze(mean(all_mean_hrf{cc}(vv,this_TR_range,:),2)); % ROI x subj
+            
+            
+        end
+        
+        thise = std(thisd,[],2)/sqrt(length(subj));
+        thism = mean(thisd,2);
+
+        
+        plot((1:size(delay_tpt_range,1)) .* [1; 1],thism.'+thise.'.*[-1; 1],'-','LineWidth',1.0,'Color',cond_colors(cc,:));
+        plot(1:size(delay_tpt_range,1),thism,'o-','Color',cond_colors(cc,:),'MarkerFaceColor',cond_colors(cc,:),'MarkerSize',3,'LineWidth',1.0);
+    end
+    
+    hold off;
+    
+    
+    set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'YTickLabel',[]);
+    if vv == 1
+        %set(gca,'XTickLabel',epoch_str,'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
+        set(gca,'XTickLabel',[],'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
+        ylabel('BOLD Z-score');
+    end
+    title(ROIs{vv});
+    
+end
+
+
+match_ylim(get(gcf,'Children'));
+
+
+%% let's do some stats!
+%
+% start with: 3-way ANOVA, incl 3-way interaction, against shuffled null
+%
+% then, 2-way ANOVAs per ROI, against shuffled null
+
+% organize data into tall format expected by ANOVA functions
+
+data_all   = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),1);
+labels_all = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),4); % subj, ROI, conds, epochs
+idx = 1;
+
+for ss = 1:length(subj)
+    for vv = 1:length(ROIs)
+        for cc = 1:length(all_mean_hrf)
+            for tt = 1:size(delay_tpt_range,1)
+                
+                this_TR_range = (which_TRs*TR)>=delay_tpt_range(tt,1) & (which_TRs*TR)<delay_tpt_range(tt,2);
+
+                data_all(idx)     = mean(all_mean_hrf{cc}(vv,this_TR_range,ss));
+                
+                
+                labels_all(idx,:) = [ss vv cc tt];
+                idx = idx+1;
+            end
+        end
+    end
+end
+
+% real ANOVAs
+
+% 3-way with interaction
+
+
+% 2-way for each ROI
+
+
+
+% seed RNG
+rng(spDist_randSeed);
+
+
 
 return
