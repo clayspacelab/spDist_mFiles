@@ -34,6 +34,13 @@ if nargin < 3 || isempty(ROIs)
     ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
 end
 
+% do stats? (takes ~10 mins)
+do_stats = 1;
+
+% if so, save them?
+save_stats = 1;
+
+
 
 func_suffix = 'surf';
 
@@ -267,7 +274,7 @@ ylabel('BOLD Z-score');
 
 
 %% bar graph of mean activation during each epoch
-figure;
+fh_epoch = figure;
 
 
 for vv = 1:length(ROIs)
@@ -308,11 +315,13 @@ for vv = 1:length(ROIs)
     hold off;
     
     
-    set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'YTickLabel',[]);
+    set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'XLim',[0.25 size(delay_tpt_range,1)+0.75]);
     if vv == 1
         %set(gca,'XTickLabel',epoch_str,'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
-        set(gca,'XTickLabel',[],'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
+        %set(gca,'XTickLabel',[],'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
         ylabel('BOLD Z-score');
+    else
+        set(gca,'YTickLabel',[]);
     end
     title(ROIs{vv});
     
@@ -330,105 +339,170 @@ match_ylim(get(gcf,'Children'));
 
 % organize data into tall format expected by ANOVA functions
 
-data_all   = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),1);
-labels_all = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),4); % subj, ROI, conds, epochs
-idx = 1;
 
-for ss = 1:length(subj)
-    for vv = 1:length(ROIs)
-        for cc = 1:length(all_mean_hrf)
-            for tt = 1:size(delay_tpt_range,1)
-                
-                this_TR_range = (which_TRs*TR)>=delay_tpt_range(tt,1) & (which_TRs*TR)<delay_tpt_range(tt,2);
-
-                data_all(idx)     = mean(all_mean_hrf{cc}(vv,this_TR_range,ss));
-                
-                
-                labels_all(idx,:) = [vv cc tt ss];
-                idx = idx+1;
+if do_stats == 1
+    
+    
+    data_all   = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),1);
+    labels_all = nan(length(subj)*length(ROIs)*size(delay_tpt_range,1)*length(all_mean_hrf),4); % subj, ROI, conds, epochs
+    idx = 1;
+    
+    for ss = 1:length(subj)
+        for vv = 1:length(ROIs)
+            for cc = 1:length(all_mean_hrf)
+                for tt = 1:size(delay_tpt_range,1)
+                    
+                    this_TR_range = (which_TRs*TR)>=delay_tpt_range(tt,1) & (which_TRs*TR)<delay_tpt_range(tt,2);
+                    
+                    data_all(idx)     = mean(all_mean_hrf{cc}(vv,this_TR_range,ss));
+                    
+                    
+                    labels_all(idx,:) = [vv cc tt ss];
+                    idx = idx+1;
+                end
             end
         end
     end
-end
-
-% real ANOVAs
-
-% 3-way with interaction
-% returns: IV1, IV2, IV3, IV1xIV2, IV1xIV3, IV2xIV3, IV1xIV2xIV3
-% subj must be last column of X
-epoch_3way_realF = RMAOV33_gh([data_all labels_all]);
-
-% 2-way for each ROI
-epoch_2way_realF = nan(length(ROIs),3);
-for vv = 1:length(ROIs)
-    thisidx = labels_all(:,1)==vv;
-    epoch_2way_realF(vv,:) = RMAOV2_gh([data_all(thisidx) labels_all(thisidx,2:end)]);
-end
-
-
-% seed RNG
-rng(spDist_randSeed);
-
-niter = 1000;
-
-% do shuffled 3-way ANOVA (shuffle labels w/in subj 1000x)
-
-epoch_3way_shufF = nan(7,niter);
-fprintf('Shuffling (3-way ANOVA...\n');
-tic;
-for ii = 1:niter
     
-    data_shuf = nan(size(data_all));
+    % real ANOVAs
     
-    for ss = 1:length(subj)
-        subjidx = labels_all(:,4)==ss;
-        thisidx = find(subjidx);
-        shufidx = randperm(length(thisidx));
-        
-        
-        data_shuf(subjidx) = data_all(thisidx(shufidx));
-        
-        clear thisidx subjidx shufidx;
+    % 3-way with interaction
+    % returns: IV1, IV2, IV3, IV1xIV2, IV1xIV3, IV2xIV3, IV1xIV2xIV3
+    % subj must be last column of X
+    epoch_3way_realF = RMAOV33_gh([data_all labels_all]);
+    
+    % 2-way for each ROI
+    epoch_2way_realF = nan(length(ROIs),3);
+    for vv = 1:length(ROIs)
+        thisidx = labels_all(:,1)==vv;
+        epoch_2way_realF(vv,:) = RMAOV2_gh([data_all(thisidx) labels_all(thisidx,2:end)]);
     end
     
-    epoch_3way_shufF(:,ii) = RMAOV33_gh([data_shuf labels_all]);
     
-end
-toc;
-
-
-
-% do shuffled 2-way ANOVA for each ROI
-
-epoch_2way_shufF = cell(length(ROIs),1);
-fprintf('Shuffling - 2 way ANOVAs\n');
-for vv = 1:length(ROIs)
+    % seed RNG
+    rng(spDist_randSeed);
     
-    fprintf('ROI %s\n',ROIs{vv});
+    niter = 1000;
     
-    % get data for this ROI
-    thisdata   = data_all(labels_all(:,1)==vv);
-    thislabels = labels_all(labels_all(:,1)==vv,[2 3 4]); % cond, epoch, subj
-
-    epoch_2way_shufF{vv} = nan(3,niter);
+    % do shuffled 3-way ANOVA (shuffle labels w/in subj 1000x)
+    
+    epoch_3way_shufF = nan(7,niter);
+    fprintf('Shuffling (3-way ANOVA...)\n');
     tic;
     for ii = 1:niter
         
-        data_shuf = nan(size(thisdata));
+        data_shuf = nan(size(data_all));
         
         for ss = 1:length(subj)
-            
-            subjidx = thislabels(:,3)==ss;
-            thisidx = find(subjidx0);
+            subjidx = labels_all(:,4)==ss;
+            thisidx = find(subjidx);
             shufidx = randperm(length(thisidx));
             
-            data_shuf(subjidx) = thisdata(thisidx(shufidx));
             
-            epoch_2way_shufF{vv}(:,ii) = RMAOV2_gh([data_shuf thislabels]);
+            data_shuf(subjidx) = data_all(thisidx(shufidx));
             
+            clear thisidx subjidx shufidx;
         end
+        
+        epoch_3way_shufF(:,ii) = RMAOV33_gh([data_shuf labels_all]);
+        
     end
     toc;
+    
+    
+    
+    % do shuffled 2-way ANOVA for each ROI
+    
+    epoch_2way_shufF = cell(length(ROIs),1);
+    fprintf('Shuffling - 2 way ANOVAs\n');
+    for vv = 1:length(ROIs)
+        
+        fprintf('ROI %s\n',ROIs{vv});
+        
+        % get data for this ROI
+        thisdata   = data_all(labels_all(:,1)==vv);
+        thislabels = labels_all(labels_all(:,1)==vv,[2 3 4]); % cond, epoch, subj
+        
+        epoch_2way_shufF{vv} = nan(3,niter);
+        tic;
+        for ii = 1:niter
+            
+            data_shuf = nan(size(thisdata));
+            
+            for ss = 1:length(subj)
+                
+                subjidx = thislabels(:,3)==ss;
+                thisidx = find(subjidx);
+                shufidx = randperm(length(thisidx));
+                
+                data_shuf(subjidx) = thisdata(thisidx(shufidx));
+                
+                epoch_2way_shufF{vv}(:,ii) = RMAOV2_gh([data_shuf thislabels]);
+                
+            end
+        end
+        toc;
+    end
+    
+    
+    % calculate p-values for 3-way ANOVA
+    epoch_3way_pval = mean(epoch_3way_realF.' <= epoch_3way_shufF,2);
+    epoch_3way_labels = {'ROI','condition','epoch','ROI x condition','ROI x epoch','condition x epoch','ROI x condition x epoch'};
+    
+    
+    % calculate p-values for 2-way ANOVA
+    epoch_2way_labels = {'condition','epoch','condition x epoch'};
+    
+    epoch_2way_pval = nan(length(ROIs),3);
+    for vv = 1:length(ROIs)
+        epoch_2way_pval(vv,:) = mean(epoch_2way_realF(vv,:) <= epoch_2way_shufF{vv}.',1);
+    end
+    
+    
+    % FDR thresholds
+    fdr_thresh = nan(1,size(epoch_2way_pval,2));
+    for ii = 1:size(epoch_2way_pval,2)
+        fdr_thresh(ii) = fdr(epoch_2way_pval(:,ii),0.05);
+    end
+    
+    % save stats, if necessary
+    
+    if save_stats == 1
+        fn2s = sprintf('%s/spDist_stats/n%i_HRFstats_shuf_%iIter_%s.mat',root,length(subj),niter,datestr(now,30));
+        fprintf('Saving to %s\n',fn2s);
+        save(fn2s,'epoch_3way_realF','epoch_3way_shufF','epoch_2way_realF','epoch_2way_shufF','epoch_3way_pval','epoch_2way_pval','epoch_3way_labels','epoch_2way_labels','fdr_thresh');
+    end
+    
+    
+    % add stats markers to figures
+    % cond: +, epoch: o, interaction: x
+    
+    stats_markers = {'+','\circ','\times'};
+    stats_pos = [-1.30 -.03; -1.0 -.04; -.75 -.03]; % in plotted units, x,y, relative to top right
+    
+    signif_color = [0 0 0];
+    trend_color  = [0.5 0.5 0.5];
+    
+    figure(fh_epoch);
+    for vv = 1:length(ROIs)
+        
+        subplot(1,length(ROIs),vv); hold on;
+        
+        tmpxlim = get(gca,'XLim');
+        tmpylim = get(gca,'YLim');
+        
+        topright = [tmpxlim(2) tmpylim(2)];
+        
+        % main effect of cond; epoch, interaction
+        for ii = 1:3
+            if epoch_2way_pval(vv,ii) <= fdr_thresh(ii)
+                text(topright(1)+stats_pos(ii,1),topright(2)+stats_pos(ii,2),stats_markers{ii},'FontSize',14,'Color',signif_color);
+            elseif epoch_2way_pval(vv,1) <= 0.05
+                text(topright(1)+stats_pos(ii,1),topright(2)+stats_pos(ii,2),stats_markers{ii},'FontSize',14,'Color',trend_color);
+            end
+        end
+        
+    end
 end
 
 return
