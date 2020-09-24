@@ -169,21 +169,30 @@ for dd = 1:length(delay_tpts)
                 
             end
             
-            my_sem = std(thisdata,1)/(length(subj));
-            
-            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1) - min(mean(thisdata,1)),'-','LineWidth',0.5,'color',cond_colors(cc,:));
+            % added sqrt here (TCS)
+            my_sem = std(thisdata,[],1)/sqrt(length(subj));
+            % TCS: plot actual values, not min-removed
+            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1),'-','LineWidth',0.5,'color',cond_colors(cc,:));
+            % orig:
+            %h(cc) = plot(linspace(-180,180,90),mean(thisdata,1) - min(mean(thisdata,1)),'-','LineWidth',0.5,'color',cond_colors(cc,:));
             hold on;
             %plot(linspace(-180,180,90),(mean(thisdata,1) - min(mean(thisdata,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
             %plot(linspace(-180,180,90),(mean(thisdata,1) - min(mean(thisdata,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
             %color in btwn +/- SEM
-            btwn_fill = [(mean(thisdata,1) - min(mean(thisdata,1)))+1.*my_sem fliplr((mean(thisdata,1) - min(mean(thisdata,1)))-1.*my_sem)];
+            % TCS: plot actual values, not min removed
+            btwn_fill = [(mean(thisdata,1))+1.*my_sem fliplr((mean(thisdata,1))-1.*fliplr(my_sem))]; % TCS: fliplr also for my_sem?
+            
+            % orig:
+            %btwn_fill = [(mean(thisdata,1) - min(mean(thisdata,1)))+1.*my_sem fliplr((mean(thisdata,1) - min(mean(thisdata,1)))-1.*my_sem)];
             fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(cc,:),'linestyle','none','facealpha',0.3);
             
             
             %line([0 0], [-.1 2.25], 'color',[.2 .2 .2],'linewidth',0.5,'linestyle','-')
             line([min(xlim) max(xlim)], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-')
+            
+            clear my_sem;
         end
         
         % things to do for every axis:
@@ -223,7 +232,6 @@ end
 match_ylim(get(gcf,'Children'));
 set(gcf,'position', [ 23         245        2386         453])
 
-% TODO: above, get the x axes correct, and add outward ticks
 
 
 %% t-test between condition during each epoch against shuffled null
@@ -375,7 +383,8 @@ for vv = 1:length(ROIs)
                 thisd_store = [thisd_store; mean(mean(all_fidelity(thisidx,delay_tpts{dd},1))) dd vv cc ss];
                 
             end
-            my_sem(dd,cc) = std(thisd(dd,cc,:))/(length(subj));
+            % TCS: added sqrt here
+            my_sem(dd,cc) = std(thisd(dd,cc,:))/sqrt(length(subj));
         end
         
     end
