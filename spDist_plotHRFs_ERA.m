@@ -7,6 +7,8 @@
 %
 % stats: 3-way shuffled ANOVA, then 2-way shuffled ANOVAs per ROI
 %
+% TODO: use 'plot' instead of 'text' for significance markers
+%
 
 function spDist_plotHRFs_ERA(subj,sess,ROIs)
 
@@ -16,7 +18,7 @@ task_dir = 'spDist';
 root = spDist_loadRoot;
 
 if nargin < 1 || isempty(subj)
-    subj = {'CC','KD','AY','MR','XL','SF','EK'};
+    subj = {'AY','CC','EK','KD','MR','SF','XL'};
 end
 
 if nargin < 2 || isempty(sess)
