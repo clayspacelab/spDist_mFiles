@@ -183,8 +183,12 @@ for dd = 1:length(delay_tpts)
             
             
             %line([0 0], [-.1 2.25], 'color',[.2 .2 .2],'linewidth',0.5,'linestyle','-')
-            line([min(xlim) max(xlim)], [0 0], 'color',[.2 .2 .2],'linewidth',0.5,'linestyle','-')
+            line([min(xlim) max(xlim)], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-')
         end
+        
+        % things to do for every axis:
+        set(gca,'TickDir','out','XTick',-180:90:180,'XTickLabel',[],'TickLength',1.5*get(gca,'TickLength'));
+        
         
         % TCS: here, I added specific XTicks (and ensured XLims are
         % -180/180)
@@ -207,6 +211,11 @@ for dd = 1:length(delay_tpts)
         if dd == 1
             title(ROIs{vv});
         end
+        
+        if vv ~= 1
+            set(gca,'YTickLabel',[]);
+        end
+        
         xlim([-180 180]);
         hold off;
     end
