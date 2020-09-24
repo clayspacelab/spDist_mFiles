@@ -362,6 +362,10 @@ cond_colors = dist_colors;
 
 thisd_store =[];
 
+% TCS: should add option for single-subj lines here too...
+
+plot_indiv = 1; % if 1, plot individual subj lines in line plot, otherwise, don't.
+hoffset = 0.15; % +/- this much 
 
 fidlines =  figure('Name','Fidelity lines');
 
@@ -370,13 +374,15 @@ h=[];
 for vv = 1:length(ROIs)
     thisd = []; %recon data
     
+    % TCS: moved from an inner loop to here
+    subplot(1,length(ROIs),vv);hold on;
+
     for dd =1:length(delay_tpts)
         
         
         for cc = 1:length(cu)
             for ss = 1:length(subj)
                 
-                subplot(1,length(ROIs),vv);hold on;
                 
                 thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
                 thisd(dd,cc,ss) = mean(mean(all_fidelity(thisidx,delay_tpts{dd},1)));
@@ -387,13 +393,20 @@ for vv = 1:length(ROIs)
             my_sem(dd,cc) = std(thisd(dd,cc,:))/sqrt(length(subj));
         end
         
+        % if we want, this is a good place to plot lines connecting indiv
+        % subj here
+        if plot_indiv == 1
+            plot(hoffset*[-1;1],squeeze(thisd(1,:,:)),'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
+        end
+        
+        
     end
     
     for cc =1:length(cu)
         % TCS: matched these to HRFs (dot makes it slightly easier to see
         % value when overlapping...)
         h(cc) = plot([1 2 3],mean(thisd(:,cc,:),3)','o-','color',cond_colors(cc,:),'linewidth',1,'MarkerSize',3,'MarkerFaceColor',cond_colors(cc,:));
-        hold on;
+ 
         for dd =1:length(delay_tpts)
             plot([dd dd],[mean(thisd(dd,cc,:),3)+1.*my_sem(dd,cc) mean(thisd(dd,cc,:),3)-1.*my_sem(dd,cc)], '-','LineWidth',1,'color',cond_colors(cc,:))
         end

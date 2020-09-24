@@ -317,7 +317,7 @@ for vv = 1:length(ROIs)
     hold off;
     
     
-    set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'XLim',[0.25 size(delay_tpt_range,1)+0.75]);
+    set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'XLim',[0.5 size(delay_tpt_range,1)+0.5]);
     if vv == 1
         %set(gca,'XTickLabel',epoch_str,'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
         %set(gca,'XTickLabel',[],'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
