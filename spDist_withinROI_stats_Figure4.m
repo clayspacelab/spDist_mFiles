@@ -54,7 +54,7 @@ else
 end
 
 
-delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12]; %for stats - up for discussion?
+delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %for stats - up for discussion?
 
 % number of iterations for permutation...
 iter = 1000;

@@ -56,7 +56,7 @@ delay_range = [9 15]; % TR beginning at 7, ending at 15, to match IEM training
 
 % these are based on *time*, not TR...
 % as in Fig. 1, 4, 5 - 3 epochs for comparing before/during/after distractor
-delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12]; %for stats - up for discussion?
+delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %for stats - up for discussion?
 % >= n,1 and < n,2
 
 epoch_str = {'Pre-distractor','Distractor','Post-distractor'};

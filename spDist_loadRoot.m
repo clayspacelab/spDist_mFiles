@@ -12,7 +12,7 @@ if ismac
 else
     this_computer = char(java.net.InetAddress.getLocalHost.getHostName);
     if strcmpi(this_computer,'tcs-compute-1')
-        root = '/mnt/LabShare/projects/nyu/spDist/';
+        root = '/home/local/PSYCH-ADS/sprague/labshare/projects/nyu/spDist/';
     elseif strcmpi(this_computer,'tcs-precision')
         root = 'Z:/projects/nyu/spDist/';
     else % for vader.psych.nyu.edu
