@@ -11,28 +11,30 @@
 % TODO: extend to compareReconstruction, which can load multiple sets of
 % sessions per subj, and will compare across sessions (and/or across sets
 % of tpts, etc... - only one set of comparisons at a time?)
+%
+% TODO: automate colorlims across figures
 
 function spDist_plotReconstructions_thruTime_Figure3(subj,sess,ROIs)
 
 root = spDist_loadRoot;
-root = '/share/data/spDist/';
+%root = '/share/data/spDist/';
 
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
     subj = {'CC','KD','AY','MR','XL','EK','SF'};
-    %subj = {'XL'};
+ 
 end
 
 if nargin < 2 || isempty(sess)
     % each subj gets one cell, with strings for each sess
-    % TODO: automate...
+
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-    %sess = {{'spDist1','spDist2'},}
 end
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
+    ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+
 end
 
 
@@ -244,7 +246,8 @@ end
 
 
 %% which tpts are we plotting throughout?
-tpts_to_plot = (tpts*myTR) >= t_range_to_plot(1) & (tpts*myTR) <= t_range_to_plot(2);
+% TCS: lte to lessthan
+tpts_to_plot = (tpts*myTR) >= t_range_to_plot(1) & (tpts*myTR) < t_range_to_plot(2);
 
 delay_tpts = cell(size(delay_tpt_range,1),1);
 for dd = 1:size(delay_tpt_range,1)
@@ -254,6 +257,10 @@ end
 
 %% plot each condition (target-locked) (average over subj)
 % length(cu) x n_rois
+
+% store all axes across figures
+recon_ax = [];
+
 
 cu = 1;
 cond_str = {'No distractor trials'};
@@ -270,7 +277,8 @@ for cc = 1:length(cu)
             thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
             thisd(:,:,ss) = squeeze(mean(all_recons{1}(thisidx,:,:),1)).';
         end
-        imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
+        % TCS: center each row over middle of TR
+        imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,mean(thisd(tpts_to_plot,:,:),3));
         colormap viridis
         if cc == 1
             title(ROIs{vv});
@@ -292,7 +300,11 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-match_clim(get(gcf,'Children'));
+
+%match_clim(get(gcf,'Children'));
+
+recon_ax = [recon_ax; get(gcf,'Children')];
+
 %c_lim = [ -1.1876    1.7960];
 %% plot each condition (target-locked) (average over subj)
 % length(cu) x n_rois
@@ -312,7 +324,8 @@ for cc = 1:length(cu)
             thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
             thisd(:,:,ss) = squeeze(mean(all_recons{1}(thisidx,:,:),1)).';
         end
-        imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
+        % TCS: center each row over middle of TR
+        imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,mean(thisd(tpts_to_plot,:,:),3));
         colormap viridis
         if cc == 1
             title(ROIs{vv});
@@ -334,8 +347,10 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-match_clim(get(gcf,'Children'));
+%match_clim(get(gcf,'Children'));
 %c_limdist = [ -1.1702    1.3151];
+
+recon_ax = [recon_ax;get(gcf,'Children')];
 
 %% plot distractor-locked (for distractor)
 cond_str ={'Distractor locked'};
@@ -351,7 +366,8 @@ for vv = 1:length(ROIs)
         thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2;
         thisd(:,:,ss) = squeeze(mean(all_recons{2}(thisidx,:,:),1)).';
     end
-    imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
+    % TCS: as above...
+    imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,mean(thisd(tpts_to_plot,:,:),3));
     colormap viridis;
     
     
@@ -373,8 +389,10 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-match_clim(get(gcf,'Children'));
+%match_clim(get(gcf,'Children'));
 %c_lim_distlock =[-1.4808    1.4039];
+recon_ax = [recon_ax;get(gcf,'Children')];
+
 
 %% plot distractor-removed target representation (all positions)
 cond_str ={'Target, dist removed'};
@@ -390,7 +408,9 @@ for vv = 1:length(ROIs)
         thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2;
         thisd(:,:,ss) = squeeze(mean(all_recons_nodist(thisidx,:,:),1)).';
     end
-    imagesc(angs,tpts(tpts_to_plot)*myTR,mean(thisd(tpts_to_plot,:,:),3));
+    
+    % TCS: as above
+    imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,mean(thisd(tpts_to_plot,:,:),3));
     colormap viridis;
     
     
@@ -413,11 +433,13 @@ end
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
 
-match_clim(get(gcf,'Children'));
+%match_clim(get(gcf,'Children'));
 %sgtitle('Distractor trials; distractor representation removed');
 %c_lim_distrem =[-0.8197    1.1589];
 
+recon_ax = [recon_ax;get(gcf,'Children')];
 
+match_clim(recon_ax);
 
 
 %% plot target fidelity on distractor-/+ trials and distractor fidelity
@@ -458,11 +480,12 @@ for vv = 1:length(ROIs)
         
         thise = std(thisd,[],1)/sqrt(length(subj));
         
+        % TCS: updated x axis
         % plot mean
-        plot(myTR*tpts,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cc,:));
+        plot(myTR*tpts + myTR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cc,:));
         
         % plot error bars
-        plot((myTR*tpts.*[1;1]).',(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cc,:));
+        plot((myTR*tpts.*[1;1]).' + myTR/2,(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cc,:));
         
         
         yline(0);
@@ -503,8 +526,8 @@ for vv = 1:length(ROIs)
 
     
     
-    plot(myTR*tpts,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(3,:));
-    plot((myTR*tpts.*[1;1]).',(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(3,:));
+    plot(myTR*tpts + myTR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(3,:));
+    plot((myTR*tpts.*[1;1]).' + myTR/2,(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(3,:));
     
     yline(0);
     
@@ -540,8 +563,8 @@ for vv = 1:length(ROIs)
 
     
     
-    plot(myTR*tpts,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(2,:));
-    plot((myTR*tpts.*[1;1]).',(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(2,:));
+    plot(myTR*tpts + myTR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(2,:));
+    plot((myTR*tpts.*[1;1]).' + myTR/2,(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(2,:));
     
     yline(0);
     
@@ -594,7 +617,7 @@ for vv = 1:length(ROIs)
         %thise  = std(diff_fidelity
         
         % plot mean
-        plot(myTR*tpts,diff_fidelity(vv,:),'-','LineWidth',1.5,'Color','k');
+        plot(myTR*tpts + myTR/2,diff_fidelity(vv,:),'-','LineWidth',1.5,'Color','k');
         
         %plot(myTR*tpts,mean(diff_fidelity,1),'-','LineWidth',1.5,'Color','k'););
         
@@ -631,7 +654,7 @@ figure;
 for cc = 1:size(mu_fidelity,3)
     subplot(size(mu_fidelity,3),1,cc); hold on;
     
-    imagesc(tpts(tpts_to_plot)*myTR,1:length(ROIs),mu_fidelity(:,tpts_to_plot,cc));
+    imagesc(tpts(tpts_to_plot)*myTR + myTR/2,1:length(ROIs),mu_fidelity(:,tpts_to_plot,cc));
     
     axis ij; axis tight;
     colormap viridis;
@@ -661,7 +684,7 @@ for cc = 1:size(mu_fidelity,3)
     tmp_fidelity = mu_fidelity(:,tpts_to_plot,cc);
     tmp_fidelity = tmp_fidelity./max(tmp_fidelity,[],2);
     
-    imagesc(tpts(tpts_to_plot)*myTR,1:length(ROIs),tmp_fidelity);
+    imagesc(tpts(tpts_to_plot)*myTR + myTR/2,1:length(ROIs),tmp_fidelity);
     
     axis ij; axis tight;
     colormap viridis;
@@ -700,7 +723,7 @@ for cc = 1:length(cu)
             thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
             thisd = squeeze(mean(all_recons{1}(thisidx,:,:),1)).';
             
-            imagesc(angs,tpts(tpts_to_plot)*myTR,thisd(tpts_to_plot,:));
+            imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,thisd(tpts_to_plot,:));
             colormap viridis
             if ss == 1
                 title(ROIs{vv});

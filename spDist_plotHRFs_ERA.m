@@ -166,10 +166,11 @@ for vv = 1:length(ROIs)
         end
         
         
-        
-        plot(which_TRs*TR,mean(thisd,1),'-','LineWidth',1.5,'Color',cond_colors(cc,:));
-        plot(which_TRs*TR,mean(thisd,1)+std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
-        plot(which_TRs*TR,mean(thisd,1)-std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
+        % plot, like for reconstructions, such that middle of each
+        % datapoint is at middle of TR
+        plot(which_TRs*TR + TR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',cond_colors(cc,:));
+        plot(which_TRs*TR + TR/2,mean(thisd,1)+std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
+        plot(which_TRs*TR + TR/2,mean(thisd,1)-std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
         clear thisd;
     end
     

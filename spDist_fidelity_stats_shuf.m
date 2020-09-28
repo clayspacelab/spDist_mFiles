@@ -24,18 +24,12 @@
 
 
 root = spDist_loadRoot;   % '/Volumes/data/wmChoose_scanner/';
-root = '/share/data/spDist/';
 
-subj = {'AY','CC','EK','KD','MR','XL','SF'};
-%subj = {'CC','AY','MR'};
+
+subj = {'AY','CC','EK','KD','MR','SF','XL'};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-%sess = {{'spDist1','spDist2'},{'spDist1','spDist2'}};
-%sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
 
-ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
-%ROIs = {'V1','V2','V3'};
-%ROIs = {'V1','V2','V3','V3AB','hV4','VO1','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS'}; % for VSS, drop iPCS and VO2, those regions are missing significant representations in some subj
-%ROIs = {'V1','V3AB','VO1','LO1','TO1','IPS0','IPS2','sPCS'};
+ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
 func_suffix = 'surf';
 
 cat_mode = 1; % if 1, look for catSess1Ses...SessN_ files, otherwise, just look for each session in turn
@@ -378,10 +372,10 @@ for vv = 1:length(ROIs)
             thise = std(thisd,[],1)/sqrt(length(subj));
             
             % plot mean
-            plot(myTR*tpts,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cond_group{gg}(cc),:));
+            plot(myTR*tpts + myTR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cond_group{gg}(cc),:));
             
             % plot error bars
-            plot((myTR*tpts.*[1;1]).',(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cond_group{gg}(cc),:));
+            plot((myTR*tpts.*[1;1]).' + myTR/2,(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cond_group{gg}(cc),:));
             
             % plot CI of mean (from shuffled data)
             %plot((myTR*tpts.*[1;1]).',all_mu_ci{cc}(vv,:),'--','LineWidth',1,'Color',[0.5 0.5 0.5]);
@@ -409,10 +403,10 @@ for vv = 1:length(ROIs)
             this_tnd_tpts(this_tnd_tpts & this_sig_tpts) = 0; % to avoid double-marking...
             
             if any(this_tnd_tpts)
-                plot((myTR*tpts(this_tnd_tpts==1)),-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor','w','MarkerSize',3);
+                plot((myTR*tpts(this_tnd_tpts==1)) + myTR/2,-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor','w','MarkerSize',3);
             end
             if any(this_sig_tpts)
-                plot((myTR*tpts(this_sig_tpts==1)),-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor',fidelity_colors(cond_group{gg}(cc),:),'MarkerSize',3);
+                plot((myTR*tpts(this_sig_tpts==1)) + myTR/2,-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor',fidelity_colors(cond_group{gg}(cc),:),'MarkerSize',3);
             end
             clear thisd thise;
         end
