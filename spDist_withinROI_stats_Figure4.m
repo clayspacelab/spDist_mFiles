@@ -396,7 +396,7 @@ for vv = 1:length(ROIs)
         % if we want, this is a good place to plot lines connecting indiv
         % subj here
         if plot_indiv == 1
-            plot(hoffset*[-1;1],squeeze(thisd(1,:,:)),'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
+            plot(dd+hoffset*[-1;1],squeeze(thisd(dd,:,:)),'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
         end
         
         
@@ -426,7 +426,11 @@ for vv = 1:length(ROIs)
         title(ROIs{vv})
     end
     
-    ylim([0 0.65])
+    if plot_indiv
+        ylim([-0.1 0.8]);
+    else
+        ylim([0 0.65])
+    end
     
     
     
