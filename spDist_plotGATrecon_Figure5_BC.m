@@ -230,20 +230,42 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
         h=[];
         for aa =1:length(trn_epoch)
             %for ee =1:length(tst_epoch)
-            if aa==1
-                ee =1;
-            elseif aa ==2
-                ee =2;
-            elseif aa ==3
-                ee=3;
-            end
-            
-            % TCS: or... ee = aa?
-            
-            thisd = nan(length(subj),size(all_recons_gat{1},2));
-            for ss = 1:length(subj)
+                if aa==1
+                    ee =1;
+                elseif aa ==2
+                    ee =2;
+                elseif aa ==3
+                    ee=3;
+                end 
                 
-                subplot(size(all_recons_gat,1),length(ROIs),vv+(ee-1)*length(ROIs));hold on;
+                thisd = nan(length(subj),size(all_recons_gat{1},2));
+                for ss = 1:length(subj)
+                    
+                    subplot(size(all_recons_gat,1),length(ROIs),vv+(ee-1)*length(ROIs));hold on;
+                    
+                    thisidx = all_subj_gat==ss & all_ROIs_gat==vv & all_conds_gat(:,1)==2;
+                    thisd(ss,:) = mean(all_recons_gat{aa,ee,pg}(thisidx,:)); %aa = TRN idx, rows; ee = TST idx, col; blue = 1, red =2 , yellow =3
+                  
+                end
+                
+                my_sem = std(thisd,1)/sqrt((length(subj)));
+                
+                h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),'-','LineWidth',1,'color',cond_colors(aa,:))% ,'LineWidth',2,'color',cond_colors(aa,:))
+                hold on;
+                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+                
+                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+                
+               btwn_fill = [(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem fliplr((mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem)];     
+               fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
+                            
+                hold on;
+                line([min(xlim) max(xlim)], [0 0], 'color',[.2 .2 .2],'linewidth',0.1,'linestyle','-')
+                ylim([-0.05 1.75])
+                if ee== 1 && aa==1
+                    title(ROIs{vv});
+                else
+                end
                 
                 thisidx = all_subj_gat==ss & all_ROIs_gat==vv & all_conds_gat(:,1)==2;
                 thisd(ss,:) = mean(all_recons_gat{aa,ee,pg}(thisidx,:)); %aa = TRN idx, rows; ee = TST idx, col; blue = 1, red =2 , yellow =3
@@ -357,7 +379,7 @@ for n_files =1:2
                 h(n_files) = plot([1 2 3], [mean(thisd(1,1,:),3) mean(thisd(2,2,:),3) mean(thisd(3,3,:),3)],'b-','linewidth',.5) % CHANGING THIS FROM -- black to - black, may be confuding w previous figs!!
                 
                 for ii=1:3
-                    my_sem = std(thisd(ii,ii,:),[],3)/(length(subj));
+                    my_sem = std(thisd(ii,ii,:),[],3)/sqrt((length(subj)));
                     
                     hold on;
                     %plot([ii ii],[mean(thisd(ii,ii,:),3)+1.*my_sem mean(thisd(ii,ii,:),3)-1.*my_sem],'k-','linewidth',.5)
@@ -407,7 +429,7 @@ for n_files =1:2
                 h(n_files) = plot([1 2 3], [mean(thisdata(1,:),2) mean(thisdata(2,:),2) mean(thisdata(3,:),2)],'-.','color', [0 0 1],'linewidth',.5) %collect n_files plot handle for legend use
                 
                 for ii=1:3
-                    my_sem = std(thisdata(ii,:),[],2)/(length(subj));
+                    my_sem = std(thisdata(ii,:),[],2)/sqrt((length(subj)));
                     
                     hold on;
                     % plot([ii ii],[mean(thisdata(ii,:),2)+1.*my_sem mean(thisdata(ii,:),2)-1.*my_sem],'-','color', [0.5 0.5 0.5],'linewidth',.5)
