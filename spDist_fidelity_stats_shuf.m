@@ -167,7 +167,7 @@ tpts_to_plot = (tpts*myTR) >= t_range_to_plot(1) & (tpts*myTR) < t_range_to_plot
 
 %% FIDELITY: compute mean for each subj
 
-%addpath /Volumes/home/tommy/Documents/MATLAB/toolboxes/resampling_statistical_toolkit/statistics; % make sure we're not using vista's FDR
+% TODO: only do stats correction over tpts_to_plot
 
 % condition label; which fidelity/recon to sort by
 conds_of_interest = [1 1;   % no distractor (WM target)
@@ -341,7 +341,10 @@ end
 cond_group = {[1 2], 3}; % what to put on same axes
 
 % target: without and with distractor; distractor
-fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
+%fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
+tmpcolors = lines(7);
+fidelity_colors = [spDist_condColors; tmpcolors(6,:)];
+clear tmpcolors;
 
 t_markers = [0 4.5 12]; % onset of delay, distractor, response
 
