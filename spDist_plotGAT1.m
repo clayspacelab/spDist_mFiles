@@ -3,15 +3,15 @@
 % for plotting cross-validated WM GAT matrices (via IEM) on distractor trials,
 % computed using spDist_channelRespAmp_GATdist.m
 
-
+% 9/21/2020 UPDATED: COLORMAP, ROIs, GCF POS - geh
 root = spDist_loadRoot;
 root = '/share/data/spDist/';
 
 subj = {'AY','CC','EK','KD','MR','XL','SF'};
 %sess= {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
-
+%ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
+ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
 
 func_suffix = 'surf';
 
@@ -125,7 +125,8 @@ for aa = 1:length(all_fidelity)
             thisd(:,:,ss) = squeeze(mean(all_fidelity{aa}(:,:,thisidx),3));
         end
         imagesc(tpts*myTR,tpts*myTR,mean(thisd,3));
-        
+        colormap magma
+        cbh = colorbar('h','location','eastoutside')
         title(ROIs{vv});
         axis tight square
         set(gca,'XTick',0:4:24,'YTick',0:4:24,'TickDir','out');
@@ -139,7 +140,9 @@ for aa = 1:length(all_fidelity)
     end
 end
 match_clim(get(gcf,'Children'));
-set(gcf,'Position',[32         778        1910         122]);
+set(cbh,'XTick',[-.2:.1:.3])
+%set(gcf,'Position',[32         778        1910         122]);
+set(gcf,'position', [ 23         245        2386         453])
 
 
 

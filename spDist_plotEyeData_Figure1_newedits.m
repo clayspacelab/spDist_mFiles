@@ -91,7 +91,7 @@ all_rt = cell(3,1);
 cond_str = {'No distractor','Distractor'};
 cond_colors = lines(3);
 
-params_of_interest = {'f_sacc'};
+params_of_interest = {'i_sacc','f_sacc'};
 param_str = {};
 
 
@@ -217,7 +217,7 @@ for ss = 1:length(subj)
 end
 
 all_rt{3} = tmp_rt;
-%% Figure 1B : Example participant eye-trace 
+% %% Figure 1B : Example participant eye-trace 
 % 
 % dist_colors = [0.7100 0.2128 0.4772; 0 0 1;]; %1 is red, no distractor, 2 is blue (near distractor), 3 is green (far distractor)
 % figure;
@@ -324,77 +324,80 @@ all_rt{3} = tmp_rt;
 
 %% Figure 1C : Aligned Saccadic Endpoints 
 
-dist_colors = [0 0 1; 0.7100 0.2128 0.4772; .3 .6 .1 ; .3 .6 .1 ; .3 .6 .1 ];
-
-params_of_interest = {'f_sacc'};
-param_str = {'f saccade'};
-
-figure;
-to_plot = {'f_sacc'}; % what fields do we want to plot?
-dist_bins = [-1 0 1 2 3]; %why is this like this? -1 means NO DISTRACTOR
-
-alph = [.4 .4 .4 .4 .4]; %translucence 
-
-for pp = 1:length(to_plot)
-    
-    for dd =1:length(dist_bins)
-        
-        if dist_bins(dd) == -1
-            thisidx = all_data.s_all.trialinfo(:,1)==1 & all_data.use_trial==1;
-            x = all_data.s_all.(to_plot{pp})(thisidx,1);
-            y = all_data.s_all.(to_plot{pp})(thisidx,2);
-            y_save = nanmean(y);
-            
-        elseif dist_bins(dd) == 0
-            
-            thisidx = all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0;
-            x = all_data.s_all.(to_plot{pp})(thisidx,1);
-            y = all_data.s_all.(to_plot{pp})(thisidx,2);
-            y_save = nanmean(y);
-        else
-            thisidx =  all_data.use_trial==1 & (all_data.s_all.trialinfo(:,6) ==dist_bins(dd) | all_data.s_all.trialinfo(:,6) ==dist_bins(dd)*-1); %collect the numbered distractor bins, [1 2 3] = CW, [-1 -2 -3] = CCW. we have alreayd flipped the y-val, we're just collect the bins here
-            
-            x = all_data.s_all.(to_plot{pp})(thisidx,1);
-            y = all_data.s_all.(to_plot{pp})(thisidx,2);
-            y_save = nanmean(y);
-                 
-        end
-        
-        if dd ==1
-            subplot(1,3,1)
-            title('No Distractor')
-        elseif dd==2
-            subplot(1,3,2)
-             title('Near Distractor')
-        else
-            subplot(1,3,3)
-             title('Far Distractor')
-        end
-        hold on;
-        scatter(x,y,30,dist_colors(dd,:),'filled','MarkerFaceAlpha',.5)
-        scatter(mean(x),mean(y),30,'k','filled')
-        hold on;
-        plot([3 15], [0 0],'--','linewidth',1,'color',[.1 .1 .1])
-        clear tmpy
-        clear thisidx
-        ylim([-6 6])
-        xlim([3 15])
-        xticks([5 10 15])
-        yticks([-5 0 5])
-        xticklabels([5 10 15])
-        axis equal
-    end
-end
-
-set(gcf,'Renderer','painters')
-match_ylim(get(gcf,'Children'))
+% dist_colors = [0 0 1; 0.7100 0.2128 0.4772; .3 .6 .1 ; .3 .6 .1 ; .3 .6 .1 ];
+% 
+% params_of_interest = {'f_sacc'};
+% param_str = {'f saccade'};
+% 
+% figure;
+% to_plot = {'f_sacc'}; % what fields do we want to plot?
+% dist_bins = [-1 0 1 2 3]; %why is this like this? -1 means NO DISTRACTOR
+% 
+% alph = [.4 .4 .4 .4 .4]; %translucence 
+% 
+% for pp = 1:length(to_plot)
+%     
+%     for dd =1:length(dist_bins)
+%         
+%         if dist_bins(dd) == -1
+%             thisidx = all_data.s_all.trialinfo(:,1)==1 & all_data.use_trial==1;
+%             x = all_data.s_all.(to_plot{pp})(thisidx,1);
+%             y = all_data.s_all.(to_plot{pp})(thisidx,2);
+%             y_save = nanmean(y);
+%             
+%         elseif dist_bins(dd) == 0
+%             
+%             thisidx = all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0;
+%             x = all_data.s_all.(to_plot{pp})(thisidx,1);
+%             y = all_data.s_all.(to_plot{pp})(thisidx,2);
+%             y_save = nanmean(y);
+%         else
+%             thisidx =  all_data.use_trial==1 & (all_data.s_all.trialinfo(:,6) ==dist_bins(dd) | all_data.s_all.trialinfo(:,6) ==dist_bins(dd)*-1); %collect the numbered distractor bins, [1 2 3] = CW, [-1 -2 -3] = CCW. we have alreayd flipped the y-val, we're just collect the bins here
+%             
+%             x = all_data.s_all.(to_plot{pp})(thisidx,1);
+%             y = all_data.s_all.(to_plot{pp})(thisidx,2);
+%             y_save = nanmean(y);
+%                  
+%         end
+%         
+%         if dd ==1
+%             subplot(1,3,1)
+%             title('No Distractor')
+%         elseif dd==2
+%             subplot(1,3,2)
+%              title('Near Distractor')
+%         else
+%             subplot(1,3,3)
+%              title('Far Distractor')
+%         end
+%         hold on;
+%         scatter(x,y,30,dist_colors(dd,:),'filled','MarkerFaceAlpha',.5)
+%         scatter(mean(x),mean(y),30,'k','filled')
+%         hold on;
+%         plot([3 15], [0 0],'--','linewidth',1,'color',[.1 .1 .1])
+%         clear tmpy
+%         clear thisidx
+%         ylim([-6 6])
+%         xlim([3 15])
+%         xticks([5 10 15])
+%         yticks([-5 0 5])
+%         xticklabels([5 10 15])
+%         axis equal
+%     end
+% end
+% 
+% set(gcf,'Renderer','painters')
+% match_ylim(get(gcf,'Children'))
 
 %% Figure 1D : Precision
 % directly compare error for no distractor, near distractor, far distractor
 % trials (subplot for each param); averaged over radial/tang...
 
-params_of_interest = {'f_sacc'}; %we're using the final saccade
-param_str = {'final sacc'};
+%params_of_interest = {'f_sacc'}; %we're using the final saccade
+%param_str = {'final sacc'};
+
+params_of_interest = {'i_sacc','f_sacc'}; %we're using the final saccade
+param_str = {'i_sacc','final sacc'};
 cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;];
 cond_str = {'No distractor','Near Distractor','Far Distractor'};
 
@@ -433,12 +436,187 @@ for pp = 1:length(params_of_interest)
     subj = [1 2 3 4 5 6 7]';
     the_subj =[subj;subj;subj];
     x = [the_y the_iv the_subj];
-    RMAOV1(x,0.05) %one-way RM ANOVA
-    
+    [fval,pval] = RMAOV1_gh(x,0.05) %one-way RM ANOVA
+    text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',pval),'color','k','fontsize',15) %filled
+
 
 end
 
 match_ylim(get(gcf,'Children'));
+%% precision by bin 
+params_of_interest = {'i_sacc','f_sacc'}; %we're using the final saccade
+param_str = {'i_sacc','final sacc'};
+cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;0 0 1;0 0 1;];
+cond_str = {'No distractor','Bin 0 Dist','Bin 1 Dist','Bin 2 Dist','Bin 3 Dist'};
+
+figure;
+
+for pp = 1:length(params_of_interest)
+    
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % distractor cond x subj
+    thise = nan(5,length(subj)); %collect this error
+    for ii = 1:length(all_err)
+       % thise(ii,:) = mean(mean(all_err{ii}(:,pp,:,:),3),1); % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+       if ii == 1 || ii ==2
+           thise(ii,:) = squeeze(mean(all_err{ii}(:,pp,:,:),3))'; % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       else
+           thise([ii:5],:)= squeeze(mean(all_err{ii}(:,pp,:,:),3)); % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       end
+    end
+    
+    plot(1:size(thise,1),thise,'-','Color',[0.3 0.3 0.3],'LineWidth',.5);
+    plot(1:size(thise,1),thise,'-','Color',[0.5 0.5 0.5],'MarkerFaceColor','w','MarkerSize',5,'LineWidth',1);
+    for ii = 1:5
+        hold on;
+        tmpe = std(thise(ii,:))/sqrt(length(subj));
+        plot(ii*[1 1],mean(thise(ii,:))+tmpe*[-1 1],'-','LineWidth',1.5,'Color',cond_colors(ii,:));
+        plot(ii,mean(thise(ii,:)),'o','LineWidth',1.5,'Color',cond_colors(ii,:),'MarkerSize',10,'MarkerFaceColor',cond_colors(ii,:));
+    end
+    
+    xlim([0 6]);
+    
+    set(gca,'XTick',1:5,'XTickLabel',cond_str','XTickLabelRotation',45,'TickDir','out');
+    xlabel('Condition');
+    if pp == 1
+        ylabel('Precision (avg sd, \circ)');
+    end
+    title(param_str{pp});
+    
+    the_y = [thise(1,:)';thise(2,:)'; thise(3,:)'; thise(4,:)'; thise(5,:)';];
+    the_iv =[ones(length(thise(1,:)'),1); 2*ones(length(thise(1,:)'),1); 3*ones(length(thise(1,:)'),1); 4*ones(length(thise(1,:)'),1); 5*ones(length(thise(1,:)'),1)];
+    subj = [1 2 3 4 5 6 7]';
+    the_subj =[subj;subj;subj;subj;subj];
+    x = [the_y the_iv the_subj];
+    RMAOV1(x,0.05) %one-way RM ANOVA
+    [fval,pval] = RMAOV1_gh(x,0.05) %one-way RM ANOVA
+        RMAOV1(x,0.05)
+
+    text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',pval),'color','k','fontsize',15) %filled
+
+
+end
+
+match_ylim(get(gcf,'Children'));
+%% mu by bin 
+
+params_of_interest = {'i_sacc','f_sacc'}; %we're using the final saccade
+param_str = {'i_sacc','final sacc'};
+cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;0 0 1;0 0 1;];
+cond_str = {'No distractor','Bin 0 Dist','Bin 1 Dist','Bin 2 Dist','Bin 3 Dist'};
+
+figure;
+
+for pp = 1:length(params_of_interest)
+    
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % distractor cond x subj
+    thise = nan(5,length(subj)); %collect this error
+    for ii = 1:length(all_mu)
+       % thise(ii,:) = mean(mean(all_err{ii}(:,pp,:,:),3),1); % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+       if ii == 1 || ii ==2
+           thise(ii,:) = squeeze(all_mu{ii}(:,pp,2,:))'; % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       else
+           thise([ii:5],:)= squeeze(all_mu{ii}(:,pp,2,:)); % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       end
+    end
+    
+    plot(1:size(thise,1),thise,'-','Color',[0.3 0.3 0.3],'LineWidth',.5);
+    plot(1:size(thise,1),thise,'-','Color',[0.5 0.5 0.5],'MarkerFaceColor','w','MarkerSize',5,'LineWidth',1);
+    for ii = 1:5
+        hold on;
+        tmpe = std(thise(ii,:))/sqrt(length(subj));
+        plot(ii*[1 1],mean(thise(ii,:))+tmpe*[-1 1],'-','LineWidth',1.5,'Color',cond_colors(ii,:));
+        plot(ii,mean(thise(ii,:)),'o','LineWidth',1.5,'Color',cond_colors(ii,:),'MarkerSize',10,'MarkerFaceColor',cond_colors(ii,:));
+    end
+    
+    xlim([0 6]);
+    
+    set(gca,'XTick',1:5,'XTickLabel',cond_str','XTickLabelRotation',45,'TickDir','out');
+    xlabel('Condition');
+    if pp == 1
+        ylabel('Mean Error, y-component');
+    end
+    title(param_str{pp});
+    
+    the_y = [thise(1,:)';thise(2,:)'; thise(3,:)'; thise(4,:)'; thise(5,:)';];
+    the_iv =[ones(length(thise(1,:)'),1); 2*ones(length(thise(1,:)'),1); 3*ones(length(thise(1,:)'),1); 4*ones(length(thise(1,:)'),1); 5*ones(length(thise(1,:)'),1)];
+    subj = [1 2 3 4 5 6 7]';
+    the_subj =[subj;subj;subj;subj;subj];
+    x = [the_y the_iv the_subj];
+    RMAOV1(x,0.05) %one-way RM ANOVA
+    [fval,pval] = RMAOV1_gh(x,0.05) %one-way RM ANOVA
+        RMAOV1(x,0.05)
+
+    text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',pval),'color','k','fontsize',15) %filled
+
+
+end
+
+match_ylim(get(gcf,'Children'));
+%% RT by bin 
+
+params_of_interest = {'i_sacc_rt'}; %we're using the final saccade
+param_str = {'RT'};
+cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;0 0 1;0 0 1;];
+cond_str = {'No distractor','Bin 0 Dist','Bin 1 Dist','Bin 2 Dist','Bin 3 Dist'};
+
+figure;
+
+for pp = 1:length(params_of_interest)
+    
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % distractor cond x subj
+    thise = nan(5,length(subj)); %collect this error
+    for ii = 1:length(all_rt)
+       if ii == 1 || ii ==2
+           thise(ii,:) = squeeze(mean(all_rt{ii}(:,pp,:,:),3))'; % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       else
+           thise([ii:5],:)= squeeze(mean(all_rt{ii}(:,pp,:,:),3)); % mean over radial/tangential; distractor bin; for n_bins, then mean over these bins
+           
+       end
+    end
+    
+    plot(1:size(thise,1),thise,'-','Color',[0.3 0.3 0.3],'LineWidth',.5);
+    plot(1:size(thise,1),thise,'-','Color',[0.5 0.5 0.5],'MarkerFaceColor','w','MarkerSize',5,'LineWidth',1);
+    for ii = 1:5
+        hold on;
+        tmpe = std(thise(ii,:))/sqrt(length(subj));
+        plot(ii*[1 1],mean(thise(ii,:))+tmpe*[-1 1],'-','LineWidth',1.5,'Color',cond_colors(ii,:));
+        plot(ii,mean(thise(ii,:)),'o','LineWidth',1.5,'Color',cond_colors(ii,:),'MarkerSize',10,'MarkerFaceColor',cond_colors(ii,:));
+    end
+    
+    xlim([0 6]);
+    
+    set(gca,'XTick',1:5,'XTickLabel',cond_str','XTickLabelRotation',45,'TickDir','out');
+    xlabel('Condition');
+    if pp == 1
+        ylabel('RT');
+    end
+    title(param_str{pp});
+    
+    the_y = [thise(1,:)';thise(2,:)'; thise(3,:)'; thise(4,:)'; thise(5,:)';];
+    the_iv =[ones(length(thise(1,:)'),1); 2*ones(length(thise(1,:)'),1); 3*ones(length(thise(1,:)'),1); 4*ones(length(thise(1,:)'),1); 5*ones(length(thise(1,:)'),1)];
+    subj = [1 2 3 4 5 6 7]';
+    the_subj =[subj;subj;subj;subj;subj];
+    x = [the_y the_iv the_subj];
+   [fval,pval] = RMAOV1_gh(x,0.05) %one-way RM ANOVA
+    RMAOV1(x,0.05)
+    text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',pval),'color','k','fontsize',15) %filled
+
+
+end
+
+match_ylim(get(gcf,'Children'));
+
 %% Figure 1E : RT
 
 cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;0 0 1;0 0 1;]; %colors for illustrator 
