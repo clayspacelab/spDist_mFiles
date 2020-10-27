@@ -3,10 +3,10 @@
 
 root = '/share/data/spDist/'
 
-%subj = {'KD','CC','AY','MR','XL','EK','SF'};
-subj = {'CC','AY','MR'};
-%sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; %two sessions removed
-sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}}
+subj = {'CC','KD','AY','MR','XL','SF','EK'};
+%subj = {'CC','AY','MR'};
+sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; %two sessions removed
+%sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}}
 %if nargin < 3
 %WHICH_EXCL = [13 20 21 22]; % don't exclude trials w/ calibration failures for now...
 WHICH_EXCL = []; % don't exclude trials w lg error, this is overridden due to geh inspection
@@ -145,12 +145,17 @@ figure(3);
 tmp_ccwidxstore = {};
 tmp_cwidxstore = {};
 
+tmprel =  all_data.s_all.trialinfo(:,3) - all_data.s_all.trialinfo(:,2);
+this_rel = mod((tmprel+180), 360)-180;
+
 % same plot
 for ss = 1:length(subj)
     
-    cwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.s_all.trialinfo(:,6)== which_bin*-1; %negative jitter = cw
-    ccwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2  & all_data.s_all.trialinfo(:,6)== which_bin; %positive jitter = ccw
-    
+    %cwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.s_all.trialinfo(:,6)== which_bin*-1; %negative jitter = cw
+    %ccwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2  & all_data.s_all.trialinfo(:,6)== which_bin; %positive jitter = ccw
+     
+   cwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.s_all.trialinfo(:,6)== 0 & this_rel< 0 % %negative jitter = cw
+    ccwidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2  & all_data.s_all.trialinfo(:,6)== 0 & this_rel > 0 %positive jitter = ccw
  
     for pp = 1:length(params_of_interest)
         tmp_mu(1,pp,:,ss) = nanmean( all_data.s_all.(params_of_interest{pp})(cwidx,:),  1 );

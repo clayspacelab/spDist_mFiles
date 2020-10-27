@@ -1,4 +1,4 @@
-function spDist_plotGATrecon_fig5c(subj,sess,ROIs)
+function spDist_plotGATrecon_Figure5_BC(subj,sess,ROIs)
 % GAT data loaded here, _GATdist_fig4TPTS, was created with the script spDist_channelRespAmp_GATdist_gh_082520
 % and the tpts delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12];
 root = '/share/data/spDist/';
@@ -328,7 +328,7 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
     legend(h, {'Train 1','Train 2','Train 3'})
     % sgtitle(gat_align{pg})
     
-end
+%end
 
 
 
@@ -337,7 +337,7 @@ end
 % plot fidelity plotting TRAIN as dv
 % which tpts are we plotting throughout?
 
-delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12];
+delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %change middle from 809.5 to 7.5-9 on oct 27 geh
 myTR = 0.75;
 
 delay_tpts = cell(size(delay_tpt_range,1),1);
