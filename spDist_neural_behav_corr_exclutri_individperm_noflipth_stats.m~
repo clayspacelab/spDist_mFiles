@@ -658,8 +658,8 @@ end
                 pval_twotail(vv,cc,ee) = 2 * min(mean(shuff_t(vv,cc,ee,:) <= real_t(vv,cc,ee)), mean(shuff_t(vv,cc,ee,:) >= real_t(vv,cc,ee)));
                 pval_onetail(vv,cc,ee) = mean(shuff_t(vv,cc,ee,:) >= real_t(vv,cc,ee));
                 
-                [pval_fdrthresh_twotail(vv,cc,ee), pval_twotail_mask(vv,cc,ee)] = fdr(pval_twotail(vv,cc,ee),0.05); % this is two tail 
-                [pval_fdrthresh_onetail(vv,cc,ee), pval_onetail_mask(vv,cc,ee)] = fdr(pval_onetail(vv,cc,ee),0.05); %one tail 
+                %pval_fdrthresh_twotail(vv,cc,ee) = fdr(pval_twotail(:),0.05); % this is two tail 
+                %pval_fdrthresh_onetail(vv,cc,ee) = fdr(pval_onetail(:),0.05); %one tail 
             end
         end
    end
