@@ -3,8 +3,7 @@
 % in the actual task, cyan = distractor, magenta = no distractor 
 % dependencies: misc_util, RMAOV1 
 
-%root = spDist_loadRoot;
-root = '/share/data/spDist/';
+root = spDist_loadRoot;
 
 %load raw subject data 
 subj = {'KD','CC','AY','MR','XL','EK','SF'};
