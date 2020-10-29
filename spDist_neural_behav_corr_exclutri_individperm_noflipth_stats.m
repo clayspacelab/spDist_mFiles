@@ -597,22 +597,27 @@ for cc =1:length(cond)
             title(ROIs{vr})
         end
         
+          [pfdr_th_twptail(cc,:,dd), pmask_th_twotail(cc,:,dd)] = fdr(p_th_twotail(cc,:,dd),0.05); % this is two tail
+          [pfdr_th_onetail(cc,:,dd), pmask_th_onetail(cc,:,dd)] = fdr(p_th_onetail(cc,:,dd),0.05); %one tail
+        
+        
     end
     
 end
 
-% two-way anova perm for each ROI
+
+%
+% two-way anova perm for each ROI?
  % correct across epochs?
 
-    
-[pfdr_th_twotaile(cc,vv,:), pmask_th_twotaile(cc,vv,:)] =  fdr(squeeze(p_th_twotail(cc,vv,:)),0.05);
+ 
 
-tmp =[squeeze(p_th_onetail(:,:,1)); squeeze(p_th_onetail(:,:,2)); squeeze(p_th_onetail(:,:,3))]
+tmp = [squeeze(p_th_onetail(:,:,1)); squeeze(p_th_onetail(:,:,2)); squeeze(p_th_onetail(:,:,3))]
 
 [fdrout, maskout] =  fdr(tmp,0.05);
 
 
-    
+%% hold off on other perms for now - 102920 
 
 
 
@@ -769,8 +774,8 @@ for cc =1:length(cond)
             pval_onetail(cc,vv,ee) = mean(shuff_t(vv,cc,ee,:) >= real_t(vv,cc,ee));
             
         end
-          [pval_fdrthresh_twotail(cc,:,ee), pval_twotail_mask(cc,:,ee)] = fdr(pval_twotail(cc,:,ee),0.05); % this is two tail
-          [pval_fdrthresh_onetail(cc,:,ee), pval_onetail_mask(cc,:,ee)] = fdr(pval_onetail(cc,:,ee),0.05); %one tail
+          [pval_fdrthresh_twotail(cc,:,ee), pval_th_twotail_mask(cc,:,ee)] = fdr(pval_th_twotail(cc,:,ee),0.05); % this is two tail
+          [pval_fdrthresh_onetail(cc,:,ee), pval_th_onetail_mask(cc,:,ee)] = fdr(pval_th_onetail(cc,:,ee),0.05); %one tail
         
     end
 end
