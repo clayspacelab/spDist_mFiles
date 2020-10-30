@@ -1,7 +1,8 @@
 function spDist_plotGATrecon_fig5c(subj,sess,ROIs)
 % GAT data loaded here, _GATdist_fig4TPTS, was created with the script spDist_channelRespAmp_GATdist_gh_082520
 % and the tpts delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12];
-root = '/share/data/spDist/';
+%root = '/share/data/spDist/';
+root = spDist_loadRoot;
 
 task_dir = 'spDist';
 
@@ -230,58 +231,31 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
         h=[];
         for aa =1:length(trn_epoch)
             %for ee =1:length(tst_epoch)
-                if aa==1
-                    ee =1;
-                elseif aa ==2
-                    ee =2;
-                elseif aa ==3
-                    ee=3;
-                end 
+            if aa==1
+                ee =1;
+            elseif aa ==2
+                ee =2;
+            elseif aa ==3
+                ee=3;
+            end
+            
+            thisd = nan(length(subj),size(all_recons_gat{1},2));
+            for ss = 1:length(subj)
                 
-                thisd = nan(length(subj),size(all_recons_gat{1},2));
-                for ss = 1:length(subj)
-                    
-                    subplot(size(all_recons_gat,1),length(ROIs),vv+(ee-1)*length(ROIs));hold on;
-                    
-                    thisidx = all_subj_gat==ss & all_ROIs_gat==vv & all_conds_gat(:,1)==2;
-                    thisd(ss,:) = mean(all_recons_gat{aa,ee,pg}(thisidx,:)); %aa = TRN idx, rows; ee = TST idx, col; blue = 1, red =2 , yellow =3
-                  
-                end
-                
-                my_sem = std(thisd,1)/sqrt((length(subj)));
-                
-                h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),'-','LineWidth',1,'color',cond_colors(aa,:))% ,'LineWidth',2,'color',cond_colors(aa,:))
-                hold on;
-                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
-                
-                %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
-                
-               btwn_fill = [(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem fliplr((mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem)];     
-               fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
-                            
-                hold on;
-                line([min(xlim) max(xlim)], [0 0], 'color',[.2 .2 .2],'linewidth',0.1,'linestyle','-')
-                ylim([-0.05 1.75])
-                if ee== 1 && aa==1
-                    title(ROIs{vv});
-                else
-                end
+                subplot(size(all_recons_gat,1),length(ROIs),vv+(ee-1)*length(ROIs));hold on;
                 
                 thisidx = all_subj_gat==ss & all_ROIs_gat==vv & all_conds_gat(:,1)==2;
                 thisd(ss,:) = mean(all_recons_gat{aa,ee,pg}(thisidx,:)); %aa = TRN idx, rows; ee = TST idx, col; blue = 1, red =2 , yellow =3
                 
             end
             
-            % TCS: added sqrt here
-            my_sem = std(thisd,1)/sqrt(length(subj));
+            my_sem = std(thisd,1)/sqrt((length(subj)));
             
             h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),'-','LineWidth',1,'color',cond_colors(aa,:))% ,'LineWidth',2,'color',cond_colors(aa,:))
             hold on;
             %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
             
             %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
-            
-            % TCS: need to fliplr here too
             
             btwn_fill = [(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem fliplr((mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem)];
             fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
@@ -294,30 +268,55 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
             else
             end
             
-            if ee==1 && aa==1 && vv ==1
-                ylabel('Test Epoch 1')
-                set(gca,'XTick',-180:90:180,'Xticklabel', {'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
-                set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
-            elseif ee==2 && aa==2 && vv ==1
-                ylabel('Test Epoch 2')
-                set(gca,'XTick',-180:90:180,'Xticklabel',{'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
-                set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
-            elseif ee==3 && aa==3 && vv ==1
-                ylabel('Test Epoch 3')
-                set(gca,'XTick',-180:180:180,'Xticklabel', {'-180','0','180'},'Xticklabelrotation',45,'TickDir','out')
-                set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
-                xlabel('Polar angle (\circ)');
-            else
-                set(gca,'XTick',-180:180:180,'Xticklabel',{'','',''},'TickDir','out');
-            end
-            
-            %end
+            thisidx = all_subj_gat==ss & all_ROIs_gat==vv & all_conds_gat(:,1)==2;
+            thisd(ss,:) = mean(all_recons_gat{aa,ee,pg}(thisidx,:)); %aa = TRN idx, rows; ee = TST idx, col; blue = 1, red =2 , yellow =3
             
         end
         
+        % TCS: added sqrt here
+        my_sem = std(thisd,1)/sqrt(length(subj));
+        
+        %h(aa) = plot(linspace(-180,180,90),mean(thisd,1) - min(mean(thisd,1)),'-','LineWidth',1,'color',cond_colors(aa,:))% ,'LineWidth',2,'color',cond_colors(aa,:))
+        h(aa) = plot(linspace(-180,180,90),mean(thisd,1),'-','LineWidth',1,'color',cond_colors(aa,:));
+        hold on;
+        %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+        
+        %plot(linspace(-180,180,90),(mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(aa,:),'HandleVisibility','off')
+        
+
+        
+        %btwn_fill = [(mean(thisd,1) - min(mean(thisd,1)))+1.*my_sem fliplr((mean(thisd,1) - min(mean(thisd,1)))-1.*my_sem)];
+        btwn_fill = [(mean(thisd,1))+1.*my_sem fliplr( (mean(thisd,1))-1.*my_sem )];
+        fill([linspace(-180,180,90) fliplr(linspace(-180,180,90))],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
+        
+        hold on;
+        line([min(xlim) max(xlim)], [0 0], 'color',[.2 .2 .2],'linewidth',0.1,'linestyle','-')
+        ylim([-0.05 1.75])
+        if ee== 1 && aa==1
+            title(ROIs{vv});
+        else
+        end
+        
+        if ee==1 && aa==1 && vv ==1
+            ylabel('Test Epoch 1')
+            set(gca,'XTick',-180:90:180,'Xticklabel', {'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
+            set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
+        elseif ee==2 && aa==2 && vv ==1
+            ylabel('Test Epoch 2')
+            set(gca,'XTick',-180:90:180,'Xticklabel',{'-180','-90','0','90','180'},'Xticklabelrotation',45,'TickDir','out')
+            set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
+        elseif ee==3 && aa==3 && vv ==1
+            ylabel('Test Epoch 3')
+            set(gca,'XTick',-180:180:180,'Xticklabel', {'-180','0','180'},'Xticklabelrotation',45,'TickDir','out')
+            set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
+            xlabel('Polar angle (\circ)');
+        else
+            set(gca,'XTick',-180:180:180,'Xticklabel',{'','',''},'TickDir','out');
+        end
+        
+        %end
+        
     end
-    
-    
     xlim([-180 180]);
     clear thisidx
     clear thisd
@@ -326,9 +325,14 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
     match_ylim(get(gcf,'Children'));
     match_xlim(get(gcf,'Children'));
     legend(h, {'Train 1','Train 2','Train 3'})
-    % sgtitle(gat_align{pg})
     
 end
+    
+    
+
+    % sgtitle(gat_align{pg})
+    
+%end
 
 
 

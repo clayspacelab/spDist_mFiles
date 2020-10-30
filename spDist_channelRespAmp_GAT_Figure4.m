@@ -8,30 +8,32 @@
 %
 % TCS 8/19/2019
 %
-function spDist_channelRespAmp_GATdist_gh_082520(subj,sess,ROIs,which_vox)
+function spDist_channelRespAmp_GAT_epoch(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
-root = '/share/data/spDist/'
+root = spDist_loadRoot; %'/share/data/spDist/'
 
-%root =  spDist_loadRoot;
+
      
 if nargin < 1
-  %   subj = {'CC','MR','AY'}
+
    subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
 end
 if nargin < 2
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-  % sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
-   % sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 
 end
 
 if nargin < 3
+    % we compute across all ROIs we define...
     ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
     
 end
+
+
+delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %for stats - up for discussion?
 
 
 % analysis parameters:
@@ -75,19 +77,15 @@ for ss = 1:length(subj)
          
         end
         
-        %delay_tpt_range = [1.5 3; 7 9; 15 16.5];
-        delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12]; % updated to parallel new fig 4, aug 25 2020
-       % delay_tpt_range = [1.5 3; 6 7.5; 10 12]; for use in spDist orig
 
-      % delay_tpt_range = [1.5 6.5; 6.5 11.5; 11.5 16.5];
-       % delay_tpt_range = [1.5 4;4 6.5;6.5 9;9 11.5;11.5 14; 14 16.5]; 
         delay_tpts_tmp = cell(size(delay_tpt_range,1),1);
         
         for dd = 1:size(delay_tpt_range,1)
-        delay_tpts_tmp{dd} = (delay_tpts*myTR) >= delay_tpt_range(dd,1) & (delay_tpts*myTR) <= delay_tpt_range(dd,2);
+            % TCS: 2nd timepoint was <=, needs to be <
+            delay_tpts_tmp{dd} = (delay_tpts*myTR) >= delay_tpt_range(dd,1) & (delay_tpts*myTR) < delay_tpt_range(dd,2);
         end
       
-        for ii =1:length(delay_tpts_tmp)
+        for ii = 1:length(delay_tpts_tmp)
             delay_idx{ii} = find(delay_tpts_tmp{ii});
         end
         
@@ -117,9 +115,9 @@ for ss = 1:length(subj)
         % (nans for no-distractor trials)
         % n_trn_tpts x n_tst_tpts x 2 (train w/ target location, train w/
         % distractor location)
-        recons = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2); 
+        recons     = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2); 
         recons_raw = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2); 
-        chan_resp = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2);
+        chan_resp  = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2);
         
         % NOTE: to keep things simple, we'll fill in no-distractor trials
         % w/ NaN above
@@ -137,8 +135,8 @@ for ss = 1:length(subj)
                     
                     fprintf('Training TPT: %i thru %i, Testing TPT: %i thru %i\n',delay_idx{trn_tpt_idx}(1),delay_idx{trn_tpt_idx}(end),delay_idx{tst_tpt_idx}(1),delay_idx{tst_tpt_idx}(end) );
                     
-                    chan_resp{trn_tpt_idx,tst_tpt_idx,aa}  = nan(size(data.c_all,1),n_chan);
-                    recons{trn_tpt_idx,tst_tpt_idx,aa}     = nan(size(data.c_all,1),length(angs));
+                    chan_resp{ trn_tpt_idx,tst_tpt_idx,aa} = nan(size(data.c_all,1),n_chan);
+                    recons{    trn_tpt_idx,tst_tpt_idx,aa} = nan(size(data.c_all,1),length(angs));
                     recons_raw{trn_tpt_idx,tst_tpt_idx,aa} = nan(size(data.c_all,1),length(angs));
                     
                     
