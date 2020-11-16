@@ -1,7 +1,7 @@
-function spDist_plotGATrecon_suppFigure5_BC(subj,sess,ROIs)
-% GAT data loaded here, _GATdist_fig4TPTS, was created with the script
-% spDist_channelRespAmp_GAT_suppFigure6
-% and the tpts delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12];
+function spDist_plotGATrecon_suppFigure5BC(subj,sess,ROIs)
+% GAT data loaded here, _GATdist_fig5TPTS, was created with the script
+% spDist_channelRespAmp_GAT_suppFigure5
+% and the tpts delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
 root = '/share/data/spDist/';
 
 task_dir = 'spDist';
@@ -20,7 +20,7 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
-
+   %ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
     ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
@@ -134,8 +134,9 @@ for yy = 1:length(n_files)
                     
                 else
                     
-                    fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5TPTS.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
-                    
+                   fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5TPTS.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
+                    %fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
+
                     fprintf('loading %s...\n',fn);
                     data = load(fn);
                     
@@ -211,7 +212,7 @@ for yy = 1:length(n_files)
         
     end
 end
-%% supp Figure 5 A
+%% supp Figure 5B
 %plot only like trn/tst combinations
 
 trn_epoch =[1 2 3];
@@ -269,19 +270,19 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
             end
             
             if ee==1 && aa==1 && vv ==1
-                ylabel('Test PRE')
+                ylabel('PRE')
                 set(gca,'XTick',-180:90:180,'Xticklabel',{'','',''},'TickDir','out');
                 set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
                 
             elseif ee==2 && aa==2 && vv ==1
-                ylabel('Test DIST')
+                ylabel('DIST')
                 set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'','','',''},'TickDir','out')
                 set(gca,'XTick',-180:90:180,'Xticklabel',{'','',''},'TickDir','out');
             elseif ee==3 && aa==3 && vv ==1
-                ylabel('Test POST')
+                ylabel('POST')
                 set(gca,'XTick',-180:90:180,'Xticklabel',{'-180','-90','0','90','180'},'TickDir','out');
                 set(gca,'YTick',0:0.5:1.5,'Yticklabel',{'0','0.5','1.0','1.5'},'TickDir','out')
-                ylabel('LORO Reconstruction')
+                ylabel('TRN/TST Matched TPTS, Recon')
                 xlabel('Polar angle (\circ)');
             else
                 set(gca,'XTick',-180:90:180,'Xticklabel',{'','',''},'TickDir','out');
@@ -307,7 +308,7 @@ end
 
 
 
-%% supp Figure 5 B
+%% supp Figure 5C
 %plot matched trn/tst GAT fidelty data, on same plot, plot independently trained fidelity data
 % plot fidelity plotting TRAIN as dv
 % which tpts are we plotting throughout?
@@ -321,8 +322,10 @@ for dd = 1:size(delay_tpt_range,1)
 end
 
 
-trn_epoch =[1 2 3];
-tst_epoch =[1 2 3];
+
+plot_indiv = 1; % if 1, plot individual subj lines in line plot, otherwise, don't.
+hoffset = 0.15; % +/- this much 
+
 
 gat_align ={'Target aligned'};
 for n_files =1:2 % looping over separatee data types  
@@ -361,16 +364,26 @@ for n_files =1:2 % looping over separatee data types
                     
                     clear my_sem
                 end
+                
+                %geh pausing on this 
+%                 if plot_indiv == 1
+%                     plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
+%                     hold on;
+%                     plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'.','markersize',10,'Color','b');
+%             
+%                 end
+%                 
                 match_ylim(get(gcf,'Children'));
                 
                 if vv ==1
                     title(ROIs{vv})
                     xlim([0.5 3.4])
                     ylabel('WM Target Fidelity')
-                    set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','Epoch 1','Epoch 2','Epoch 3',''},'XTickLabelRotation',45,'TickDir','out');
-                    
+                    set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','PRE','DIST','POST',''},'TickDir','out');
+                    set(gca,'YTick',0:0.2:.6,'Yticklabel',{'0','.2','.4','.6'},'TickDir','out')
                 else
                     set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','','','',''},'XTickLabelRotation',45,'TickDir','out');
+                    set(gca,'YTick',0:0.2:.6,'Yticklabel',{'','','',''},'TickDir','out')
                 end
             end
         end
@@ -411,7 +424,7 @@ for n_files =1:2 % looping over separatee data types
                 
             
                 xlim([0.5 3.5])
-               % ylim([-0.05 .6])
+                ylim([-0.05 .6])
                 if vv ==1
                     
                     ylabel('WM target Fidelity')
@@ -424,19 +437,11 @@ for n_files =1:2 % looping over separatee data types
             
 
                 clear thisdata
-                
+                title(ROIs{vv});
             end
-            
-            
-            
-            title(ROIs{vv});
-            
-            ylim([-0.05 .6])
-            xlim([0.5 3.5])
-            
-            
-            
-            
+   
+          
+          
         end
         
     end

@@ -73,9 +73,6 @@ all_data.subj_all = all_subj;
 % first, narrow based on saccade preprocessing/scoring exclusions
 all_data.use_trial = ~cellfun( @any, cellfun( @(a) ismember(a, WHICH_EXCL), all_data.s_all.excl_trial, 'UniformOutput',false));
 
-% seed random number generator:     
-rng(spDist_randSeed);
-
 
 %% organize data
 distractor_bins = unique(all_data.s_all.trialinfo(all_data.s_all.trialinfo(:,1)~=1,6));
@@ -115,36 +112,46 @@ all_mupol{1} = tmp_mupol;
 all_errpol{1} = tmp_errpol;
 
 clear tmp_err tmp_mu tmp_errpol tmp_mupol;
-% shuffle zero bin flipping 1000 times. 
-iter =1000;
-tmp_mupol = nan(1,length(params_of_interest),2,length(subj),iter);
-for xx =1:iter
-for ss = 1:length(subj)
-    
-    for bb =1 %placeholder, keep dimens same size as when we collect others 
-       
-        for pp = 1:length(params_of_interest)
-            tmpd =  all_data.s_all.(params_of_interest{pp});
-            tmpidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; 
-           
-            
-            orig_y =  tmpd(tmpidx,2);
-            n_flip =round(length(orig_y)/2);
-            orig_y(1:n_flip) = orig_y(1:n_flip)*-1;
-            
-            tmpd(tmpidx,2) = orig_y;
-           
-            
-      
-            [dtheta_mu, drad_mu] = cart2pol(tmpd(tmpidx,1), tmpd(tmpidx,2));
-            tmp_mupol(bb,pp,:,ss,xx) = mean([drad_mu rad2deg(dtheta_mu)]); %put rad as x FIRST, theta as Y second, in keeping with later indexing 
-
-            clear  drad_mu dtheta_mu tmpd tmpidx orig_y n_flip
-        end
-    end
-end
-end 
-all_mupol_shuf{1} = tmp_mupol; 
+% 
+% tmp_err = nan(1,length(params_of_interest),2,length(subj)); 
+% tmp_mu = nan(1,length(params_of_interest),2,length(subj));
+% tmp_cw = nan(1,length(params_of_interest),2,length(subj));
+% tmp_ccw = nan(1,length(params_of_interest),2,length(subj));
+% tmp_errpol = nan(1,length(params_of_interest),2,length(subj));
+% tmp_mupol = nan(1,length(params_of_interest),2,length(subj));
+% 
+% for ss = 1:length(subj)
+%     
+%     for bb =1 %placeholder, keep dimens same size as when we collect others 
+%        
+%         for pp = 1:length(params_of_interest)
+%             tmpd =  all_data.s_all.(params_of_interest{pp});
+%             tmpidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; 
+%            
+%             
+%             orig_y =  tmpd(tmpidx,2);
+%             n_tflip = [1:round(length(orig_y)/2)]; %how many trials are there? flip half. make it a 1:number vector 
+%             flip_y =  -1.*orig_y(n_tflip);
+%             tmpd(tmpidx,2) = flip_y
+%             
+%             orig_y_flip = orig_y*-1;
+%             tmpd(tmpidx,2) = orig_y_flip;  
+%             
+%  
+%             % distractor bin x param x [radial; tangential] x subj
+%             tmp_err(bb,pp,:,ss) = std( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
+%             tmp_mu(bb,pp,:,ss) = mean( tmpd(thisidx,:),  1 ); % use idx with all zero bin from flipped data 
+% 
+%             [dtheta_err, drad_err]= cart2pol(all_data.s_all.(params_of_interest{pp})(thisidx,1), all_data.s_all.(params_of_interest{pp})(thisidx,2));
+%             tmp_errpol(bb,pp,:,ss) = std([drad_err rad2deg(dtheta_err)]);
+%             [dtheta_mu, drad_mu] = cart2pol(tmpd(thisidx,1), tmpd(thisidx,2));
+%             tmp_mupol(bb,pp,:,ss) = mean([drad_mu rad2deg(dtheta_mu)]); %put rad as x FIRST, theta as Y second, in keeping with later indexing 
+% 
+%             clear dtheta_err drad_err drad_mu dtheta_mu tmpd thisidx orig_y orig_y_flip
+%         end
+%     end
+% end
+% %%% inserting
 % collect and store random zero bin trials 
 tmp_cw = nan(1,length(params_of_interest),2,length(subj));
 tmp_ccw = nan(1,length(params_of_interest),2,length(subj));
@@ -162,7 +169,8 @@ for ss = 1:length(subj)
             orig_y_flip = orig_y*-1;
             tmpd(tmpidx,2) = orig_y_flip;  % here is where the actual y flip is inserted for CW bins, into tmpd ONLY 
             
-            thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; %now, collect all jitte
+            thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; %now, collect all jitters.
+ 
             % distractor bin x param x [radial; tangential] x subj
             tmp_err(bb,pp,:,ss) = std( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
             tmp_mu(bb,pp,:,ss) = mean( tmpd(thisidx,:),  1 ); % use idx with all zero bin from flipped data 
@@ -236,6 +244,7 @@ clear tmp_err tmp_mu tmp_errpol tmpmupol;
 tmp_err = nan(1,length(params_of_interest),2,length(subj)); 
 tmp_mu  = nan(1,length(params_of_interest),2,length(subj)); 
 tmp_errpol = nan(1,length(params_of_interest),2,length(subj));
+%tmp_mupol = nan(1,length(params_of_interest),2,length(subj));
 
 for pp = 1:length(params_of_interest)
     for ss = 1:length(subj)
@@ -498,9 +507,9 @@ for pp = 1:length(params_of_interest)
     thise = nan(2,length(subj)); %collect this error
     for ii = 1:2
      if ii ==1
-        thise(ii,:) = squeeze(all_errpol{1}(:,pp,2,:)); % DO NOT mean over 3rd dimension here, look only at the 'y' component 
+        thise(ii,:) = squeeze(all_errpol{1}(:,pp,1,:)); % DO NOT mean over 3rd dimension here, look only at the 'y' component 
      elseif ii ==2
-        thise(ii,:) = squeeze(all_errpol_alldist{1}(:,pp,2,:)); % this "all_err_alldist" container is used bc all_err separates near vs. far dists. Simplified w this {} where all dist trials are within a single cell 
+        thise(ii,:) = squeeze(all_errpol_alldist{1}(:,pp,1,:)); % this "all_err_alldist" container is used bc all_err separates near vs. far dists. Simplified w this {} where all dist trials are within a single cell 
      end 
     end
  
@@ -613,7 +622,7 @@ for pp = 1:length(params_of_interest)
     subplot(1,length(params_of_interest),pp); hold on;
     
     % nbins x nsubj
-    thism_near = squeeze(all_mupol{2}(:,pp,2,:))'; %this is the only condition that is information for this analysis.
+    thism_near = squeeze(all_mupol{2}(:,pp,1,:))'; %this is the only condition that is information for this analysis.
     plot(1+0.15,thism_near,'o','MarkerSize',5,'Markerfacecolor',[0.3 0.3 0.3], 'Color',[0.3 0.3 0.3]);
     plot(1,mean(thism_near,2),'o','MarkerSize',15,'Color',cond_colors(2,:),'MarkerFaceColor',cond_colors(2,:));
     hold on;
@@ -632,30 +641,72 @@ xlim([0 2])
 
 [h_bias_near p_bias_near,CI,STATS] = ttest(thism_near(1,:)') %t-test to determine if bias is different than zero
 text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',p_bias_near),'color','k','fontsize',15) %filled
-t_real = STATS.tstat;
+
 match_ylim(get(gcf,'Children'));
 set(gcf,'position',[ 549   724   499   571])
- 
+%% inserting
+params_of_interest = {'f_sacc'}; %we're using the final saccade
+param_str = {'final sacc'};
+cond_colors = [0.7100    0.2128    0.4772;0 0 1;0 0 1;0 0 1;0 0 1;];
+cond_str = {'No distractor','Bin 0 Dist','Bin 1 Dist','Bin 2 Dist','Bin 3 Dist'};
+figure;
 
-%% insert shuffling bias test 
-for xx = 1:iter
 for pp = 1:length(params_of_interest)
     
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % distractor cond x subj
+    thise = nan(5,length(subj)); %collect this error
+    
+    for ii = 1:length(all_mupol)
+       if ii == 1 || ii ==2
+           thise(ii,:) = squeeze(all_mupol{ii}(:,pp,1,:))'; % mean over radial/tangential; distractor bin; for n_bins, then squeeze over these bins to make 1x n_subj vect
+       else
+           thise([ii:5],:)= squeeze(all_mupol{ii}(:,pp,1,:)) ; % mean over radial/tangential; distractor bin; for n_bins,  then squeeze over these bins to make 1x n_subj vect
+           thise = thise-12; 
+       end
+    end
+    
+    plot(1:size(thise,1),thise,'-','Color',[0.3 0.3 0.3],'LineWidth',.5);
+    
+    for ii = 1:5
+        hold on;
+        tmpe = std(thise(ii,:))/sqrt(length(subj));
+        plot(ii*[1 1],mean(thise(ii,:))+tmpe*[-1 1],'-','LineWidth',1.5,'Color',cond_colors(ii,:));
+        plot(ii,mean(thise(ii,:)),'o','LineWidth',1.5,'Color',cond_colors(ii,:),'MarkerSize',10,'MarkerFaceColor',cond_colors(ii,:));
+    end
+    
+    xlim([0 6]);
+    
+    set(gca,'XTick',1:5,'XTickLabel',cond_str','XTickLabelRotation',45,'TickDir','out');
+    xlabel('Condition');
+    if pp == 1
+        ylabel('Error, Ecc');
+    end
+    title(param_str{pp});
+    
 
-     thism_near = squeeze(all_mupol_shuf{1}(:,pp,2,:,xx)); %this is the only condition that is information for this analysis.
+    the_y = [thise(2,:)'; thise(3,:)'; thise(4,:)'; thise(5,:)';]; % do not use no distractor condition here 
+    the_iv =[ones(length(thise(1,:)'),1); 2*ones(length(thise(1,:)'),1); 3*ones(length(thise(1,:)'),1); 4*ones(length(thise(1,:)'),1);];
+    subj = [1 2 3 4 5 6 7]';
+    the_subj =[subj;subj;subj;subj;];
+    x = [the_y the_iv the_subj];
+    RMAOV1(x,0.05) %one-way RM ANOVA
+    [fval,pval] = RMAOV1_gh(x,0.05) %one-way RM ANOVA
+    RMAOV1(x,0.05)
 
-  [~,~,~,stats] = ttest(thism_near);
-  t_shuf(xx) = stats.tstat;
-  clear stats thism_near
+
+    text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',pval),'color','k','fontsize',15) %filled
+
+
 end
-end 
-fprintf('pause')
+
+match_ylim(get(gcf,'Children'));
+set(gcf,'position',[ 549   724   499   571])
 
 
-bias_pval = 2 * min(mean(t_shuf<=t_real), mean(t_shuf>=t_real)); % no pvals are greater than real 
+%%%%
 
- 
-%%
 %%%%%%%%%%%%%%%%%% SUPPLEMENATARY FIGURE 1 A  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% REPORTED STATS ONLY - PRECISION, Distractor Absent, Distractor Present Abs(Bin)
 % STATS ARE ONLY ON Distractor Present (4-level RM ANOVA) : polar deg
@@ -675,9 +726,9 @@ for pp = 1:length(params_of_interest)
     
     for ii = 1:length(all_errpol)
        if ii == 1 || ii ==2
-           thise(ii,:) = squeeze(all_errpol{ii}(:,pp,2,:))'; % mean over radial/tangential; distractor bin; for n_bins, then squeeze over these bins to make 1x n_subj vect
+           thise(ii,:) = squeeze(all_errpol{ii}(:,pp,1,:))'; % mean over radial/tangential; distractor bin; for n_bins, then squeeze over these bins to make 1x n_subj vect
        else
-           thise([ii:5],:)= squeeze(all_errpol{ii}(:,pp,2,:)) ; % mean over radial/tangential; distractor bin; for n_bins,  then squeeze over these bins to make 1x n_subj vect
+           thise([ii:5],:)= squeeze(all_errpol{ii}(:,pp,1,:)) ; % mean over radial/tangential; distractor bin; for n_bins,  then squeeze over these bins to make 1x n_subj vect
            
        end
     end

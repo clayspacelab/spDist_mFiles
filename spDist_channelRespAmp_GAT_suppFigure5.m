@@ -8,7 +8,7 @@
 %
 % TCS 8/19/2019
 %
-function spDist_channelRespAmp_GATdist_gh_082520(subj,sess,ROIs,which_vox)
+function spDist_channelRespAmp_GAT_suppFigure5(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
@@ -17,20 +17,18 @@ root = '/share/data/spDist/'
 %root =  spDist_loadRoot;
      
 if nargin < 1
-  %   subj = {'CC','MR','AY'}
+
    subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
 end
 if nargin < 2
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-  % sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
-   % sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 
 end
 
 if nargin < 3
-    ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
-    
+    %ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'}; %change this back 111220
+    ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 
@@ -75,12 +73,8 @@ for ss = 1:length(subj)
          
         end
         
-        %delay_tpt_range = [1.5 3; 7 9; 15 16.5];
-        delay_tpt_range = [3.75 5.25; 8 9.5; 10.5 12]; % updated to parallel new fig 4, aug 25 2020
-       % delay_tpt_range = [1.5 3; 6 7.5; 10 12]; for use in spDist orig
-
-      % delay_tpt_range = [1.5 6.5; 6.5 11.5; 11.5 16.5];
-       % delay_tpt_range = [1.5 4;4 6.5;6.5 9;9 11.5;11.5 14; 14 16.5]; 
+     
+        delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; 
         delay_tpts_tmp = cell(size(delay_tpt_range,1),1);
         
         for dd = 1:size(delay_tpt_range,1)
@@ -146,10 +140,7 @@ for ss = 1:length(subj)
                     for fold_idx = 1:n_folds
                         
                         % ~~~~~~~ first, estimate IEM ~~~~~~~~~~
-                        
-                        
-                        
-                        
+    
                         % pick CV sets
                         trn_runs = ones(length(unique(data.r_LORO)),1);
                         
@@ -330,9 +321,9 @@ for ss = 1:length(subj)
         % save with VE marker when which_vox < 1, otherwise, number of
         % vox
         if which_vox < 1
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_fig4TPTS.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_fig5TPTS.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
         else
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_fig4TPTS.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_fig5TPTS.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
         end
         fprintf('saving to %s...\n',fn2s);
         

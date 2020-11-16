@@ -30,6 +30,7 @@ subj = {'AY','CC','EK','KD','MR','SF','XL'};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 
 ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+% ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 func_suffix = 'surf';
 
 cat_mode = 1; % if 1, look for catSess1Ses...SessN_ files, otherwise, just look for each session in turn
@@ -422,9 +423,9 @@ end
 
 myy = match_ylim(get(gcf,'Children'));
 set(mh(:),'YData',[min(myy(:,1)) max(myy(:,2))]);
-
+set(gcf,'Position',[109   372   989   168]); %for concat ROIs
 set(gcf,'Position',[185         745        1843         470]);
-
+set(gcf,'Position',[109  372 1843 470]);
 
 % NOTE: other aspects of plotting from MGSMap_fidelity_stats_shuf.m were
 % not edited, so can be copied/pasted from that file if desired

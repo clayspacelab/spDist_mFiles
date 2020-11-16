@@ -11,8 +11,8 @@ subj = {'AY','CC','EK','KD','MR','XL','SF'};
 %sess= {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 %ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
-ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
-
+%ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 func_suffix = 'surf';
 
 nchan = 8;
@@ -38,7 +38,7 @@ for ss = 1:length(subj)
         
             
             % just one file to load
-            fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
+            fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
             
             fprintf('loading %s...\n',fn);
             data = load(fn);
@@ -126,7 +126,7 @@ for aa = 1:length(all_fidelity)
         end
         imagesc(tpts*myTR,tpts*myTR,mean(thisd,3));
         colormap magma
-        cbh = colorbar('h','location','eastoutside')
+      
         title(ROIs{vv});
         axis tight square
         set(gca,'XTick',0:4:24,'YTick',0:4:24,'TickDir','out');
@@ -139,13 +139,13 @@ for aa = 1:length(all_fidelity)
         
     end
 end
-match_clim(get(gcf,'Children'));
-set(cbh,'XTick',[-.2:.1:.3])
+
 %set(gcf,'Position',[32         778        1910         122]);
+
 set(gcf,'position', [ 23         245        2386         453])
-
-
-
+match_clim(get(gcf,'Children'));
+cbh = colorbar('h','location','eastoutside')
+set(cbh,'XTick',[-.26:.1:.38])
 
 %% plot (individual subj as rows)
 % NOTE: for now, only matched clim within figure...

@@ -1,4 +1,4 @@
-function spDist_neural_behav_corr_exclutri_individperm_noflipth_stats(subj,sess,ROIs)
+function spDist_neural_behav_corr_exclutri_individperm_noflipth_fig5(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -273,71 +273,82 @@ end
 % squeeze over subj, collect each subj, all trials into one container
 rho_group_theta = nan(length(cond),length(ROIs),1);
 pval_group_theta = nan(length(cond),length(ROIs),1);
+rho_theta = nan(length(subj),length(ROIs),1);
+pval_theta = nan(length(subj),length(ROIs),1);
 
 bn_corr_theta_dist =  figure('Name','behneurcorrthetadist');
 bn_corr_theta_both =  figure('Name','behneurcorrthetaboth');
+figure 
 
-for cc = 1:length(cond)
-    
-for vv=1:length(ROIs)
-
- for dd =1:length(delay_tpts)   
-    thisb_neural_tmp =[];
-    thisb_behav_tmp =[];
-    thisb_behav = [];
-    thisb_neural = [];
-    thisb_behav_poldegtmp =[];
-    thisb_behav_poldeg =[];
-    
-    for ss = 1:length(subj)   
-        thisb_neural_tmp(ss,:) =  squeeze(store_b(cc,vv,dd,ss,:));
-        thisb_behav_tmp(ss,:)=  squeeze(mu(2,ss,cc,:))';
-        thisb_behav_poldegtmp(ss,:)=  dtheta_poldeg(ss,cc,:);
+for ss = 6 %1:length(subj)
+    hold on;
+    for cc = 2% 1:length(cond)
+        
+        for vv = 1:length(ROIs)
+            
+            for dd = 3 % 1:length(delay_tpts)
+                
+                thisb_neural_tmp =[];
+                thisb_behav_tmp =[];
+                thisb_behav = [];
+                thisb_neural = [];
+                thisb_behav_poldegtmp =[];
+                thisb_behav_poldeg =[];
+                
+                
+                thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+                thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+                thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+                
+                
+                thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp));
+                thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp));
+                thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
+              
+                %subplot(length(delay_tpts),length(ROIs),(dd-1)*length(ROIs)+vv); hold on;
+                %subplot(length(subj),length(ROIs),(ss-1)*length(ROIs)+vv); hold on;
+                subplot(1,length(ROIs),vv); hold on;
+                scatter(thisb_neural,thisb_behav_poldeg,30,dist_colors(cc,:),'filled','MarkerFaceAlpha',.4)
+                
+                title(ROIs{vv})
+                lsline
+                set(gcf,'Position',[  -110         706        1882         624])
+              % xlim([-180 180])
+               %ylim([-25 25])
+               
+               
+               
+                if vv==1 && ss ==7 
+                    ylabel({'Polar angle \circ delta, target, sacc endpt', 'Epoch 3'})
+                    xlabel('Neural bias, Polar angle \circ')
+                else
+                end
+                [rho_theta(ss,vv,dd), pval_theta(ss,vv,dd)] = corr(thisb_neural', thisb_behav_poldeg');
+                clear this neural thisb_behav_poldeg
+            end
+            
+            
+        end
+        
+        
+        
+        
     end
-
-    thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
-    thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); 
-    thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
-    set(0, 'CurrentFigure', bn_corr_theta_dist)
-    subplot(length(delay_tpts),length(ROIs),(dd-1)*length(ROIs)+vv); hold on;
-    scatter(thisb_neural,thisb_behav_poldeg,30,dist_colors(cc,:),'filled','MarkerFaceAlpha',.1)
-    title(ROIs{vv})
-    lsline
-    set(gcf,'Position',[  -110         706        1882         624])
-    if vv==1 && dd==1
-    ylabel('Epoch 1')
-    elseif vv==1 && dd==2
-    ylabel('Epoch 2')
-    elseif vv==1 && dd ==3
-    ylabel({'Polar angle \circ delta, target, sacc endpt', 'Epoch 3'})
-    xlabel('Neural bias, Polar angle \circ')
-    else 
-    end
-end  
-    [rho_group_theta(cc,vv,dd), pval_group_theta(cc,vv,dd)] = corr(thisb_neural, thisb_behav_poldeg);
- 
- end
-   
-
-   
-   
-end
-
-
-
+    set(get(gcf,'Children'),'XLim',[-180 180],'YLim',[-25 25])
+    
+    
 end
 
 
 %% corr on individual subj, convert to z, t-test
 
-%fish_theta_fig =  figure('Name','fish_theta');
-
+fish_theta_fig =  figure('Name','fish_theta');
 store_fish_ztheta= [];
 pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 fish_z_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 
-for cc = 1:length(cond)
+for cc = 2 %1:length(cond)
     
 for vv=1:length(ROIs)
     
@@ -377,22 +388,22 @@ for vv=1:length(ROIs)
     end
 
 %     
-%     set(0, 'CurrentFigure', fish_theta_fig)
-%     subplot(1,length(ROIs),vv); hold on;
-%     plot(dd,fish_z_theta(cc,:,vv,dd),'o','color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',4)
-%     hold on;
-%     my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
-%     plot(dd,mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',8)
-%     plot(dd*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',1)
-%     title(ROIs{vv})
-%     ylim([-1 1])
-%     xlim([0.05 3.5])
-%     if vv==1
-%     set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','Epoch 1','Epoch 2','Epoch 3',''},'XTickLabelRotation',45,'TickDir','out');
-%     ylabel('Fisher-Z Corr')
-%     else
-%     set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','','','',''},'XTickLabelRotation',45,'TickDir','out');
-%     end 
+    set(0, 'CurrentFigure', fish_theta_fig)
+    subplot(1,length(ROIs),vv); hold on;
+    plot(dd,fish_z_theta(cc,:,vv,dd),'o','color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',3)
+    hold on;
+    my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
+    plot(dd,mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',8)
+    plot(dd*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',1)
+    title(ROIs{vv})
+    ylim([-1 1])
+    xlim([0.05 3.5])
+    if vv==1
+    set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','Epoch 1','Epoch 2','Epoch 3',''},'XTickLabelRotation',45,'TickDir','out');
+    ylabel('Fisher-Z Corr')
+    else
+    set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','','','',''},'XTickLabelRotation',45,'TickDir','out');
+    end 
     
     [h_th,p_th(cc,vv,dd),~,stats_th] = ttest(fish_z_theta(cc,:,vv,dd));
     realT_th(cc,vv,dd) = stats_th.tstat;
