@@ -14,7 +14,7 @@
 %
 % TODO: automate colorlims across figures
 
-function spDist_plotReconstructions_thruTime_Figure3(subj,sess,ROIs)
+function spDist_plotReconstructions_thruTime_suppFigure3(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -32,8 +32,8 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
-  ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'}; %update ROIs 103020
-
+   %ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+ ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 
@@ -76,7 +76,7 @@ else
     vox_str = sprintf('_%ivox',which_vox);
 end
 
-delay_tpt_range = [2 5; 5 9;9 10.5; 10.5 12];
+delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %note: this is not used, just updating time windows in case something comes up
 
 
 
