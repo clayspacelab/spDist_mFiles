@@ -1,8 +1,7 @@
 
 
-function spDist_withinROI_stats_Figure4(subj,sess,ROIs)
-% stats checked and confirmed 11/10/2020 
-% w /updated middle epoch
+function spDist_withinROI_stats_suppFigure4(subj,sess,ROIs)
+
 root = spDist_loadRoot;%'/share/data/spDist/'; %updated root
 
 task_dir = 'spDist';
@@ -16,7 +15,8 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+    ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+
 end
 
 func_suffix = 'surf';
@@ -54,6 +54,7 @@ else
 end
 
 
+
 delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; 
 
 % number of iterations for permutation...
@@ -62,8 +63,6 @@ iter = 1000;
 
 % seed random number generator:     
 rng(spDist_randSeed);
-
-
 
 %% load data
 startidx = 1;
@@ -228,9 +227,6 @@ for dd = 1:length(delay_tpts)
 end
 match_ylim(get(gcf,'Children'));
 set(gcf,'position',  [ 121         287        1574         503])
-%set(gcf,'position', [ 23         245        2386         453])
-
-
 
 %% t-test between condition during each epoch against shuffled null
 %
@@ -575,6 +571,8 @@ end
 match_xlim(get(gcf,'Children'));
 legend(h, {'No distractor', 'Distractor'})
 set(gcf,'position', [ 23         245        2386         453])
+
+
 %% 3-way ANOVA permutation
 % get fidelity , over average delay epochs, for each condition, permutation test
 %%%% this takes ~2.7 hrs minutes to run!!!!! (anovan)
@@ -749,7 +747,6 @@ end
 end
 
 %%%% TMP COM
-
 %% 2-way ANOVA permutation
 % get fidelity , over average delay epochs, for each condition, permutation test
 %%%% this takes ~24 minutes to run!!!!!
@@ -862,14 +859,16 @@ ta = table(ROIs',exact_store(:,1),exact_store(:,2),exact_store(:,3));
 ta.Properties.VariableNames={'ROIs','Epoch','Cond','EpochCond'}
 
 
-%% plot sigs on the subplots -- anovan
+%% plot sigs on the subplots -- 2-way ANOVAN shuffle output
+% note to self in the future : we DO correct with FDR for 2-way output, but
+% NOT for 3-way 
 sig_colors = lines(3);
 
 %correct them pvals
 p_fdr_perm= nan(3,1);
 p_masked_perm= nan(length(ROIs),3);
 
-for ee =1:3 %epoch var
+for ee =1:3 %effect var
     [p_fdr_perm(ee), p_masked_perm(:,ee)] = fdr(exact_store(:,ee),0.05);
     
     
