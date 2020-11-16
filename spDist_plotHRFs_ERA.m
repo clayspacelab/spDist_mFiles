@@ -56,10 +56,10 @@ delay_range = [9 15]; % TR beginning at 7, ending at 15, to match IEM training
 
 % these are based on *time*, not TR...
 % as in Fig. 1, 4, 5 - 3 epochs for comparing before/during/after distractor
-delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12]; %for stats - up for discussion?
+delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; %for stats - up for discussion?
 % >= n,1 and < n,2
 
-epoch_str = {'Pre-distractor','Distractor','Post-distractor'};
+epoch_str = {'PRE','DIST','POST'};
 
 t_markers = [0 4.5 12]; % beginning of delay, beginning of distractor, beginning of response
 
@@ -168,9 +168,9 @@ for vv = 1:length(ROIs)
         
         % plot, like for reconstructions, such that middle of each
         % datapoint is at middle of TR
-        plot(which_TRs*TR + TR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',cond_colors(cc,:));
-        plot(which_TRs*TR + TR/2,mean(thisd,1)+std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
-        plot(which_TRs*TR + TR/2,mean(thisd,1)-std(thisd,[],1)/sqrt(length(subj)),':','LineWidth',0.75,'Color',cond_colors(cc,:));
+        plot(which_TRs*TR + TR/2,mean(thisd,1),'-','LineWidth',1.0,'Color',cond_colors(cc,:));
+        plot(which_TRs*TR + TR/2,mean(thisd,1)+std(thisd,[],1)/sqrt(length(subj)),'-','LineWidth',0.5,'Color',cond_colors(cc,:));
+        plot(which_TRs*TR + TR/2,mean(thisd,1)-std(thisd,[],1)/sqrt(length(subj)),'-','LineWidth',0.5,'Color',cond_colors(cc,:));
         clear thisd;
     end
     
@@ -189,6 +189,7 @@ set(axhrf,'YLim',[min(myy(:,1)) max(myy(:,2))],'XLim',[which_TRs(1) which_TRs(en
 set(mh,'YData',[min(myy(:,1)) max(myy(:,2))]);
 
 %set(gcf,'Position',[ 66        1180        2279         158])
+set(gcf,'Position',[722        1187        1782         151]);
 %legend(condstr,'location','best');
 
 
@@ -320,7 +321,7 @@ for vv = 1:length(ROIs)
     
     set(gca,'XTick',1:size(delay_tpt_range,1),'XTickLabel',[],'XTickLabelRotation',-45,'FontSize',12,'TickDir','out','Box','off','YTick',-0.5:.25:1,'XLim',[0.5 size(delay_tpt_range,1)+0.5]);
     if vv == 1
-        %set(gca,'XTickLabel',epoch_str,'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
+        set(gca,'XTickLabel',epoch_str,'XTickLabelRotation',-45,'YTickLabel',-.5:.25:1);
         %set(gca,'XTickLabel',[],'XTickLabelRotation',-45,'YTickLabel',-.5:.25:.1);
         ylabel('BOLD Z-score');
     else
@@ -473,7 +474,7 @@ if do_stats == 1
     if save_stats == 1
         fn2s = sprintf('%s/spDist_stats/n%i_HRFstats_shuf_%iIter_%s.mat',root,length(subj),niter,datestr(now,30));
         fprintf('Saving to %s\n',fn2s);
-        save(fn2s,'epoch_3way_realF','epoch_3way_shufF','epoch_2way_realF','epoch_2way_shufF','epoch_3way_pval','epoch_2way_pval','epoch_3way_labels','epoch_2way_labels','fdr_thresh');
+        save(fn2s,'subj','ROIs','epoch_3way_realF','epoch_3way_shufF','epoch_2way_realF','epoch_2way_shufF','epoch_3way_pval','epoch_2way_pval','epoch_3way_labels','epoch_2way_labels','fdr_thresh');
     end
     
     
