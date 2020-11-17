@@ -18,12 +18,9 @@ function spDist_scoreEyeData(subj,sess,WHICH_EXCL)
 
 close all;
 %root = spDist_loadRoot;
-root = '/share/data/spDist/'
-%root = sprintf('/d/DATA/data/spDist/')
-%ifg_fn = '~/Documents/MATLAB/toolboxes_dev/iEye_ts/examples/p_500hz.ifg';
-%ifg_fn = '/Volumes/home/grace/iEye/examples/p_500hz.ifg';
+root = '/share/data/spDist/';
+
 ifg_fn = '/share/home/grace/iEye/examples/p_500hz.ifg';
-%ifg_fn = '/d/DATA/home/grace/iEye/examples/p_500hz.ifg';
 
 task_dir = 'spDist';
 

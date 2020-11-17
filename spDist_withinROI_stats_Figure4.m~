@@ -433,8 +433,8 @@ for vv = 1:length(ROIs)
     end
     
     if plot_indiv
-        %ylim([-0.1 0.8]);
           ylim([-0.1 1]);
+          
     else
         ylim([0 0.65])
     end
