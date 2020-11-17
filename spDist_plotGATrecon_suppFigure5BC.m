@@ -456,7 +456,7 @@ for n_files =1:2 % looping over separatee data types
                         subplot(1,length(ROIs),vv);hold on;
                         
                         thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2;
-                        thisdata(dd,ss) = mean(mean(all_fidelity(thisidx,delay_tpts{dd},1),2),1); % ensure this is identical to the tpts used for GAT
+                        thisdata(dd,ss) = mean(mean( all_fidelity(thisidx,delay_tpts{dd},1) ,2),1); % ensure this is identical to the tpts used for GAT
                         
                         data_ANOVA(idx) = thisdata(dd,ss);
                         labels_ANOVA(idx,:) = [vv 1 dd ss];
@@ -479,7 +479,7 @@ for n_files =1:2 % looping over separatee data types
                 
                 
                 xlim([0.5 3.5])
-                ylim([-0.05 .6])
+                %ylim([-0.05 .6])
                 if vv ==1
                     
                     ylabel('WM target Fidelity')
@@ -660,7 +660,7 @@ fprintf('\nFDR thresh - model: p = %0.03f, epoch: p = %0.03f, interaction: p = %
 
 
 if save_stats == 1
-    fn2s = sprintf('%s/spDist_stats/n%i_GATEpochStats_shuf_%Iter_%s.mat',root,length(subj),niter,datestr(now,30));
+    fn2s = sprintf('%s/spDist_stats/n%i_GATEpochStats_shuf_%iIter_%s.mat',root,length(subj),niter,datestr(now,30));
     fprintf('Saving stats to %s\n',fn2s);
     save(fn2s,'realF_ANOVA33','permF_ANOVA33','p_ANOVA33','IV_labels','realF_ANOVA2','permF_ANOVA2','p_ANOVA2','fdr_thresh_ANOVA2','subj','ROIs','delay_tpt_range');
 end
