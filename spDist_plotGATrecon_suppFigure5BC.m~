@@ -598,13 +598,7 @@ p_ANOVA33 = mean(permF_ANOVA33>=realF_ANOVA33,1);
 IV_labels = {'ROI','model','epoch'};
 
 % IV1, IV2, IV3, IV1xIV2, IV1xIV3, IV2xIV3, IV1xIV2xIV3
-fprintf('ME ROI:      p = %0.03f\n',p_ANOVA33(1));
-fprintf('ME model:    p = %0.03f\n',p_ANOVA33(2));
-fprintf('ME epoch:    p = %0.03f\n',p_ANOVA33(3));
-fprintf('ROI x model: p = %0.03f\n',p_ANOVA33(4));
-fprintf('ROI x epoch: p = %0.03f\n',p_ANOVA33(5));
-fprintf('mod x epoch: p = %0.03f\n',p_ANOVA33(6));
-fprintf('3-way inter: p = %0.03f\n',p_ANOVA33(7));
+fprintf('ME ROI:   p = %0.03f\n',p_ANOVA33(1));
 
 % loop over ROIs, 2-way ANOVA against shuffled null
 realF_ANOVA2 = nan(length(ROIs),3);
@@ -665,12 +659,6 @@ if save_stats == 1
     save(fn2s,'realF_ANOVA33','permF_ANOVA33','p_ANOVA33','IV_labels','realF_ANOVA2','permF_ANOVA2','p_ANOVA2','fdr_thresh_ANOVA2','subj','ROIs','delay_tpt_range');
 end
 
-
-
-
-
-
-if 0
 
 
 %% 2-way & 1-way true ANOVA w/_thruTime1 data
@@ -1293,5 +1281,5 @@ end
 fprintf('the end')
 end
 
-end
+
 
