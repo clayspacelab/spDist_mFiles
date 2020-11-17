@@ -456,7 +456,7 @@ for n_files =1:2 % looping over separatee data types
                         subplot(1,length(ROIs),vv);hold on;
                         
                         thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==2;
-                        thisdata(dd,ss) = mean(mean( all_fidelity(thisidx,delay_tpts{dd},1) ,2),1); % ensure this is identical to the tpts used for GAT
+                        thisdata(dd,ss) = mean(mean(all_fidelity(thisidx,delay_tpts{dd},1),2),1); % ensure this is identical to the tpts used for GAT
                         
                         data_ANOVA(idx) = thisdata(dd,ss);
                         labels_ANOVA(idx,:) = [vv 1 dd ss];
@@ -479,7 +479,7 @@ for n_files =1:2 % looping over separatee data types
                 
                 
                 xlim([0.5 3.5])
-                %ylim([-0.05 .6])
+                ylim([-0.05 .6])
                 if vv ==1
                     
                     ylabel('WM target Fidelity')
@@ -598,13 +598,7 @@ p_ANOVA33 = mean(permF_ANOVA33>=realF_ANOVA33,1);
 IV_labels = {'ROI','model','epoch'};
 
 % IV1, IV2, IV3, IV1xIV2, IV1xIV3, IV2xIV3, IV1xIV2xIV3
-fprintf('ME ROI:      p = %0.03f\n',p_ANOVA33(1));
-fprintf('ME model:    p = %0.03f\n',p_ANOVA33(2));
-fprintf('ME epoch:    p = %0.03f\n',p_ANOVA33(3));
-fprintf('ROI x model: p = %0.03f\n',p_ANOVA33(4));
-fprintf('ROI x epoch: p = %0.03f\n',p_ANOVA33(5));
-fprintf('mod x epoch: p = %0.03f\n',p_ANOVA33(6));
-fprintf('3-way inter: p = %0.03f\n',p_ANOVA33(7));
+fprintf('ME ROI:   p = %0.03f\n',p_ANOVA33(1));
 
 % loop over ROIs, 2-way ANOVA against shuffled null
 realF_ANOVA2 = nan(length(ROIs),3);
@@ -660,17 +654,11 @@ fprintf('\nFDR thresh - model: p = %0.03f, epoch: p = %0.03f, interaction: p = %
 
 
 if save_stats == 1
-    fn2s = sprintf('%s/spDist_stats/n%i_GATEpochStats_shuf_%iIter_%s.mat',root,length(subj),niter,datestr(now,30));
+    fn2s = sprintf('%s/spDist_stats/n%i_GATEpochStats_shuf_%Iter_%s.mat',root,length(subj),niter,datestr(now,30));
     fprintf('Saving stats to %s\n',fn2s);
     save(fn2s,'realF_ANOVA33','permF_ANOVA33','p_ANOVA33','IV_labels','realF_ANOVA2','permF_ANOVA2','p_ANOVA2','fdr_thresh_ANOVA2','subj','ROIs','delay_tpt_range');
 end
 
-
-
-
-
-
-if 0
 
 
 %% 2-way & 1-way true ANOVA w/_thruTime1 data
@@ -1293,5 +1281,5 @@ end
 fprintf('the end')
 end
 
-end
+
 

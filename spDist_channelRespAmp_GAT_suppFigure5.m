@@ -12,9 +12,9 @@ function spDist_channelRespAmp_GAT_suppFigure5(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
-root = '/share/data/spDist/'
+%root = '/share/data/spDist/'
 
-%root =  spDist_loadRoot;
+root =  spDist_loadRoot;
      
 if nargin < 1
 
@@ -52,6 +52,17 @@ func_suffix = 'surf';
 %delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
 
 myTR = 0.75;
+
+
+% define delay timepoints/indexes
+delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
+delay_tpts_tmp = cell(size(delay_tpt_range,1),1);
+
+        
+
+
+
+
 % loop over subj, ROIs and load each session, concatenate, and process
 for ss = 1:length(subj)
     
@@ -74,19 +85,7 @@ for ss = 1:length(subj)
         end
         
      
-        delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; 
-        delay_tpts_tmp = cell(size(delay_tpt_range,1),1);
-        
-        for dd = 1:size(delay_tpt_range,1)
-        delay_tpts_tmp{dd} = (delay_tpts*myTR) >= delay_tpt_range(dd,1) & (delay_tpts*myTR) <= delay_tpt_range(dd,2);
-        end
-      
-        for ii =1:length(delay_tpts_tmp)
-            delay_idx{ii} = find(delay_tpts_tmp{ii});
-        end
-        
-    
-        
+
         which_TRs = data.which_TRs;
         %which_TRs_tst = data_tst.which_TRs;
         %which_TRs_trn = data_trn.which_TRs;
@@ -103,6 +102,21 @@ for ss = 1:length(subj)
 %            % delay_idx = find(ismember(which_TRs,delay_tpts));
 %             delay_idx_test{ii} = find(ismember(which_TRs,find(delay_tpts_tmp{ii})));
 %         end 
+
+
+        % TCS: >= for first tpt, then < for last (updated 11/16/2020)
+        for dd = 1:size(delay_tpt_range,1)
+            delay_tpts_tmp{dd} = (delay_tpts*myTR) >= delay_tpt_range(dd,1) & (delay_tpts*myTR) < delay_tpt_range(dd,2);
+        end
+
+        for ii =1:length(delay_tpts_tmp)
+            delay_idx{ii} = find(delay_tpts_tmp{ii});
+        end
+
+
+
+
+
         %IEM_trn_tpt_idx = find(ismbember(which_TRs,trn_tpts)); % tpts to average over when training IEM
         
        % delay_idx = find(ismember(which_TRs,delay_tpts));
@@ -320,10 +334,11 @@ for ss = 1:length(subj)
         
         % save with VE marker when which_vox < 1, otherwise, number of
         % vox
+        % renamed files to _epochTPTS rather than _Fig5TPTS (TCS)
         if which_vox < 1
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_fig5TPTS.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_epochTPTS.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
         else
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_fig5TPTS.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_epochTPTS.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
         end
         fprintf('saving to %s...\n',fn2s);
         
