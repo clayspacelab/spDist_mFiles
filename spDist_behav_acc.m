@@ -45,15 +45,16 @@ all_data.subj_all = all_subj;
 % determine which trials to include
 % first, narrow based on saccade preprocessing/scoring exclusions
 all_data.use_trial = ~cellfun( @any, cellfun( @(a) ismember(a, WHICH_EXCL), all_data.s_all.excl_trial, 'UniformOutput',false));
-all_data.use_trial(all_data.s_all.f_sacc_err>10) = 0; %exclude trials with errors > 10 deg
-all_data.use_trial(all_data.s_all.i_sacc_err>10) = 0;
-all_data.use_trial(ismember(all_data.s_all.r_num, [8,12,14]) & all_subj==3) = 0; %3 here specifically refers to subj 3 above (AY), see spDist_eyeDataNotes for 
-% drop trials with very short (< 100 ms) or very long RT (> 1 s)
-all_data.use_trial(all_data.s_all.i_sacc_rt<0.1 | all_data.s_all.i_sacc_rt>1.0) = 0;
+% all_data.use_trial(all_data.s_all.f_sacc_err>10) = 0; %exclude trials with errors > 10 deg
+% all_data.use_trial(all_data.s_all.i_sacc_err>10) = 0;
+% all_data.use_trial(ismember(all_data.s_all.r_num, [8,12,14]) & all_subj==3) = 0; %3 here specifically refers to subj 3 above (AY), see spDist_eyeDataNotes for 
+% % drop trials with very short (< 100 ms) or very long RT (> 1 s)
+% all_data.use_trial(all_data.s_all.i_sacc_rt<0.1 | all_data.s_all.i_sacc_rt>1.0) = 0;
 %% what was acc?
 
 acc_mu = mean(all_data.s_all.trialinfo(:,11));%idx of task acc 
-coh_mu = mean(all_data.s_all.trialinfo(:,12))
+sem_mu = std(all_data.s_all.trialinfo(:,11))/sqrt(length(subj));
+coh_mu = mean(all_data.s_all.trialinfo(:,12));
 %% what was acc by bin?
 
 dist_bins =[-3 -2 -1 0 1 2 3];
@@ -76,7 +77,7 @@ plot([1:length(dist_bins)], bin_acc','-', 'color',[.5 .5 .5])
 hold on;
 
 for ii=1:length(dist_bins)
-    sem = std(bin_acc(:,ii),1)/length(subj)
+    sem = std(bin_acc(:,ii),1)/sqrt(length(subj))
     plot(ii, mean(bin_acc(:,ii)),'ko','markersize',10)
     plot([ii ii], [mean(bin_acc(:,ii))+1.*sem mean(bin_acc(:,ii))-1.*sem], 'k-','linewidth',2)
     clear sem

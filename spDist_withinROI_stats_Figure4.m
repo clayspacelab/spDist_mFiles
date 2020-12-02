@@ -173,13 +173,13 @@ for dd = 1:length(delay_tpts)
             my_sem = std(thisdata,[],1)/sqrt(length(subj));
             
             % TCS: plot actual values, not min-removed
-            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1),'-','LineWidth',0.5,'color',cond_colors(cc,:));
+            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1),'-','LineWidth',1.5,'color',cond_colors(cc,:));
 
             hold on;
  
-            plot(linspace(-180,180,90),mean(thisdata,1)+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
+            %plot(linspace(-180,180,90),mean(thisdata,1)+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
-            plot(linspace(-180,180,90),mean(thisdata,1)-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
+            %plot(linspace(-180,180,90),mean(thisdata,1)-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
             %color in btwn +/- SEM
             % TCS: plot actual values, not min removed
@@ -431,13 +431,13 @@ for vv = 1:length(ROIs)
         set(gca,'Ytick',[0 .4 .8 ],'TickDir','out');
         title(ROIs{vv})
     end
-    
-    if plot_indiv
-        ylim([-0.1 0.8]);
-    else
-        ylim([0 0.65])
-    end
-    
+%     
+%     if plot_indiv
+%         ylim([-0.1 0.8]);
+%     else
+%         ylim([0 0.65])
+%     end
+    match_ylim(get(gcf,'Children'));
     
     
 end
@@ -865,7 +865,8 @@ ta.Properties.VariableNames={'ROIs','Epoch','Cond','EpochCond'}
 %% plot sigs on the subplots -- anovan
 sig_colors = lines(3);
 
-%correct them pvals
+%correct them pvals - note, it is OK to correct over each effect (across
+%ROIS) separatelyly
 p_fdr_perm= nan(3,1);
 p_masked_perm= nan(length(ROIs),3);
 
