@@ -8,24 +8,26 @@
 %
 % TCS 8/19/2019
 %
-function spDist_channelRespAmp_GATdist(subj,sess,ROIs,which_vox)
+function spDist_channelRespAmp_GAT(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
-root = '/share/data/spDist/'
-%root =  spDist_loadRoot;
 
+root =  spDist_loadRoot;
+     
 if nargin < 1
+
    subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
 end
 if nargin < 2
- sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};    
+    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+
 end
 
 if nargin < 3
-   % ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
-    ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+    ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'}; %change this back 111220
+    %ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 
@@ -48,6 +50,17 @@ align_to = {'targ_ang_all','dist_ang_all'};
 func_suffix = 'surf';
 %delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
 
+myTR = 0.75;
+
+
+% define delay timepoints/indexes
+delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
+delay_tpts_tmp = cell(size(delay_tpt_range,1),1);
+
+        
+
+
+
 
 % loop over subj, ROIs and load each session, concatenate, and process
 for ss = 1:length(subj)
@@ -67,9 +80,11 @@ for ss = 1:length(subj)
             
             data = cat_struct(data,thisdata,{'rf','TR','which_TRs'}); % skip 'rf', these will be the same
             delay_tpts = thisdata.which_TRs;
+         
         end
         
-        
+     
+
         which_TRs = data.which_TRs;
         %which_TRs_tst = data_tst.which_TRs;
         %which_TRs_trn = data_trn.which_TRs;
@@ -80,16 +95,38 @@ for ss = 1:length(subj)
         
         
         % because which_TRs doesn't necessarily start at 1...
-        delay_idx = find(ismember(which_TRs,delay_tpts));
+        
+        %think we should turn this into what we loop over 
+%        for ii =1:length(delay_tpts_tmp)
+%            % delay_idx = find(ismember(which_TRs,delay_tpts));
+%             delay_idx_test{ii} = find(ismember(which_TRs,find(delay_tpts_tmp{ii})));
+%         end 
+
+
+        % TCS: >= for first tpt, then < for last (updated 11/16/2020)
+        for dd = 1:size(delay_tpt_range,1)
+            delay_tpts_tmp{dd} = (delay_tpts*myTR) >= delay_tpt_range(dd,1) & (delay_tpts*myTR) < delay_tpt_range(dd,2);
+        end
+
+        for ii =1:length(delay_tpts_tmp)
+            delay_idx{ii} = find(delay_tpts_tmp{ii});
+        end
+
+
+
+
+
         %IEM_trn_tpt_idx = find(ismbember(which_TRs,trn_tpts)); % tpts to average over when training IEM
         
+       % delay_idx = find(ismember(which_TRs,delay_tpts));
+
         % save out recons rotated to align with target and with distractor
         % (nans for no-distractor trials)
         % n_trn_tpts x n_tst_tpts x 2 (train w/ target location, train w/
         % distractor location)
-        recons = cell(length(delay_tpts),length(delay_tpts), 2); 
-        recons_raw = cell(length(delay_tpts),length(delay_tpts), 2); 
-        chan_resp = cell(length(delay_tpts),length(delay_tpts), 2);
+        recons = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2); 
+        recons_raw = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2); 
+        chan_resp = cell(length(delay_tpts_tmp),length(delay_tpts_tmp), 2);
         
         % NOTE: to keep things simple, we'll fill in no-distractor trials
         % w/ NaN above
@@ -99,13 +136,13 @@ for ss = 1:length(subj)
         this_ru = unique(data.r_LORO); % all the runs we'll CV over
         n_folds = length(this_ru);
         
-        for trn_tpt_idx = 1:length(delay_tpts)
-            for tst_tpt_idx = 1:length(delay_tpts)
-                
+        for trn_tpt_idx = 1:length(delay_idx)
+            for tst_tpt_idx = 1:length(delay_idx)
+  
                 % use align_to variable for training/testing?
                 for aa = 1:length(align_to)
                     
-                    fprintf('Training TPT: %i, Testing TPT: %i\n',trn_tpt_idx,tst_tpt_idx);
+                    fprintf('Training TPT: %i thru %i, Testing TPT: %i thru %i\n',delay_idx{trn_tpt_idx}(1),delay_idx{trn_tpt_idx}(end),delay_idx{tst_tpt_idx}(1),delay_idx{tst_tpt_idx}(end) );
                     
                     chan_resp{trn_tpt_idx,tst_tpt_idx,aa}  = nan(size(data.c_all,1),n_chan);
                     recons{trn_tpt_idx,tst_tpt_idx,aa}     = nan(size(data.c_all,1),length(angs));
@@ -116,10 +153,7 @@ for ss = 1:length(subj)
                     for fold_idx = 1:n_folds
                         
                         % ~~~~~~~ first, estimate IEM ~~~~~~~~~~
-                        
-                        
-                        
-                        
+    
                         % pick CV sets
                         trn_runs = ones(length(unique(data.r_LORO)),1);
                         
@@ -132,10 +166,10 @@ for ss = 1:length(subj)
                         
                         
                         % select voxels, data
-                        trndata = mean(data.dt_allz(trn_idx,:,delay_idx(trn_tpt_idx)),3);
+                        trndata = mean(data.dt_allz(trn_idx,:,delay_idx{trn_tpt_idx}(1):delay_idx{trn_tpt_idx}(end)),3);
                         mystd = std(trndata,[],1);
                         
-                        tstdata = mean(data.dt_allz(tst_idx,:,delay_idx(tst_tpt_idx)),3);
+                        tstdata = mean(data.dt_allz(tst_idx,:,delay_idx{tst_tpt_idx}(1):delay_idx{tst_tpt_idx}(end)),3);
                         
                         % if which_vox < 1, means we're using VE threshold
                         if which_vox < 1
@@ -299,10 +333,13 @@ for ss = 1:length(subj)
         
         % save with VE marker when which_vox < 1, otherwise, number of
         % vox
+        % renamed files to _epochTPTS rather than _Fig5TPTS (TCS) %% geh
+        % updating, _epochTPTS to _epochTPTS_gh on 1/14/21 as to not
+        % confused those files TCS has recreated
         if which_vox < 1
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_fig5.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_epochTPTS_gh.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
         else
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_fig5.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_epochTPTS_gh.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
         end
         fprintf('saving to %s...\n',fn2s);
         
@@ -315,5 +352,6 @@ for ss = 1:length(subj)
     end
     
     
+%end
 end
 return

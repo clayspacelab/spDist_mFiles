@@ -1,19 +1,22 @@
-
-%spDist_plotEyeData.m
+function spDist_behavioralAnalysis(subj,sess) 
+% based on spDist_plotEyeData.m
 % in the actual task, cyan = distractor, magenta = no distractor 
 % dependencies: misc_util, RMAOV1 
 
+if nargin < 1 || isempty(subj)
+    subj = {'AY','CC','EK','KD','MR','SF','XL'};
+end
+
+if nargin < 2 || isempty(subj)
+sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; 
+end
 root = spDist_loadRoot;
 
 %load raw subject data 
 
-subj = {'AY','CC','EK','KD','MR','SF','XL'}; 
-
-sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}}; %two sessions removed
-
 scatterplot_1BC = 0; % plot portions of figure that take quite a while? y/n 
 
-WHICH_EXCL = [13 20 21 22]; % see geh spDist_eyeDataNotes.txt on how/why these exclu criteria were chosen. 
+WHICH_EXCL = [13 20 21 22]; % use all exclusion criteria
 if ismember(WHICH_EXCL,13)
     which_excl_str ={'broken fix'};
 elseif ismember(WHICH_EXCL,[13 20])
@@ -73,10 +76,8 @@ all_data.subj_all = all_subj;
 % first, narrow based on saccade preprocessing/scoring exclusions
 all_data.use_trial = ~cellfun( @any, cellfun( @(a) ismember(a, WHICH_EXCL), all_data.s_all.excl_trial, 'UniformOutput',false));
 
-% seed random number generator:     
+
 rng(spDist_randSeed);
-
-
 %% organize data
 distractor_bins = unique(all_data.s_all.trialinfo(all_data.s_all.trialinfo(:,1)~=1,6));
 distractor_spacing = 360/length(distractor_bins);
@@ -115,10 +116,13 @@ all_mupol{1} = tmp_mupol;
 all_errpol{1} = tmp_errpol;
 
 clear tmp_err tmp_mu tmp_errpol tmp_mupol;
-% shuffle zero bin flipping 1000 times. 
-iter =1000;
-tmp_mupol = nan(1,length(params_of_interest),2,length(subj),iter);
-for xx =1:iter
+
+% set-up separate, stand-alone structure for bias shuffled test 
+
+tmp_mu = nan(1,length(params_of_interest),2,length(subj));
+tmp_mupol = nan(1,length(params_of_interest),2,length(subj));
+tic
+for xx =1:1000
 for ss = 1:length(subj)
     
     for bb =1 %placeholder, keep dimens same size as when we collect others 
@@ -129,31 +133,35 @@ for ss = 1:length(subj)
            
             
             orig_y =  tmpd(tmpidx,2);
-            n_flip =round(length(orig_y)/2);
-            orig_y(1:n_flip) = orig_y(1:n_flip)*-1;
+            shuf_idx = randperm(length(orig_y));
+            shuf_orig_y = orig_y(shuf_idx);
             
-            tmpd(tmpidx,2) = orig_y;
-           
-            
-      
+            n_tflip = round(length(orig_y)/2); %how many trials are there? flip half. make it a 1:number vector 
+            flip_y =  -1.*shuf_orig_y(1:n_tflip);
+            noflip_y = shuf_orig_y(n_tflip+1:end);
+            tmpd(tmpidx,2) = [flip_y;noflip_y];
+
             [dtheta_mu, drad_mu] = cart2pol(tmpd(tmpidx,1), tmpd(tmpidx,2));
             tmp_mupol(bb,pp,:,ss,xx) = mean([drad_mu rad2deg(dtheta_mu)]); %put rad as x FIRST, theta as Y second, in keeping with later indexing 
 
-            clear  drad_mu dtheta_mu tmpd tmpidx orig_y n_flip
+            clear dtheta_err drad_err drad_mu dtheta_mu tmpd thisidx orig_y orig_y_flip
         end
     end
 end
-end 
-all_mupol_shuf{1} = tmp_mupol; 
+end
+toc
+
+
+shuf_mupol{1} = tmp_mupol; % this will only be used for bias testing 
+
 % collect and store random zero bin trials 
-tmp_cw = nan(1,length(params_of_interest),2,length(subj));
-tmp_ccw = nan(1,length(params_of_interest),2,length(subj));
+
 tmp_errpol = nan(1,length(params_of_interest),2,length(subj));
 tmp_mupol = nan(1,length(params_of_interest),2,length(subj));
 
 for ss = 1:length(subj)
     
-    for bb =1 %placeholder, keep dimens same size as when we collect others 
+    for bb =1 % placeholder, keep dimens same size as when we collect others 
        
         for pp = 1:length(params_of_interest)
             tmpd =  all_data.s_all.(params_of_interest{pp});
@@ -162,7 +170,8 @@ for ss = 1:length(subj)
             orig_y_flip = orig_y*-1;
             tmpd(tmpidx,2) = orig_y_flip;  % here is where the actual y flip is inserted for CW bins, into tmpd ONLY 
             
-            thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; %now, collect all jitte
+            thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==0; %now, collect all jitters.
+ 
             % distractor bin x param x [radial; tangential] x subj
             tmp_err(bb,pp,:,ss) = std( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
             tmp_mu(bb,pp,:,ss) = mean( tmpd(thisidx,:),  1 ); % use idx with all zero bin from flipped data 
@@ -234,7 +243,6 @@ clear tmp_err tmp_mu tmp_errpol tmpmupol;
 
 % create a new container for _alldist - for precision only 
 tmp_err = nan(1,length(params_of_interest),2,length(subj)); 
-tmp_mu  = nan(1,length(params_of_interest),2,length(subj)); 
 tmp_errpol = nan(1,length(params_of_interest),2,length(subj));
 
 for pp = 1:length(params_of_interest)
@@ -252,6 +260,7 @@ end
 
 all_err_alldist{1} = tmp_err;
 all_errpol_alldist{1} = tmp_errpol;
+
 clear tmp_err  tmp_errpol 
 
 % first, RT for no-distractor trials
@@ -330,7 +339,6 @@ end
 all_rt_alldist{1} =tmp_rt; 
 
 if scatterplot_1BC ==1 
-
 %% Figure 1B : Example participant eye-trace 
 
 dist_colors = [0.7100 0.2128 0.4772; 0 0 1;]; %1 is red, no distractor, 2 is blue (near distractor), 3 is green (far distractor)
@@ -476,7 +484,6 @@ end
 set(gcf,'Renderer','painters')
 match_ylim(get(gcf,'Children'))
 else
-
 %% Figure 1D : Precision, Distractor Absent vs. Distractor Present (all distractor bins collapsed), polar deg 
 
 % directly compare avg sd for no distractor, near distractor, far
@@ -540,8 +547,6 @@ for pp = 1:length(params_of_interest)
 end
 set(gcf,'position',[ 549   724   499   571])
 match_ylim(get(gcf,'Children'));
-
-
 
 %% RT : No distractor, all distractor bins collapsed (seconds) 
 
@@ -631,31 +636,52 @@ xlabel('Near Distractor')
 xlim([0 2])
 
 [h_bias_near p_bias_near,CI,STATS] = ttest(thism_near(1,:)') %t-test to determine if bias is different than zero
+realT = STATS.tstat;
 text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',p_bias_near),'color','k','fontsize',15) %filled
-t_real = STATS.tstat;
+
 match_ylim(get(gcf,'Children'));
 set(gcf,'position',[ 549   724   499   571])
- 
 
-%% insert shuffling bias test 
-for xx = 1:iter
+%%%%
+% permutation bias testing ; take randomly flipped bias (mu), subject to
+% ttest, iter x 
+params_of_interest = {'f_sacc'};
+param_str = {'final sacc'};
+
+figure;
+for xx=1:1000
 for pp = 1:length(params_of_interest)
     
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % nbins x nsubj
+    thism_near = squeeze(shuf_mupol{1}(:,pp,2,:,xx))'; %this is the only condition that is information for this analysis.
+    plot(xx+0.15,thism_near,'o','MarkerSize',5,'Markerfacecolor',[0.3 0.3 0.3], 'Color',[0.3 0.3 0.3]);
+    plot(xx,mean(thism_near,2),'o','MarkerSize',15,'Color',cond_colors(2,:),'MarkerFaceColor',cond_colors(2,:));
+    hold on;
+    
+    tmpe = std(thism_near)/sqrt(length(subj));
+    plot([xx xx], mean(thism_near)+tmpe*[-1 1],'-','LineWidth',1.5,'Color',cond_colors(2,:));
 
-     thism_near = squeeze(all_mupol_shuf{1}(:,pp,2,:,xx)); %this is the only condition that is information for this analysis.
-
-  [~,~,~,stats] = ttest(thism_near);
-  t_shuf(xx) = stats.tstat;
-  clear stats thism_near
+    %errorbar(1, mean(thism_near), [std(thism_near)/sqrt(length(subj))],'linewidth',2,'Color',cond_colors(2,:))
+    title('Shuffled Bias');
+    
+   [h_bias p_bias,CI,STATS] = ttest(thism_near(1,:)');
+   shufT(xx) = STATS.tstat;
+   
+    ylabel('Bias, Polar Angle (\circ), toward distractor');
 end
-end 
-fprintf('pause')
+end
+xlabel('Near Distractor')
+xlim([0 xx+1])
+perm_pval = 2 * min(mean(shufT<=realT), mean(shufT>=realT));
 
+text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',perm_pval),'color','k','fontsize',15) %filled
 
-bias_pval = 2 * min(mean(t_shuf<=t_real), mean(t_shuf>=t_real)); % no pvals are greater than real 
+match_ylim(get(gcf,'Children'));
+set(gcf,'position',[ 549   724   499   571])
 
- 
-%%
+%%%%
 %%%%%%%%%%%%%%%%%% SUPPLEMENATARY FIGURE 1 A  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %% REPORTED STATS ONLY - PRECISION, Distractor Absent, Distractor Present Abs(Bin)
 % STATS ARE ONLY ON Distractor Present (4-level RM ANOVA) : polar deg
@@ -780,3 +806,4 @@ end
 
 fprintf('behave done')
 %c/p to illustrator, scale by %60
+return 

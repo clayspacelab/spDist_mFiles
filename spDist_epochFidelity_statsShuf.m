@@ -1,8 +1,9 @@
-    
 
-function spDist_withinROI_stats_suppFigure4(subj,sess,ROIs)
 
-root = spDist_loadRoot;%'/share/data/spDist/'; %updated root
+function spDist_epochFidelity_statsShuf(subj,sess,ROIs)
+% stats checked and confirmed 11/10/2020 
+% w /updated middle epoch
+root = spDist_loadRoot;
 
 task_dir = 'spDist';
 
@@ -15,8 +16,7 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
-    ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
-
+    ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 func_suffix = 'surf';
@@ -54,7 +54,6 @@ else
 end
 
 
-
 delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; 
 
 % number of iterations for permutation...
@@ -63,6 +62,8 @@ iter = 1000;
 
 % seed random number generator:     
 rng(spDist_randSeed);
+
+
 
 %% load data
 startidx = 1;
@@ -172,13 +173,13 @@ for dd = 1:length(delay_tpts)
             my_sem = std(thisdata,[],1)/sqrt(length(subj));
             
             % TCS: plot actual values, not min-removed
-            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1),'-','LineWidth',0.5,'color',cond_colors(cc,:));
+            h(cc) = plot(linspace(-180,180,90),mean(thisdata,1),'-','LineWidth',1.5,'color',cond_colors(cc,:));
 
             hold on;
  
-            plot(linspace(-180,180,90),mean(thisdata,1)+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
+            %plot(linspace(-180,180,90),mean(thisdata,1)+1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
-            plot(linspace(-180,180,90),mean(thisdata,1)-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
+            %plot(linspace(-180,180,90),mean(thisdata,1)-1.*my_sem,'-','LineWidth',.1,'color',cond_colors(cc,:),'HandleVisibility','off')
             
             %color in btwn +/- SEM
             % TCS: plot actual values, not min removed
@@ -227,6 +228,9 @@ for dd = 1:length(delay_tpts)
 end
 match_ylim(get(gcf,'Children'));
 set(gcf,'position',  [ 121         287        1574         503])
+%set(gcf,'position', [ 23         245        2386         453])
+
+
 
 %% t-test between condition during each epoch against shuffled null
 %
@@ -427,13 +431,13 @@ for vv = 1:length(ROIs)
         set(gca,'Ytick',[0 .4 .8 ],'TickDir','out');
         title(ROIs{vv})
     end
-    
-    if plot_indiv
-        ylim([-0.1 0.8]);
-    else
-        ylim([0 0.65])
-    end
-    
+%     
+%     if plot_indiv
+%         ylim([-0.1 0.8]);
+%     else
+%         ylim([0 0.65])
+%     end
+    match_ylim(get(gcf,'Children'));
     
     
 end
@@ -571,8 +575,6 @@ end
 match_xlim(get(gcf,'Children'));
 legend(h, {'No distractor', 'Distractor'})
 set(gcf,'position', [ 23         245        2386         453])
-
-
 %% 3-way ANOVA permutation
 % get fidelity , over average delay epochs, for each condition, permutation test
 %%%% this takes ~2.7 hrs minutes to run!!!!! (anovan)
@@ -747,6 +749,7 @@ end
 end
 
 %%%% TMP COM
+
 %% 2-way ANOVA permutation
 % get fidelity , over average delay epochs, for each condition, permutation test
 %%%% this takes ~24 minutes to run!!!!!
@@ -859,16 +862,15 @@ ta = table(ROIs',exact_store(:,1),exact_store(:,2),exact_store(:,3));
 ta.Properties.VariableNames={'ROIs','Epoch','Cond','EpochCond'}
 
 
-%% plot sigs on the subplots -- 2-way ANOVAN shuffle output
-% note to self in the future : we DO correct with FDR for 2-way output, but
-% NOT for 3-way 
+%% plot sigs on the subplots -- anovan
 sig_colors = lines(3);
 
-%correct them pvals
+%correct them pvals - note, it is OK to correct over each effect (across
+%ROIS) separatelyly
 p_fdr_perm= nan(3,1);
 p_masked_perm= nan(length(ROIs),3);
 
-for ee =1:3 %effect var
+for ee =1:3 %epoch var
     [p_fdr_perm(ee), p_masked_perm(:,ee)] = fdr(exact_store(:,ee),0.05);
     
     

@@ -20,9 +20,7 @@ trn_dir = 'wmChoose';
 trn_sess = 'MGSMap'; % files to load for training
 
 root =  spDist_loadRoot;
-%trn_root = sprintf('%s/../wmChoose_scanner/',root);
-%trn_root = sprintf('%s/../../datb/wmChoose_scanner/',root)
-% FUCKING datb/data makes this not work...just use super-absolute path here
+
 trn_root = sprintf('%s/../wmChoose_scanner',root);%/deathstar/datb/wmChoose_scanner';
 
 if nargin < 1 || isempty(subj)
@@ -389,7 +387,7 @@ for ss = 1:length(subj)
         end
         fprintf('saving to %s...\n',fn2s);
         
-        save(fn2s,'c_all','r_all','p_all','n_chan','delay_tpts','angs','recons','recons_raw','recons_nodist','chan_resp','w_all','which_vox','sess_all','these_vox','a_all','fn_trn');
+     %   save(fn2s,'c_all','r_all','p_all','n_chan','delay_tpts','angs','recons','recons_raw','recons_nodist','chan_resp','w_all','which_vox','sess_all','these_vox','a_all','fn_trn');
         
         clear data c_all r_all p_all chan_resp w_all recons a_all;
         

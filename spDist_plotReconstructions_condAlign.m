@@ -14,7 +14,7 @@
 %
 % TODO: automate colorlims across figures
 
-function spDist_plotReconstructions_thruTime_Figure3(subj,sess,ROIs)
+function spDist_plotReconstructions_condAlign(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -80,23 +80,6 @@ delay_tpt_range = [2 5; 5 9;9 10.5; 10.5 12];
 
 
 
-% for fidelity timecourses
-% tmpcolors = lines(7);
-% 
-% ROI_colors = [repmat(tmpcolors(1,:),3,1); % V1, V2, V3
-%     tmpcolors(4,:);             % V3AB
-%     tmpcolors(1,:);             % hV4
-%     repmat(tmpcolors(3,:),1,1); % VO1
-%     repmat(tmpcolors(1,:),2,1); % LO1/2
-%     
-%     repmat(tmpcolors(2,:),2,1); % TO1-2
-%     
-%     repmat(tmpcolors(5,:),2,1); % IPS0-1
-%     repmat(tmpcolors(6,:),2,1); % IPS2-3
-%     tmpcolors(7,:);             % sPCS
-%     ];             % iPCS (color 1...)
-
-
 %% load data
 startidx = 1;
 for ss = 1:length(subj)
@@ -136,9 +119,7 @@ for ss = 1:length(subj)
                 angs = data.angs;
                 tpts = data.delay_tpts;
                 
-                % ugh have to do this in a multi-D array...
-                %all_r2 = nan(length(ROIs),length(tpts),length(subj));
-                
+          
             end
             
             
@@ -230,12 +211,9 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-
-%match_clim(get(gcf,'Children'));
-%set(gcf,'Position',[109   372   989   168]); %for concat ROIs
 recon_ax = [recon_ax; get(gcf,'Children')];
 
-%c_lim = [ -1.1876    1.7960];
+
 %% plot each condition (target-locked) (average over subj)
 % length(cu) x n_rois
 
@@ -277,9 +255,6 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-%match_clim(get(gcf,'Children'));
-%c_limdist = [ -1.1702    1.3151];
-%set(gcf,'Position',[109   372   989   168]); %for concat ROIs
 recon_ax = [recon_ax;get(gcf,'Children')];
 
 %% plot distractor-locked (for distractor)
@@ -319,11 +294,8 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-%match_clim(get(gcf,'Children'));
-%c_lim_distlock =[-1.4808    1.4039];
 recon_ax = [recon_ax;get(gcf,'Children')];
 
-%set(gcf,'Position',[109   372   989   168]); %for concat ROIs
 %% plot distractor-removed target representation (all positions)
 cond_str ={'Target, dist removed'};
 figure;
@@ -362,10 +334,6 @@ end
 
 set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',[0 4.5 12]);
 set(gcf,'Position',[102         405        1353         174]);
-%set(gcf,'Position',[109   372   989   168]); %for concat ROIs
-%match_clim(get(gcf,'Children'));
-%sgtitle('Distractor trials; distractor representation removed');
-%c_lim_distrem =[-0.8197    1.1589];
 
 recon_ax = [recon_ax;get(gcf,'Children')];
 
@@ -526,317 +494,5 @@ set(mh3,'YData',[min(myy(:,1)) max(myy(:,2))]);
 set(gcf,'Position',[185         745        1843         470]);
 
 
-%% fidelity difference: distractor present vs absent
-
-
-%diff_fidelity = nan(length(ROIs),size(all_fidelity,2),3); % ROIs x tpts x targ w/ and w/out distractor; distractor
-
-diff_fidelity = mu_fidelity(:,:,2)-mu_fidelity(:,:,1); % dist - no dist
-
-figure;
-% first, plot the target fidelity
-for vv = 1:length(ROIs)
-    
-    subplot(1,length(ROIs),vv); hold on;
-    
-    
-    
-    for cc = 1:length(cu)
-        
-        thismu = mean(diff_fidelity,1);
-        %thise  = std(diff_fidelity
-        
-        % plot mean
-        plot(myTR*tpts + myTR/2,diff_fidelity(vv,:),'-','LineWidth',1.5,'Color','k');
-        
-        %plot(myTR*tpts,mean(diff_fidelity,1),'-','LineWidth',1.5,'Color','k'););
-        
-        % TODO: plot std error across subj
-        
-        title(ROIs{vv});
-        if vv == 1
-            ylabel('Target fidelity (distractor - no distractor)');
-            xlabel('Time (s)');
-        end
-        
-        set(gca,'XTick',[0:6:24],'TickDir','out');
-        
-        clear thisd;
-    end
-    
-    mh1(vv,:) = plot(t_markers.*[1;1],[0 .1],'-','Color',[0.7 0.7 0.7],'LineWidth',0.75);
-    
-end
-
-%myy = cell2mat(get(get(gcf,'Children'),'YLim'));
-
-myy = match_ylim(get(gcf,'Children'));
-set(mh1,'YData',[min(myy(:,1)) max(myy(:,2))]);
-%set(mh2,'YData',[min(myy(:,1)) max(myy(:,2))]);
-
-
-
-%% image view of above (ROIs x time)
-
-title_str = {'WM target: no distractor','WM target: distractor','Distractor','WM target: distractor removed'};
-
-figure;
-for cc = 1:size(mu_fidelity,3)
-    subplot(size(mu_fidelity,3),1,cc); hold on;
-    
-    imagesc(tpts(tpts_to_plot)*myTR + myTR/2,1:length(ROIs),mu_fidelity(:,tpts_to_plot,cc));
-    
-    axis ij; axis tight;
-    colormap viridis;
-    if cc == size(mu_fidelity,3)
-        xlabel('Time (s)');
-        
-    end
-    title(title_str{cc});
-    ylabel('ROI');
-    set(gca,'YTick',1:length(ROIs),'YTickLabel',ROIs,'TickDir','out','Box','off');
-    
-    for tt = 1:length(t_markers)
-        plot([1 1]*t_markers(tt),[0.5 length(ROIs)+0.5],'--','Color','r','LineWidth',1);
-    end
-    
-end
-
-match_clim(get(gcf,'Children'));
-sgtitle('Fidelity');
-
-%% same, ROI-normalized
-
-figure;
-for cc = 1:size(mu_fidelity,3)
-    subplot(size(mu_fidelity,3),1,cc); hold on;
-    
-    tmp_fidelity = mu_fidelity(:,tpts_to_plot,cc);
-    tmp_fidelity = tmp_fidelity./max(tmp_fidelity,[],2);
-    
-    imagesc(tpts(tpts_to_plot)*myTR + myTR/2,1:length(ROIs),tmp_fidelity);
-    
-    axis ij; axis tight;
-    colormap viridis;
-    if cc == size(mu_fidelity,3)
-        xlabel('Time (s)');
-        
-    end
-    title(title_str{cc});
-    ylabel('ROI');
-    set(gca,'YTick',1:length(ROIs),'YTickLabel',ROIs,'TickDir','out','Box','off');
-    
-    for tt = 1:length(t_markers)
-        plot([1 1]*t_markers(tt),[0.5 length(ROIs)+0.5],'--','Color','r','LineWidth',1);
-    end
-    
-end
-
-%match_clim(get(gcf,'Children'));
-
-sgtitle('Fidelity (normalized)');
-
-%% plot (individual subj as rows)
-% n_subj x n_rois 
-
-all_ax_ss = [];
-for cc = 1:length(cu)
-    figure;
-    for ss = 1:length(subj)
-
-
-        for vv = 1:length(ROIs)
-            
-            %subplot(length(cu),length(ROIs),(cc-1)*length(ROIs)+vv);hold on;
-            subplot(length(subj),length(ROIs),(ss-1)*length(ROIs)+vv);hold on;
-            
-            thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==cu(cc);
-            thisd = squeeze(mean(all_recons{1}(thisidx,:,:),1)).';
-            
-            imagesc(angs,tpts(tpts_to_plot)*myTR + myTR/2,thisd(tpts_to_plot,:));
-            colormap viridis
-            if ss == 1
-                title(ROIs{vv});
-            end
-            axis ij tight
-            set(gca,'XTick',-180:90:180);
-            if vv == 1
-                if ss == length(subj)
-                    xlabel('Polar angle (\circ)');
-                end
-                ylabel(sprintf('%s - time (s)',subj{ss}));
-                set(gca,'XTickLabel',{'-180','','0','','180'});
-                
-            else
-                set(gca,'YTick',[],'XTickLabel',[],'YTickLabel',[]);
-            end
-            xlim([-180 180]);
-        end
-    end
-    all_ax_ss = [all_ax_ss;get(gcf,'Children')];
-    
-    set(get(gcf,'Children'),'TickDir','out','Box','off','TickLength',[0.015 0.015],'YTick',0:5:10);
-    set(gcf,'Position',[ 220        1058        1760         194]);
-    
-    try
-        %sgtitle(subj{ss}); % only R2018b or later...
-        sgtitle(cond_str{cc})
-    catch
-        fprintf('UPGRADE YOUR MATLAB (2018b or newer)!\n');
-        set(gcf,'NumberTitle','off','Name',subj{ss});
-    end
-end
-
-match_clim(all_ax_ss(:));
-
-
-
-
-
-
-%% plot average reconstruction over defined delay-period
-% figure;
-% for vv = 1:length(ROIs)
-%     
-%     this_recons = nan(length(subj),length(angs));
-%     
-%     for ss = 1:length(subj)
-%         
-%         thisidx = all_subj == ss & all_ROIs == vv;
-%         tidx = ismember(tpts,plot_tpts);
-%         
-%         this_recons(ss,:) = mean( mean(all_recons(thisidx,:,tidx),3), 1 );
-%         
-%     end
-%     
-%     subplot(1,length(ROIs),vv); hold on;
-%     plot(angs,mean(this_recons,1),'-','LineWidth',2,'Color',ROI_colors(vv,:));
-%     
-%     thiserr = std(this_recons,[],1)/sqrt(length(subj));
-%     plot(angs,mean(this_recons,1)+thiserr,'--','LineWidth',0.5,'Color',ROI_colors(vv,:));
-%     plot(angs,mean(this_recons,1)-thiserr,'--','LineWidth',0.5,'Color',ROI_colors(vv,:));
-%     
-%     title(ROIs{vv});
-%     
-%     if vv == 1
-%         xlabel('Position (\circ)');
-%         ylabel('BOLD Z-score');
-%     else
-%         set(gca,'YTickLabel',[]);
-%     end
-%     
-%     set(gca,'XTick',-180:180:180,'Box','off','TickDir','out','FontSize',14);
-%     
-% end
-% 
-% match_ylim(get(gcf,'Children'));
-
-
-
-%% FIDELITY: plot mean across subj
-
-% if proto_ROI is not empty, draw that ROI's timecourse behind the 'true'
-% timecourse in all ROIs (except this ROI)
-
-
-% TEMPORARILY: we'll skip over these (TODO)
-if 0
-proto_ROI = 4; % V3AB
-
-proto_color = [0.7 0.7 0.7];
-
-
-if ~isempty(proto_ROI)
-    % quick - compute the mean for proto-ROI - same as below
-    proto_d = nan(length(subj),size(all_fidelity,2));
-    for ss = 1:length(subj)
-        thisidx = all_subj==ss & all_ROIs==proto_ROI;
-        proto_d(ss,:) = mean(all_fidelity(thisidx,:),1);
-        clear thisidx;
-    end
-    proto_fidelity = mean(proto_d,1);
-end
-
-all_m_fidelity = nan(length(ROIs),size(all_fidelity,2));
-all_subj_fidelity = nan(length(ROIs),size(all_fidelity,2),length(subj));
-% 1x n_rois
-figure;
-for vv = 1:length(ROIs)
-    
-    subplot(1,length(ROIs),vv);hold on;
-    
-    
-    thisd = nan(length(subj),size(all_fidelity,2));
-    for ss = 1:length(subj)
-        thisidx = all_subj==ss & all_ROIs==vv;
-        thisd(ss,:) = mean(all_fidelity(thisidx,:),1);
-        all_subj_fidelity(vv,:,ss) = thisd(ss,:);
-    end
-    
-    if ~isempty(proto_ROI)
-        plot(tpts*myTR,proto_fidelity,'-','LineWidth',1.5,'Color',proto_color);
-    end
-    
-    plot(tpts*myTR,mean(thisd,1),'-','LineWidth',2,'Color',ROI_colors(vv,:));
-    plot(tpts*myTR,mean(thisd,1)-std(thisd,[],1)/sqrt(length(subj)),'--','LineWidth',0.5,'Color',ROI_colors(vv,:));
-    plot(tpts*myTR,mean(thisd,1)+std(thisd,[],1)/sqrt(length(subj)),'--','LineWidth',0.5,'Color',ROI_colors(vv,:));
-    
-    xlim(t_range_to_plot);
-    
-    all_m_fidelity(vv,:) = mean(thisd,1);
-    
-    
-    title(ROIs{vv});
-    
-    if vv == 1
-        xlabel('Time (s)');
-        ylabel('Fidelity (BOLD Z-score)');
-    else
-        set(gca,'YTickLabel',[]);
-    end
-    
-end
-
-
-set(get(gcf,'Children'),'YLim',[-0.075 0.8],'TickDir','out','TickLength',[1 1]*0.015,'YTick',[-0.2:0.2:0.8]);
-set(gcf,'Position',[216         866        1760         117]);
-
-%% fidelity for each subj for each ROI (just the above, with one row per subj)
-
-figure;
-for ss = 1:length(subj)
-    for vv = 1:length(ROIs)
-        subplot(length(subj),length(ROIs),vv+(ss-1)*length(ROIs)); hold on;
-        if ~isempty(proto_ROI) % plot this subj's proto-ROI timecourse
-            plot(tpts*myTR,proto_d(ss,:),'-','LineWidth',1.0,'Color',proto_color);
-        end
-        plot(tpts*myTR,all_subj_fidelity(vv,:,ss),'-','LineWidth',1.5,'Color',ROI_colors(vv,:));
-        xlim(t_range_to_plot);
-        
-        if ss == 1
-            title(ROIs{vv});
-        end
-        
-        if vv == 1
-            if ss == length(subj)
-                xlabel('Time (s)');
-            end
-            ylabel(subj{ss});
-        else
-            set(gca,'YTickLabel',[]);
-        end
-        
-        if ss ~= length(subj)
-            set(gca,'XTickLabel',[]);
-        end
-        
-    end
-end
-
-set(get(gcf,'Children'),'YLim',[-0.075 1.2],'TickDir','out','TickLength',[1 1]*0.015,'YTick',[0:0.5:1],'XTick',0:6:12);
-%set(gcf,'Position',[216         866        1760         117]);
-
-
-end
 
 return

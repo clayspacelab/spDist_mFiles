@@ -1,4 +1,4 @@
-function spDist_neural_behav_corr_exclutri_individperm_noflipth_stats(subj,sess,ROIs)
+function spDist_neuralBehavCorr(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -6,7 +6,6 @@ root = spDist_loadRoot;
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
-   %subj = {'CC','KD','AY','MR','XL','SF','EK'};
    subj = {'AY','CC','EK','KD','MR','SF','XL'}; %alph
 
 
@@ -20,8 +19,7 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
- % ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
-   ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+ ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 
@@ -165,7 +163,8 @@ fprintf('neural and behave loaded...\n')
 all_recons_noflip = all_recons{1}; % simply reiterate, we are NOT flipping a thing 
 
 
-delay_tpt_range = [3.75 5.25; 7.5 9; 10.5 12];
+delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; %updated on nov 092020
+%delay_tpt_range = [3.75 5.25; 8.25 9.75; 12 13.5] %test
 myTR = 0.75;
 
 delay_tpts = cell(size(delay_tpt_range,1),1);
@@ -176,7 +175,7 @@ end
 
 
 cond = [1 2]; % do no distractor, then distractor 
-store_b = nan(length(cond),length(ROIs),length(subj),36);
+store_b = nan(length(cond),length(ROIs),length(delay_tpts),length(subj),36);
 
 
 figure;
@@ -257,9 +256,9 @@ for cc = 1:length(cond)
             else
                 thisorigidx = all_data_beh.use_trial==1 &  all_ROIs ==1 & all_r==ru(nr) & all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==2  & all_data_beh.s_all.trialinfo(:,6)==0;                
             end
-            err(1,ss,cc,nr) = nanstd(all_data_beh.s_all.(params_of_interest{1})(thisorigidx,2));
-            mu(:,ss,cc,nr) = nanmean( all_data_beh.s_all.(params_of_interest{1})(thisorigidx,:),  1 ); %mean of a single number = the number .. leaving this
-            tmp(1,:) = nanmean( all_data_beh.s_all.(params_of_interest{1})(thisorigidx,:),  1 );
+            err(1,ss,cc,nr) = std(all_data_beh.s_all.(params_of_interest{1})(thisorigidx,2));
+            mu(:,ss,cc,nr) = mean( all_data_beh.s_all.(params_of_interest{1})(thisorigidx,:),  1 ); %mean of a single number = the number .. leaving this
+            tmp(1,:) = mean( all_data_beh.s_all.(params_of_interest{1})(thisorigidx,:),  1 );
             [dtheta(ss,cc,nr), drad(ss,cc,nr)]= cart2pol(tmp(1),tmp(2));
             dtheta_poldeg(ss,cc,nr) = dtheta(ss,cc,nr).*360/(2*pi);
             
@@ -270,78 +269,151 @@ for cc = 1:length(cond)
     end
 end
 
-% squeeze over subj, collect each subj, all trials into one container
+%% bias  %% Figure 1F : Near Distractor trials: Bias, polar degrees 
+ 
+params_of_interest = {'f_sacc'};
+param_str = {'final sacc'};
+
+mu_bias = nan(1,1,2,length(subj)); % no subj performed > 36 runs 
+
+drad_bias = [];
+dtheta_bias = [];
+
+for pp =1:length(params_of_interest)
+    for bb =1
+        for ss = 1:length(subj)
+            
+            tmpd =  all_data_beh.s_all.(params_of_interest{pp});
+            tmpidx = all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==2 & all_data_beh.use_trial==1 & all_data_beh.s_all.trialinfo(:,6)==0 & all_data_beh.s_all.trialinfo(:,10) < 0; %negative CW jitter
+            orig_y =  tmpd(tmpidx,2);
+            orig_y_flip = orig_y*-1;
+            tmpd(tmpidx,2) = orig_y_flip;  % here is where the actual y flip is inserted for CW bins, into tmpd ONLY
+            
+            thisidx = all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==2 & all_data_beh.use_trial==1 & all_data_beh.s_all.trialinfo(:,6)==0; %now, collect all jitters.
+            
+            % distractor bin x param x [radial; tangential] x subj
+            tmp_mu(bb,pp,:,ss) = mean( tmpd(thisidx,:),  1 ); % use idx with all zero bin from flipped data
+          
+            [dtheta_bias, drad_bias] = cart2pol(tmpd(thisidx,1), tmpd(thisidx,2));
+            mu_bias(bb,pp,:,ss) = mean([drad_bias rad2deg(dtheta_bias)]); %put rad as x FIRST, theta as Y second, in keeping with later indexing
+            
+            clear dtheta_err drad_err drad_mu dtheta_mu tmpd thisidx orig_y orig_y_flip
+            
+            
+            
+        end
+        
+    end
+end
+
+figure;
+
+for pp = 1:length(params_of_interest)
+    
+    subplot(1,length(params_of_interest),pp); hold on;
+    
+    % nbins x nsubj
+    thism_near = squeeze(mu_bias(:,pp,2,:))'; %this is the only condition that is information for this analysis.
+    plot(1+0.15,thism_near,'o','MarkerSize',5,'Markerfacecolor',[0.3 0.3 0.3], 'Color',[0.3 0.3 0.3]);
+    plot(1,mean(thism_near,2),'o','MarkerSize',15,'Color',dist_colors(2,:),'MarkerFaceColor',dist_colors(2,:));
+    hold on;
+    
+    tmpe = std(thism_near)/sqrt(length(subj));
+    plot([1 1], mean(thism_near)+tmpe*[-1 1],'-','LineWidth',1.5,'Color',dist_colors(2,:));
+
+    %errorbar(1, mean(thism_near), [std(thism_near)/sqrt(length(subj))],'linewidth',2,'Color',cond_colors(2,:))
+    title(param_str{pp});
+    
+   
+    ylabel('Bias, Polar Angle (\circ), toward distractor');
+end
+xlabel('Near Distractor')
+xlim([0 2])
+
+[h_bias_near p_bias_near,CI,STATS] = ttest(thism_near(1,:)') %t-test to determine if bias is different than zero
+text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',p_bias_near),'color','k','fontsize',15) %filled
+
+match_ylim(get(gcf,'Children'));
+set(gcf,'position',[ 549   724   499   571])
+%% Figure 5 B & C
+
 rho_group_theta = nan(length(cond),length(ROIs),1);
 pval_group_theta = nan(length(cond),length(ROIs),1);
+rho_theta = nan(length(subj),length(ROIs),1);
+pval_theta = nan(length(subj),length(ROIs),1);
+subj_col = lines(7);
 
-bn_corr_theta_dist =  figure('Name','behneurcorrthetadist');
-bn_corr_theta_both =  figure('Name','behneurcorrthetaboth');
+figure 
 
-for cc = 1:length(cond)
-    
-for vv=1:length(ROIs)
-
- for dd =1:length(delay_tpts)   
-    thisb_neural_tmp =[];
-    thisb_behav_tmp =[];
-    thisb_behav = [];
-    thisb_neural = [];
-    thisb_behav_poldegtmp =[];
-    thisb_behav_poldeg =[];
-    
-    for ss = 1:length(subj)   
-        thisb_neural_tmp(ss,:) =  squeeze(store_b(cc,vv,dd,ss,:));
-        thisb_behav_tmp(ss,:)=  squeeze(mu(2,ss,cc,:))';
-        thisb_behav_poldegtmp(ss,:)=  dtheta_poldeg(ss,cc,:);
+for ss = 6 % 1:length(subj)
+    hold on;
+    for cc = 2 %1:length(cond)
+        
+        for vv = 1:length(ROIs)
+            
+            for dd = 3 %1:length(delay_tpts)
+                
+                thisb_neural_tmp =[];
+                thisb_behav_tmp =[];
+                thisb_behav = [];
+                thisb_neural = [];
+                thisb_behav_poldegtmp =[];
+                thisb_behav_poldeg =[];
+                
+                
+                thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+                thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+                thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+                
+                
+                thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp));
+                thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp));
+                thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
+              
+                subplot(1,length(ROIs),vv); hold on;
+             
+                scatter(thisb_neural,thisb_behav_poldeg,30,subj_col(ss,:),'filled','MarkerFaceAlpha',.4)
+                
+                title(ROIs{vv})
+                lsline
+                set(gcf,'Position',[  -110         706        1882         624])
+         
+                if vv==1 && ss ==7 
+                    ylabel({'Polar angle \circ delta, target, sacc endpt', 'Epoch 3'})
+                    xlabel('Neural bias, Polar angle \circ')
+                else
+                end
+                [rho_theta(cc,ss,vv,dd), pval_theta(cc,ss,vv,dd)] = corr(thisb_neural', thisb_behav_poldeg'); %untransformed rho 
+                clear this neural thisb_behav_poldeg
+            end
+            
+            
+        end
+  
     end
+   
+    
+    
+end
 
-    thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
-    thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); 
-    thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
-    set(0, 'CurrentFigure', bn_corr_theta_dist)
-    subplot(length(delay_tpts),length(ROIs),(dd-1)*length(ROIs)+vv); hold on;
-    scatter(thisb_neural,thisb_behav_poldeg,30,dist_colors(cc,:),'filled','MarkerFaceAlpha',.1)
-    title(ROIs{vv})
-    lsline
-    set(gcf,'Position',[  -110         706        1882         624])
-    if vv==1 && dd==1
-    ylabel('Epoch 1')
-    elseif vv==1 && dd==2
-    ylabel('Epoch 2')
-    elseif vv==1 && dd ==3
-    ylabel({'Polar angle \circ delta, target, sacc endpt', 'Epoch 3'})
-    xlabel('Neural bias, Polar angle \circ')
-    else 
-    end
-end  
-    [rho_group_theta(cc,vv,dd), pval_group_theta(cc,vv,dd)] = corr(thisb_neural, thisb_behav_poldeg);
+ set(get(gcf,'Children'),'XLim',[-180 180],'YLim',[-25 25],'xtick',-180:90:180) %,'xtick',{'180','0','180'},
+
  
- end
-   
 
-   
-   
-end
+%% figure  5c 
 
-
-
-end
-
-
-%% corr on individual subj, convert to z, t-test
-
-%fish_theta_fig =  figure('Name','fish_theta');
-
+fish_theta_fig =  figure('Name','fish_theta');
 store_fish_ztheta= [];
 pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 fish_z_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 
-for cc = 1:length(cond)
+figure
+for cc = 2 %1:length(cond)
     
 for vv=1:length(ROIs)
     
-    for dd = 1:length(delay_tpts)
+    for dd = 3 %1:length(delay_tpts)
         
     for ss = 1:length(subj)
         
@@ -377,22 +449,24 @@ for vv=1:length(ROIs)
     end
 
 %     
-%     set(0, 'CurrentFigure', fish_theta_fig)
-%     subplot(1,length(ROIs),vv); hold on;
-%     plot(dd,fish_z_theta(cc,:,vv,dd),'o','color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',4)
-%     hold on;
-%     my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
-%     plot(dd,mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',8)
-%     plot(dd*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',1)
-%     title(ROIs{vv})
-%     ylim([-1 1])
-%     xlim([0.05 3.5])
-%     if vv==1
-%     set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','Epoch 1','Epoch 2','Epoch 3',''},'XTickLabelRotation',45,'TickDir','out');
-%     ylabel('Fisher-Z Corr')
-%     else
-%     set(gca,'Xtick',[0 1 2 3 4],'Xticklabel',{'','','','',''},'XTickLabelRotation',45,'TickDir','out');
-%     end 
+   
+    hold on;
+    plot(vv+0.15,fish_z_theta(cc,:,vv,dd),'o','MarkerSize',5,'Markerfacecolor',[0.3 0.3 0.3], 'Color',[0.3 0.3 0.3]);
+    hold on;
+    my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
+    plot(vv,mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',10)
+    plot(vv*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',2)
+    %title(ROIs{vv})
+    ylim([-1 1])
+    xlim([0.05 7.5])
+    line([0 8], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-') % geh add y =0 baseline 
+
+   % if vv==1
+    set(gca,'Xtick',[0 1 2 3 4 5 6 7 8 ],'Xticklabel',{'','V1-V3','V3AB','hV4','LO1','IPS0-IPS1','IPS2-IPS3','sPCS',''},'XTickLabelRotation',45,'TickDir','out');
+    ylabel('Fisher Z-transformed Rho')
+    %else
+    set(gcf,'position',[ 549   724   499   571])
+    %end 
     
     [h_th,p_th(cc,vv,dd),~,stats_th] = ttest(fish_z_theta(cc,:,vv,dd));
     realT_th(cc,vv,dd) = stats_th.tstat;
@@ -401,77 +475,33 @@ for vv=1:length(ROIs)
 
 end
 end 
-% 
-% y_var = store_fish_ztheta(:,1); %fish z 
-% cond_var = store_fish_ztheta(:,2); %condition
-% subj_var = store_fish_ztheta(:,3); %subject
-% roi_var = store_fish_ztheta(:,4); %roi 
-% epoch_var = store_fish_ztheta(:,5); %epoch 
-% 
-% % perform real T test
-% 
-%     for vv =1:length(ROIs)
-%         for cc =1:length(cond)
-%             for ee = 1:3
-%                 thisidx = roi_var ==vv & cond_var ==cc & epoch_var ==ee;
-%                 y_shuf =y_var(thisidx); %these are already shuffled, see above
-%                 [~,~,~,stats] = ttest(y_shuf);
-%                 real_t(vv,cc,ee) = stats.tstat;
-%                 
-%                 clear thisidx y_shuf
-%             end   
-%         end
-%     end
-% % perform true 2-way anova 
-% 
-% p_real = {};
-% 
-% f_real = [];
-% 
-% for vv =1:length(ROIs)
-% 
-%     thisroiidx = roi_var==vv;
-%     y = y_var(thisroiidx);
-%     thiscond= cond_var(thisroiidx);
-%     thissubj = subj_var(thisroiidx);
-%     thisepoch = epoch_var(thisroiidx); 
-%     [f_real(vv,:)] = RMAOV2_gh([y,thisepoch,thiscond,thissubj],0.05);
-%     clear thisroiidx y thiscond thissubj thisepoch 
-%   
-% end 
-% 
-% 
-% clear cond_var roi_var epoch_var subj_var y_var
-% 
-% y_var = store_fish_ztheta(:,1); %fish z 
-% cond_var = store_fish_ztheta(:,2); %condition
-% subj_var = store_fish_ztheta(:,3); %subject
-% roi_var = store_fish_ztheta(:,4); %roi 
-% epoch_var = store_fish_ztheta(:,5); %epoch 
-% 
-% % 1-way 
-% 
-% f_real_one = [];
-% pval_real_one =[];
-% 
-% for cc =1:length(cond)
-% for vv =1:length(ROIs)
-% 
-%     thisroiidx = roi_var==vv & cond_var==cc;
-%     y = y_var(thisroiidx);
-%   
-%     thissubj = subj_var(thisroiidx);
-%     thisepoch = epoch_var(thisroiidx); 
-%   
-%     [f_real_one(cc,vv), pval_real_one(cc,vv)] = RMAOV1_gh([y,thisepoch,thissubj],0.05);
-%     clear thisroiidx y thissubj thisepoch 
-%   
-% end 
-% end 
-% 
-% 
-% clear cond_var roi_var epoch_var subj_var y_var
-% check the usage of 'random' per the grouping var 
+
+
+
+
+%%
+
+y_var = store_fish_ztheta(:,1); 
+cond_var = store_fish_ztheta(:,2); %condition
+subj_var = store_fish_ztheta(:,3); %subject
+roi_var = store_fish_ztheta(:,4); %roi 
+epoch_var = store_fish_ztheta(:,5); %epoch 
+
+
+
+
+f_real_one = [];
+p_real_one = [];
+
+
+y = y_var;
+thissubj = subj_var;
+thisroi = roi_var;
+[f_real_one, pval_real_one] = RMAOV1_gh([y,thisroi,thissubj],0.05);
+clear thisroiidx y thiscond thissubj thisepoch
+
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%% PERM TEST # 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -505,10 +535,10 @@ for xx = 1:iter
     else
     end
     
-    for cc = 1:length(cond)
+    for cc = 2 %1:length(cond)
         for vv=1:length(ROIs)
             
-            for dd =1:length(delay_tpts)
+            for dd = 3 %1:length(delay_tpts)
                 
                 for ss = 1:length(subj)
                     thisb_neural_tmp_perm = [];
@@ -530,7 +560,7 @@ for xx = 1:iter
                     
                     thisb_behav_poldegperm = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp_perm));
                     
-                    thisb_neural_poldegperm  = thisb_neural_tmp_perm (~isnan(thisb_behav_tmp_perm));
+                    thisb_neural_poldegperm  = thisb_neural_tmp_perm(~isnan(thisb_behav_tmp_perm));
                     
                     % do the shuffle
                     shuff_btheta = thisb_behav_poldegperm; %reload these each time
@@ -546,7 +576,7 @@ for xx = 1:iter
                     fish_zthperm(cc,ss,vv,dd,xx) = atanh(rho_permth(cc,ss,vv,dd,xx));
                     
                     
-                   % fish_zthstore_perm =[fish_zthstore_perm; fish_zthperm(cc,ss,vv,dd,xx) cc ss vv dd xx]; 
+                    fish_zthstore_perm =[fish_zthstore_perm; fish_zthperm(cc,ss,vv,dd,xx) cc ss vv dd xx]; 
  
                    
                    clear thisidx subjidxth shuff_bidxth  shuff_btheta shuff_ntheta bthdata nthdata
@@ -572,15 +602,8 @@ pmask_th_twotail =[];
 pmask_th_onetail =[];
 pfdr_th_onetail =[];
 
-p_th_twotaile = [];
-p_th_onetaile = [];
-pmask_th_twotaile = [];
-pmask_th_onetaile = [];
-pfdr_th_twotaile = [];
-pfdr_th_onetaile = [];
 
-
-tdistpolbias = figure('Name','tdistpolbias');
+figure;
 
 realT_col = lines(3);
 for cc =1:length(cond)
@@ -605,21 +628,12 @@ for cc =1:length(cond)
 end
 
 
-%
-% two-way anova perm for each ROI?
- % correct across epochs?
-
- 
-
-tmp = [squeeze(p_th_onetail(:,:,1)); squeeze(p_th_onetail(:,:,2)); squeeze(p_th_onetail(:,:,3))]
-
-[fdrout, maskout] =  fdr(tmp,0.05);
 
 
-%% hold off on other perms for now - 102920 
+%% shuffled 1- way ANOVA
 
 
-
+% parcel out all the shuffled info form above 
 
 y_var = fish_zthstore_perm(:,1);
 cond_var = fish_zthstore_perm(:,2);
@@ -632,154 +646,48 @@ iter_var = fish_zthstore_perm(:,6);
 
 for zz =1:iter
     
-    for vv = 1:length(ROIs)
-        
-   
-        thisroiidx = roi_var ==vv & iter_var == zz;
-        y_shuf = y_var(thisroiidx); %these are already shuffled, see above
-        thisepoch = epoch_var(thisroiidx);
-        thiscond =cond_var(thisroiidx);
-        thissubj=subj_var(thisroiidx);
-        
-        [p_iter{vv,zz},t_iter{vv,zz},~] = anovan(y_shuf,{thissubj,thisepoch,thiscond},'model','full','random',1,'varnames',{'subj','epoch','cond'},'display','off');
-        [f_store_iter_2(vv,zz,:)] = RMAOV2_gh([y_shuf,thisepoch,thiscond,thissubj],0.05);
-        
-        clear thisroiidx thisepoch thiscond thissubj y_shuf
-
-    end
-end
-toc
-
-% visualize 
-
-iv_str_rm ={'epoch','cond','epoch*cond'};
-which_effect_rm = [1 2 3];
-exact_store_tmp=[];
-exact_store_rm_2 =nan(length(ROIs),length(which_effect_rm));
-
-for vv =1:length(ROIs)
-    figure('name','2-way perm; RMAOV2')
     
-    for ww =1:length(which_effect_rm)
-        extract_vals=[];
-        for ii=1:iter
-            extract_vals = [extract_vals; f_store_iter_2(vv,ii,which_effect_rm(ww))];
-        end
-        hold on;
-        
-        subplot(1,length(which_effect_rm),ww)
-        histogram(extract_vals)
-        line([f_real(vv,which_effect_rm(ww)) f_real(vv,which_effect_rm(ww))], [min(ylim) max(ylim)], 'color','r','linewidth',2,'linestyle','--')
-        title(iv_str_rm{which_effect_rm(ww)},'Interpreter','none');
-       % exact_p = sum(extract_vals >= f_real(vv,which_effect_rm(ww)))/iter;
-        exact_p = 2 * min ( sum(extract_vals >= f_real(vv,which_effect_rm(ww)))/iter, sum(extract_vals <= f_real(vv,which_effect_rm(ww)))/iter );
-        
-        text(max(xlim)-(.5*max(xlim)),max(ylim)-(.25*max(ylim)),sprintf('p=%0.4f',exact_p),'FontSize',9)
-        exact_store_rm_2(vv,ww) = [exact_store_tmp; exact_p];
-        clear exact_p
-        sgtitle(ROIs{vv})
-        title(iv_str_rm{ww})
-        if ww ==1
-            xlabel('T-stat')
-            ylabel('Frequency of T-stat')
-        else
-        end
-        
-    end
+    thisidx = iter_var == zz;
+    y_shuf = y_var(thisidx); %these are already shuffled, see above
+    thisroi = roi_var(thisidx);
+    thissubj=subj_var(thisidx);
+  
+    [f_store_iter_1(zz,:)] = RMAOV1_gh([y_shuf,thisroi,thissubj],0.05);
+    clear thisroiidx thisepoch thiscond thissubj y_shuf
+    
 end
 
-% one-way anova perm
-for xx=1:iter
-for cc =1:length(cond)
-for vv =1:length(ROIs)
-
-    thisroiidx = roi_var==vv & cond_var==cc & iter_var ==xx;
-    y = y_var(thisroiidx);
-    thissubj = subj_var(thisroiidx);
-    thisepoch = epoch_var(thisroiidx); 
-  
-    [f_real_one_perm(cc,vv,xx)] = RMAOV1_gh([y,thisepoch,thissubj],0.05);
-    clear thisroiidx y thissubj thisepoch 
-  
-end 
-end 
-end 
-
-% visualize 1--way result 
 
 iv_str_rm ={'epoch'};
 which_effect_rm = 1;
 exact_store_tmp = [];
 exact_store_rm_1 =nan(length(ROIs),length(which_effect_rm));
 
-for vv =1:length(ROIs)
-     figure('name','2-way perm; RMAOV2')
-for cc =1:length(cond)
-   
+  
+for cc =2 
+      figure('name','1-way perm; RMAOV1')
     extract_vals= [];
     for ii= 1:iter
-        extract_vals = [extract_vals; f_real_one_perm(cc,vv,ii)];
+        extract_vals = [extract_vals; f_store_iter_1(ii)];
     end
 
     
     subplot(1,2,cc)
     hold on;
     histogram(extract_vals)
-    line([f_real_one(cc,vv) f_real(cc,vv)], [min(ylim) max(ylim)], 'color','r','linewidth',2,'linestyle','--')
+    line([f_real_one f_real_one], [min(ylim) max(ylim)], 'color','r','linewidth',2,'linestyle','--')
     title(iv_str_rm{which_effect_rm(1)},'Interpreter','none');
-    % exact_p = sum(extract_vals >= f_real(vv,which_effect_rm(ww)))/iter;
-    exact_p = 2 * min ( sum(extract_vals >= f_real_one(cc,vv))/iter, sum(extract_vals <= f_real_one(cc,vv))/iter );
+    exact_p = sum(extract_vals >= f_real_one)/iter;
     
     text(max(xlim)-(.5*max(xlim)),max(ylim)-(.25*max(ylim)),sprintf('p=%0.4f',exact_p),'FontSize',9)
-    exact_store_rm_1(vv,1) = [exact_store_tmp; exact_p];
+    exact_store_rm_1 = [exact_store_tmp; exact_p];
     clear exact_p
-    sgtitle(ROIs{vv})
     title(iv_str_rm{1})
     xlabel('T-stat')
     ylabel('Frequency of T-stat')
 
     
 end
-end
-
-
-
-
-% do ttest for each roi,epoch,condition
-
-for xx =1:iter
-    for vv =1:length(ROIs)
-        for cc =1:length(cond)
-            for ee = 1:3
-                thisidx = roi_var ==vv & cond_var ==cc & epoch_var ==ee & iter_var == xx;
-                y_shuf =y_var(thisidx); %these are already shuffled, see above
-                [~,~,~,stats] = ttest(y_shuf);
-                shuff_t(vv,cc,ee,xx) = stats.tstat;
-                
-                clear thisidx y_shuf
-            end   
-        end
-    end
-end
-fprintf('done')
-
-% pvals
-
-for cc =1:length(cond)
-    for ee = 1:3
-        for vv =1:length(ROIs)
-            
-            pval_twotail(cc,vv,ee) = 2 * min(mean(shuff_t(vv,cc,ee,:) <= real_t(vv,cc,ee)), mean(shuff_t(vv,cc,ee,:) >= real_t(vv,cc,ee)));
-            pval_onetail(cc,vv,ee) = mean(shuff_t(vv,cc,ee,:) >= real_t(vv,cc,ee));
-            
-        end
-          [pval_fdrthresh_twotail(cc,:,ee), pval_th_twotail_mask(cc,:,ee)] = fdr(pval_th_twotail(cc,:,ee),0.05); % this is two tail
-          [pval_fdrthresh_onetail(cc,:,ee), pval_th_onetail_mask(cc,:,ee)] = fdr(pval_th_onetail(cc,:,ee),0.05); %one tail
-        
-    end
-end
-
-
 
 
 fprintf('done')

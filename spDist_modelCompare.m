@@ -1,4 +1,4 @@
-function spDist_plotGATrecon_suppFigure5BC(subj,sess,ROIs)
+function spDist_modelCompare(subj,sess,ROIs)
 % GAT data loaded here, _GATdist_fig5TPTS, was created with the script
 % spDist_channelRespAmp_GAT_suppFigure5
 % and the tpts delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
@@ -9,8 +9,6 @@ task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
     subj = {'AY','CC','EK','KD','MR','SF','XL'};
-    
-    
 end
 
 if nargin < 2 || isempty(sess)
@@ -21,12 +19,12 @@ if nargin < 2 || isempty(sess)
 end
 
 if nargin < 3 || isempty(ROIs)
-    %ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
-    ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+    ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+    %ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
 
-save_stats = 1;
+save_stats = 0; %gh change 
 
 func_suffix = 'surf';
 
@@ -146,7 +144,7 @@ for yy = 1:length(n_files)
             % LORO/GAT model    
             else
                 
-                fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_epochTPTS.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
+                fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_epochTPTS_gh.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
                 %fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
                 
                 fprintf('loading %s...\n',fn);
@@ -247,16 +245,9 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
         
         h=[];
         for aa =1:length(trn_epoch)
-%             if aa==1 % keeping these as two to avoid future confusion, could use aa in place of ee but would prefer to keep ee
-%                 ee =1;
-%             elseif aa ==2
-%                 ee =2;
-%             elseif aa ==3
-%                 ee=3;
-%             end
 
 
-            % TCS: easier way tot do this...
+            % TCS: easier way to do this...
             ee = aa;
             
             thisd = nan(length(subj),size(all_recons_gat{1},2));
@@ -274,21 +265,16 @@ for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2,
             % command
             % fixed std to use dim 1, not mode 1 (mode 0 is default)
             my_sem = std(thisd,[],1)/sqrt((length(subj)));
-            %h(aa) = plot(angs_gat,mean(thisd,1),'-','LineWidth',1,'color',cond_colors(aa,:));
             h(aa) = plot(angs_gat,mean(thisd,1),'-','LineWidth',1,'color',LORO_color);
             
             % TCS: updated the colors below to be consistent
             hold on;
-            %plot(angs_gat,mean(thisd,1)+1.*my_sem,'-','LineWidth',.5,'color',cond_colors(aa,:))
-            %plot(angs_gat,mean(thisd,1)-1.*my_sem,'-','LineWidth',.5,'color',cond_colors(aa,:))
             
             plot(angs_gat,mean(thisd,1)+1.*my_sem,'-','LineWidth',.5,'color',LORO_color)
             plot(angs_gat,mean(thisd,1)-1.*my_sem,'-','LineWidth',.5,'color',LORO_color)
             
             
             btwn_fill = [mean(thisd,1)+1.*my_sem fliplr((mean(thisd,1)-1.*my_sem))];
-            
-            %fill([angs_gat fliplr(angs_gat)],btwn_fill,cond_colors(aa,:),'linestyle','none','facealpha',0.3);
             fill([angs_gat fliplr(angs_gat)],btwn_fill,LORO_color,'linestyle','none','facealpha',0.3);
             
             
@@ -416,13 +402,13 @@ for n_files =1:2 % looping over separatee data types
                 end
                 
                 %geh pausing on this
-                %                 if plot_indiv == 1
-                %                     plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
-                %                     hold on;
-                %                     plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'.','markersize',10,'Color','b');
-                %
-                %                 end
-                %
+                                if plot_indiv == 1
+                                    plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
+                                    hold on;
+                                    plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'.','markersize',10,'Color','b');
+                
+                                end
+                
                 match_ylim(get(gcf,'Children'));
                 
                 if vv ==1
@@ -665,7 +651,34 @@ if save_stats == 1
     save(fn2s,'realF_ANOVA33','permF_ANOVA33','p_ANOVA33','IV_labels','realF_ANOVA2','permF_ANOVA2','p_ANOVA2','fdr_thresh_ANOVA2','subj','ROIs','delay_tpt_range');
 end
 
+% geh adding stats markers 01/18/21
 
+stats_markers ={'M','E','X'};
+stats_pos = [-1.30 -.03; -1.0 -.04; -.75 -.03]; % in plotted units, x,y, relative to top right
+
+signif_color = [0 0 0];
+trend_color  = [0.5 0.5 0.5];
+
+for vv = 1:length(ROIs)
+    for ii =1:3 % effect #; IV1, IV2, IV1 x IV2, MODEL, EPOCH, MODEL x EPOCH
+        figure(3); hold on;
+        subplot(1,length(ROIs),vv)
+        
+        tmpxlim = get(gca,'XLim');
+        tmpylim = get(gca,'YLim');
+        
+        topright = [tmpxlim(2) tmpylim(2)];
+        
+        if p_ANOVA2(vv,ii) <= fdr_thresh_ANOVA2(ii)
+            text(topright(1)+stats_pos(ii,1),topright(2)+stats_pos(ii,2),stats_markers{ii},'FontSize',18,'Color',signif_color);
+        elseif p_ANOVA2(vv,ii) <= 0.05
+            text(topright(1)+stats_pos(ii,1),topright(2)+stats_pos(ii,2),stats_markers{ii},'FontSize',18,'Color',trend_color);
+        end
+        
+        
+    end
+    
+end
 
 
 
@@ -677,7 +690,7 @@ if 0
 % get fidelity , over average delay epochs, for each condition, permutation test
 %%%% this takes ~24 minutes to run!!!!!
 
- thisfide_store = [];
+thisfide_store = [];
 the_y_store= [];
 
 for dd = 1:length(delay_tpts)
