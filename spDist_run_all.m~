@@ -17,24 +17,24 @@ if nargin < 3 || isempty(ROIs)
 end
 
 
-%spDist_behavioralAnalysis(subj,sess) 
+spDist_behavioralAnalysis(subj,sess) 
 
 fprintf('\nBehavioral results done (Figure 1)\n')
 
-%spDist_exampleTrial
+spDist_exampleTrial
 
 fprintf('\n example trial done (Figure 2)\n')
 
 % takes > 15 minutes
-%spDist_plotHRFs_ERA_pRFvoxSelection_btwnRFstats(subj,sess,ROIs) % extraneous figs are produced
+spDist_plotHRFs_ERA_pRFvoxSelection(subj,sess,ROIs) % extraneous figs 
 
 fprintf('\n univariate analysis done (Figure 3)\n')
 
-%spDist_plotReconstructions_condAlign(subj,sess,ROIs) % good
+spDist_plotReconstructions_condAlign(subj,sess,ROIs) % good
 
 fprintf('\n reconstructions generated (Figure4)\n')
 
-spDist_epochFidelity_statsShuf(subj,sess,ROIs)
+%spDist_epochFidelity_statsShuf(subj,sess,ROIs)
 
 fprintf('\n fidelity over epochs quantified (Figure 5)\n')
 

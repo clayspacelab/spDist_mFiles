@@ -1,21 +1,33 @@
 # spDist_mFiles
-
-
-to recreate the Figures as shown in Hallenbeck et al, 2021, run the following code
-dependencies included in spDist_mFiles
+dependencies
+within spDist_mFiles:
 RMAOV1_gh.m
 RMAOV2_gh.m
 RMAOV33_gh.m
+RMAOV1.m
+RMAOV2.m
+RMAOV33.m
 spDist_condColors.m
 spDist_randSeed.m
 spDist_concatBehav.m
 spDist_loadRoot (should be modified to point to where neural data is stored)
+to recreate the Figures shown in Hallenbeck et al, 2021, run the following code
+dependencies included in spDist_mFiles
 
+software:
+Matlab2018b (or higher)
 
+hardware: n/a
+install time: n/a
+
+Instructions & Expected output
+*please note, at this time (03/02/2021), each script produces additional plots.
+Upon acceptance, these will be relocated.
+Expected run-time:
 1. spDist_behavioralAnalysis (Figure 1)
 Sections denote portions of Figure 1. Ensure behavioral data is accessible by 'root'. Eye data shared herein has been extracted, preprocessed, and scored by iEye_ts (github/tommysprague/iEye_ts). To plot aligned eye traces (1B) and scatter plot (1C; takes > 10 mins), set scatterplot_1BC = 1. Supplementary Figure 1 data is also given by this script.
-2. spDist_plotHRFs_ERA_pRFvoxSelection (Figure 2)
-Change spDist_loadRoot to location where extracted neural data has been stored locally. 4th input argument, 'alignment' defaults to target position. To recreate figure 2c (distractor aligned Rf in vs out), set alignment argument to 'dist_ang_all'.
+2. spDist_plotHRFs_ERA_pRFvoxSelection_btwnRFstats (Figure 2)
+Change spDist_loadRoot to location where extracted neural data has been stored locally. 4th input argument, 'alignment' defaults to target position. To recreate Figure 2c (distractor aligned Rf in vs out), set alignment argument to 'dist_ang_all'.
 3. spDist_plotBasis,  spDist_exampleTrial.m (Figure 3)
 4. spDist_plotReconstructions_condAlign. Will plot 3 separate plots for Figure 4 A (distractor absent, target aligned) B (distractor present, target algined), & C (distractor present, distractor aligned)(Figure 4). To obtain statistical results examining fidelity on a TR basis, compared to a null-distritbuion, run spDist_fidelity_stats_shuf.m.
 5. spDist_epochFidelity_statsShuf.m (Figure 5)

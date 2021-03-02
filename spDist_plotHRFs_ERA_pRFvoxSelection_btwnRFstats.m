@@ -77,7 +77,7 @@ vox_outn =nan(length(subj),2,length(ROIs),360);
 % (because we use less than/equal to for tpt selection...)
 % (this is based on tr - we want to INCLUDE TRs that span this range)
 delay_range = [9 15]; % TR beginning at 7, ending at 15, to match IEM training
-delay_range = [7 15]; 
+%delay_range = [7 15]; 
 % these are based on *time*, not TR...
 % as in Fig. 1, 4, 5 - 3 epochs for comparing before/during/after distractor
 delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; %for stats - up for discussion?
