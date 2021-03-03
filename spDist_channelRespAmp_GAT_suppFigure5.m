@@ -16,18 +16,19 @@ tst_dir = 'spDist';
 
 root =  spDist_loadRoot;
      
-if nargin < 1
+if nargin < 1 || isempty(subj)
 
    subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
 end
-if nargin < 2
+if nargin < 2 || isempty(sess)
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 
 end
 
-if nargin < 3
+if nargin < 3 || isempty(ROIs)
     %ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'}; %change this back 111220
+    %ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'}; 
     ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 end
 
@@ -52,7 +53,6 @@ func_suffix = 'surf';
 %delay_tpts = -3:26; % 0.8 s TR ---- what we want to reconstruct
 
 myTR = 0.75;
-
 
 % define delay timepoints/indexes
 delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
