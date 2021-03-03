@@ -7,8 +7,9 @@
 %
 %
 % TCS 8/19/2019
-%
-function spDist_channelRespAmp_GAT(subj,sess,ROIs,which_vox)
+% renamed on 03/02/21 with _epochTPTs to differentiate from _GATdist, which
+% uses all TPTs
+function spDist_channelRespAmp_GAT_epochTPTs(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 

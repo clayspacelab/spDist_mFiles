@@ -14,7 +14,8 @@ basis_set = spDist_makeX1(angs,chan_centers);
 basis_colors = hsv(nchans);
 
 %% normal plot
-figure;
+
+figure('name','Figure1B');
 hold on;
 for cc = 1:nchans
     plot(angs,basis_set(:,cc),'-','Color',basis_colors(cc,:));

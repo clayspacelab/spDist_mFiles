@@ -176,7 +176,7 @@ recon_ax = [];
 cu = 1;
 cond_str = {'No distractor trials'};
 
-figure;
+figure('name','Figure4A');
 for cc = 1:length(cu)
     for vv = 1:length(ROIs)
         
@@ -220,7 +220,7 @@ recon_ax = [recon_ax; get(gcf,'Children')];
 cu = 2;
 cond_str = {'Distractor trials'};
 
-figure;
+figure('name','Figure4B');
 for cc = 1:length(cu)
     for vv = 1:length(ROIs)
         
@@ -260,7 +260,7 @@ recon_ax = [recon_ax;get(gcf,'Children')];
 %% plot distractor-locked (for distractor)
 cond_str ={'Distractor locked'};
 
-figure;
+figure('name','Figure4C');
 for vv = 1:length(ROIs)
     
     subplot(1,length(ROIs),vv);hold on;

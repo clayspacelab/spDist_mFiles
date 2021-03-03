@@ -1,8 +1,6 @@
 function spDist_modelCompare(subj,sess,ROIs)
-% GAT data loaded here, _GATdist_fig5TPTS, was created with the script
-% spDist_channelRespAmp_GAT_suppFigure5
-% and the tpts delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12];
-%root = '/share/data/spDist/';
+% NOTE: LORO data must already be generated to run this script. see
+% spDist_channelRespAmp_GAT.m to generate (can take ~24 hours)
 root = spDist_loadRoot;
 
 task_dir = 'spDist';
@@ -24,7 +22,7 @@ if nargin < 3 || isempty(ROIs)
 end
 
 
-save_stats = 0; %gh change 
+save_stats = 0; 
 
 func_suffix = 'surf';
 
@@ -145,7 +143,6 @@ for yy = 1:length(n_files)
             else
                 
                 fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_epochTPTS_gh.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
-                %fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
                 
                 fprintf('loading %s...\n',fn);
                 data = load(fn);
@@ -228,7 +225,7 @@ for yy = 1:length(n_files)
         
     end
 end
-%% supp Figure 5B
+%% Figure 6B
 %plot only like trn/tst combinations
 
 trn_epoch =[1 2 3];
@@ -239,7 +236,7 @@ cond_colors = [ 0 0 1; 0 0 1; 0 0 1];
 
 
 for pg=1:length(gat_align) % can be length 1 - target aligned recon or length 2, targ aling and dist align. for now, need only target
-    figure ('Name','trnlines')
+    figure ('Name','trnlines;Figure6C')
     
     for vv = 1:length(ROIs)
         
@@ -327,7 +324,7 @@ match_xlim(get(gcf,'Children'));
 
 
 
-%% supp Figure 5C
+%% Figure 6C - old ver
 %plot matched trn/tst GAT fidelty data, on same plot, plot independently trained fidelity data
 % plot fidelity plotting TRAIN as dv
 % which tpts are we plotting throughout?
@@ -401,7 +398,7 @@ for n_files =1:2 % looping over separatee data types
                     clear my_sem
                 end
                 
-                %geh pausing on this
+                
                                 if plot_indiv == 1
                                     plot([1 2 3]+hoffset,[squeeze(thisd(1,1,:)) squeeze(thisd(2,2,:)) squeeze(thisd(3,3,:))],'-','LineWidth',0.25,'Color',[0.4 0.4 0.4]);
                                     hold on;
@@ -503,8 +500,7 @@ legend(h, 'LORO  model', 'Ind Model')
 model_cond = [1 2]; 
 
 
-
-figure;
+figure('name','Figure6D');
 for vv = 1:length(ROIs)
     subplot(1,length(ROIs),vv); hold on;
 

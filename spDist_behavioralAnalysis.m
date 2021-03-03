@@ -14,7 +14,7 @@ root = spDist_loadRoot;
 
 %load raw subject data 
 
-scatterplot_1BC = 0; % plot portions of figure that take quite a while? y/n 
+scatterplot_1BC = 1; % plot portions of figure that take quite a while? y/n 
 
 WHICH_EXCL = [13 20 21 22]; % use all exclusion criteria
 if ismember(WHICH_EXCL,13)
@@ -342,7 +342,8 @@ if scatterplot_1BC ==1
 %% Figure 1B : Example participant eye-trace 
 
 dist_colors = [0.7100 0.2128 0.4772; 0 0 1;]; %1 is red, no distractor, 2 is blue (near distractor), 3 is green (far distractor)
-figure;
+
+figure('name','Figure1B');
 hold on;
 xdat_to_plot = [1 2 3 4 5 6 7 8 9 10]; % these are the annotations from our eye-data output, marking the distinct epochs of the task
 dist_cond =[1 2];
@@ -432,7 +433,7 @@ ylabel('Eye position (DVA)');
 
 dist_colors = spDist_condColors; % 1= RED = no distractor; 2 =blue = DISTRACTOR
 
-figure;
+figure('name','Figure1C');
 params_of_interest= {'f_sacc'}; % what fields do we want to plot?
 
 dist_bins = [1 2]; %1 = no dist, 2 = dist 
@@ -495,7 +496,7 @@ param_str = {'final sacc'};
 cond_colors = spDist_condColors;  %red, blue
 cond_str = {'Distractor Absent','Distractor Present'};
 
-figure;
+figure('name','Figure1D');
 
 for pp = 1:length(params_of_interest) 
     
@@ -556,7 +557,7 @@ param_str = {'RT'};
 cond_colors = spDist_condColors;
 cond_str = {'Distractor Absent','Distractor Present'};
 
-figure;
+figure('name','Figure1E');
 
 for pp = 1:length(params_of_interest)
     

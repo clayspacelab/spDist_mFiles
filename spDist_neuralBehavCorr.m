@@ -306,7 +306,7 @@ for pp =1:length(params_of_interest)
     end
 end
 
-figure;
+figure('Name','Bias;Figure7A');
 
 for pp = 1:length(params_of_interest)
     
@@ -335,7 +335,7 @@ text(max(xlim)-(.2*max(xlim)),max(ylim)-(.1*max(ylim)),sprintf('p = %.3f',p_bias
 
 match_ylim(get(gcf,'Children'));
 set(gcf,'position',[ 549   724   499   571])
-%% Figure 5 B & C
+%% Figure 6 B & C
 
 rho_group_theta = nan(length(cond),length(ROIs),1);
 pval_group_theta = nan(length(cond),length(ROIs),1);
@@ -343,7 +343,7 @@ rho_theta = nan(length(subj),length(ROIs),1);
 pval_theta = nan(length(subj),length(ROIs),1);
 subj_col = lines(7);
 
-figure 
+figure('Name','individ subj;Figure7B');
 
 for ss = 6 % 1:length(subj)
     hold on;
@@ -400,9 +400,9 @@ end
 
  
 
-%% figure  5c 
+%% figure  7C
 
-fish_theta_fig =  figure('Name','fish_theta');
+fish_theta_fig =  figure('Name','fish_theta;Figure7C');
 store_fish_ztheta= [];
 pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
@@ -692,8 +692,8 @@ end
 
 fprintf('done')
  
-fn2s = sprintf('%s/%s_corr/neurbehcorr_concatROIs_fsacc_%iiterperm_%s.mat',root,task_dir,iter,datestr(now,'mmddyyyyHHMM'));
-save(fn2s);
-fprintf('saving to %s...\n',fn2s);
+% fn2s = sprintf('%s/%s_corr/neurbehcorr_concatROIs_fsacc_%iiterperm_%s.mat',root,task_dir,iter,datestr(now,'mmddyyyyHHMM'));
+% save(fn2s);
+% fprintf('saving to %s...\n',fn2s);
 end
 

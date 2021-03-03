@@ -359,7 +359,7 @@ sig_offset = 0.1; % how far to move significant points
 
 %mu_fidelity = nan(length(ROIs),size(all_fidelity,2),4); % ROIs x tpts x targ w/ and w/out distractor; distractor; with-distractor after removing distractor...
 
-figure;
+figure('name','Figure4DE');
 % first, plot the target fidelity
 for vv = 1:length(ROIs)
     

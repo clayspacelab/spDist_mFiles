@@ -333,7 +333,7 @@ mh = nan(length(ROIs),length(t_markers));
 
 condstr = {'Dist Absent','Dist Present'}; 
 
- figure;
+figure('name','Figure2A');
 for cc = 1:length(cu)
    
 for vv = 1:length(ROIs)

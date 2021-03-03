@@ -155,7 +155,7 @@ cu = [1 2];
 dist_colors = spDist_condColors;%     [0.7100 0.2128 0.4772; 0 0 1;]; %first is RED, second is blue, beware its opposite matlab (lines(2)). this color scheme is in alignment w precue colors in actual exp (mag - mgs, cyan -dist)
 cond_colors = dist_colors;
 
-reconcomp = figure('name','reconcomp');
+reconcomp = figure('name','reconcomp; Figure5A');
 
 for dd = 1:length(delay_tpts)
     for vv = 1:length(ROIs)
@@ -365,7 +365,7 @@ thisd_store =[];
 plot_indiv = 1; % if 1, plot individual subj lines in line plot, otherwise, don't.
 hoffset = 0.15; % +/- this much 
 
-fidlines =  figure('Name','Fidelity lines');
+fidlines =  figure('Name','Fidelity lines; Figure5B');
 
 h=[];
 
