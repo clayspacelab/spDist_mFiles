@@ -16,18 +16,16 @@ function spDist_plotReconstructions_thruTime(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
+
 task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
-    subj = {'CC','KD','AY','MR','XL','SF','EK'};
-    %subj = {'XL'};
+    subj = {'CC','KD','AY','MR','XL','EK','SF'};
 end
 
 if nargin < 2 || isempty(sess)
     % each subj gets one cell, with strings for each sess
-    % TODO: automate...
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-    %sess = {{'spDist1','spDist2'},}
 end
 
 if nargin < 3 || isempty(ROIs)

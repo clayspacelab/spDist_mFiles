@@ -20,21 +20,19 @@ trn_dir = 'wmChoose';
 trn_sess = 'MGSMap'; % files to load for training
 
 root =  spDist_loadRoot;
-%trn_root = sprintf('%s/../wmChoose_scanner/',root);
-%trn_root = sprintf('%s/../../datb/wmChoose_scanner/',root)
-% FUCKING datb/data makes this not work...just use super-absolute path here
-trn_root = '/deathstar/datb/wmChoose_scanner';
 
-if nargin < 1
+trn_root = sprintf('%s/../wmChoose_scanner',root);%/deathstar/datb/wmChoose_scanner';
+
+if nargin < 1 || isempty(subj)
     subj = {'AY','CC','EK','KD','MR','SF','XL'};
         
 end
-if nargin < 2
+if nargin < 2 || isempty(sess)
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
     
 end
 
-if nargin < 3
+if nargin < 3 || isempty(ROIs)
     ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
     
 end
@@ -389,7 +387,7 @@ for ss = 1:length(subj)
         end
         fprintf('saving to %s...\n',fn2s);
         
-        save(fn2s,'c_all','r_all','p_all','n_chan','delay_tpts','angs','recons','recons_raw','recons_nodist','chan_resp','w_all','which_vox','sess_all','these_vox','a_all','fn_trn');
+     %   save(fn2s,'c_all','r_all','p_all','n_chan','delay_tpts','angs','recons','recons_raw','recons_nodist','chan_resp','w_all','which_vox','sess_all','these_vox','a_all','fn_trn');
         
         clear data c_all r_all p_all chan_resp w_all recons a_all;
         

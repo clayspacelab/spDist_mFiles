@@ -64,8 +64,7 @@ end
 extrial_dist   = 297;
 extrial_nodist = 175;
 
-figure;
-
+figure('name','Figure3B');
 
 subplot(1,2,1);
 hold on;

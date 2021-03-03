@@ -25,16 +25,12 @@
 
 root = spDist_loadRoot;   % '/Volumes/data/wmChoose_scanner/';
 
-subj = {'AY','CC','EK','KD','MR','XL','SF'};
-%subj = {'CC','AY'};
+
+subj = {'AY','CC','EK','KD','MR','SF','XL'};
 sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-%sess = {{'spDist1','spDist2'},{'spDist1','spDist2'}};
 
-
-ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
-%ROIs = {'V1','V2','V3'};
-%ROIs = {'V1','V2','V3','V3AB','hV4','VO1','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS'}; % for VSS, drop iPCS and VO2, those regions are missing significant representations in some subj
-%ROIs = {'V1','V3AB','VO1','LO1','TO1','IPS0','IPS2','sPCS'};
+ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+% ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
 func_suffix = 'surf';
 
 cat_mode = 1; % if 1, look for catSess1Ses...SessN_ files, otherwise, just look for each session in turn
@@ -170,12 +166,9 @@ end
 %% which tpts are we plotting throughout?
 tpts_to_plot = (tpts*myTR) >= t_range_to_plot(1) & (tpts*myTR) < t_range_to_plot(2);
 
-
-
-
 %% FIDELITY: compute mean for each subj
 
-%addpath /Volumes/home/tommy/Documents/MATLAB/toolboxes/resampling_statistical_toolkit/statistics; % make sure we're not using vista's FDR
+% TODO: only do stats correction over tpts_to_plot
 
 % condition label; which fidelity/recon to sort by
 conds_of_interest = [1 1;   % no distractor (WM target)
@@ -222,7 +215,7 @@ for cc = 1:size(conds_of_interest,1)
             shuf_data = nan(length(subj),n_shuf_iter);
             real_data = nan(length(subj),1);
             for ss = 1:length(subj)
-                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==conds_of_interest(cc,1);
+                thisidx = all_subj==ss & all_ROIs==vv & all_conds(:,1)==conds_of_interest(cc,1); %& all_conds(:,6)==0; %(all_conds(:,6)==1 | all_conds(:,6)==-1); %CATCH
                 shuf_data(ss,:) = squeeze(mean(all_fidelity_shuf{conds_of_interest(cc,2)}(thisidx,tpt_idx,:),1));
                 real_data(ss) = mean(all_fidelity{conds_of_interest(cc,2)}(thisidx,tpt_idx));
                 all_ci{cc}(vv,tpt_idx,ss) = prctile(squeeze(mean(all_fidelity_shuf{conds_of_interest(cc,2)}(thisidx,tpt_idx,:),1)),ci_level);
@@ -333,7 +326,7 @@ for cc = 1:size(conds_of_interest,1)
             clear this_crossing this_tpts;
         end
     end
-    sgtitle(cond_str{cc});
+%    sgtitle(cond_str{cc});
 end
 
 
@@ -349,16 +342,24 @@ end
 cond_group = {[1 2], 3}; % what to put on same axes
 
 % target: without and with distractor; distractor
-fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
+%fidelity_colors = lines(7); fidelity_colors = fidelity_colors(4:6,:);
+tmpcolors = lines(7);
+fidelity_colors = [spDist_condColors; tmpcolors(6,:)];
+clear tmpcolors;
 
 t_markers = [0 4.5 12]; % onset of delay, distractor, response
+
+if ismember(sess{1},{'spDistLong1','spDistLong2'})
+    t_markers = [0 4.5 10 16]; %updated distractor off 
+else
+end
 mh = nan(length(ROIs),length(t_markers),length(cond_group));
 
 sig_offset = 0.1; % how far to move significant points
 
 %mu_fidelity = nan(length(ROIs),size(all_fidelity,2),4); % ROIs x tpts x targ w/ and w/out distractor; distractor; with-distractor after removing distractor...
 
-figure;
+figure('name','Figure4DE');
 % first, plot the target fidelity
 for vv = 1:length(ROIs)
     
@@ -375,10 +376,10 @@ for vv = 1:length(ROIs)
             thise = std(thisd,[],1)/sqrt(length(subj));
             
             % plot mean
-            plot(myTR*tpts,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cond_group{gg}(cc),:));
+            plot(myTR*tpts + myTR/2,mean(thisd,1),'-','LineWidth',1.5,'Color',fidelity_colors(cond_group{gg}(cc),:));
             
             % plot error bars
-            plot((myTR*tpts.*[1;1]).',(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cond_group{gg}(cc),:));
+            plot((myTR*tpts.*[1;1]).' + myTR/2,(mean(thisd,1)+[-1;1].*thise).','--','LineWidth',1,'Color',fidelity_colors(cond_group{gg}(cc),:));
             
             % plot CI of mean (from shuffled data)
             %plot((myTR*tpts.*[1;1]).',all_mu_ci{cc}(vv,:),'--','LineWidth',1,'Color',[0.5 0.5 0.5]);
@@ -394,9 +395,9 @@ for vv = 1:length(ROIs)
             end
             
             if gg ~= length(cond_group)
-                set(gca,'XTick',[0:6:24],'TickDir','out','XTickLabel',[]);
+                set(gca,'XTick',[0 4.5 12],'TickDir','out','XTickLabel',[]);
             else
-                set(gca,'XTick',[0:6:24],'TickDir','out');
+                set(gca,'XTick',[0 4.5 12],'TickDir','out');
             end
             
             
@@ -406,10 +407,10 @@ for vv = 1:length(ROIs)
             this_tnd_tpts(this_tnd_tpts & this_sig_tpts) = 0; % to avoid double-marking...
             
             if any(this_tnd_tpts)
-                plot((myTR*tpts(this_tnd_tpts==1)),-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor','w','MarkerSize',3);
+                plot((myTR*tpts(this_tnd_tpts==1)) + myTR/2,-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor','w','MarkerSize',3);
             end
             if any(this_sig_tpts)
-                plot((myTR*tpts(this_sig_tpts==1)),-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor',fidelity_colors(cond_group{gg}(cc),:),'MarkerSize',3);
+                plot((myTR*tpts(this_sig_tpts==1)) + myTR/2,-0.25-cc*sig_offset,'o','Color',fidelity_colors(cond_group{gg}(cc),:),'MarkerFaceColor',fidelity_colors(cond_group{gg}(cc),:),'MarkerSize',3);
             end
             clear thisd thise;
         end
@@ -422,9 +423,9 @@ end
 
 myy = match_ylim(get(gcf,'Children'));
 set(mh(:),'YData',[min(myy(:,1)) max(myy(:,2))]);
-
+set(gcf,'Position',[109   372   989   168]); %for concat ROIs
 set(gcf,'Position',[185         745        1843         470]);
-
+set(gcf,'Position',[109  372 1843 470]);
 
 % NOTE: other aspects of plotting from MGSMap_fidelity_stats_shuf.m were
 % not edited, so can be copied/pasted from that file if desired

@@ -2,21 +2,26 @@ function spDist_plotEyeData(subj,sess,WHICH_EXCL)
 
 
 root = spDist_loadRoot;
+root = '/share/data/spDist/'
 
 if nargin < 1
-    subj = {'KD','CC','AY','MR','XL'};
+    %subj = {'CC','MR','AY'};
+          subj = {'KD','CC','AY','MR','XL','EK','SF'};
+
 end
 %subj = {'CC'};
 if nargin < 2
     % TODO: if no defined sessions, use all....
-    sess_template = {'spDist1','spDist2'};
-    sess = cell(length(subj),1); for ss = 1:length(subj); sess{ss} = sess_template; end 
-    clear sess_template
-    %sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+  % sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist2'}}
+   %sess = {{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'},{'spDistLong1','spDistLong2'}};
+    %sess_template = {'spDist1','spDist2'};
+    %sess = cell(length(subj),1); for ss = 1:length(subj); sess{ss} = sess_template; end 
+    %clear sess_template
+    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
 end
 
 if nargin < 3
-    WHICH_EXCL = [13 20 21 22]; % don't exclude trials w/ calibration failures for now...
+    WHICH_EXCL = [13 20 22]; % don't exclude trials w/ calibration failures for now...
     %WHICH_EXCL = [20 21 22]; % don't exclude trials w/ calibration failures for now...
 end
 
@@ -100,8 +105,8 @@ for ss = 1:length(subj)
     thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==1 & all_data.use_trial==1;
     for pp = 1:length(params_of_interest)
         % distractor bin x param x [radial; tangential] x subj
-        tmp_err(1,pp,:,ss) = std( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
-        tmp_mu(1,pp,:,ss)  = mean( all_data.s_all.(params_of_interest{pp})(thisidx,:), 1 );
+        tmp_err(1,pp,:,ss) = nanstd( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
+        tmp_mu(1,pp,:,ss)  = nanmean( all_data.s_all.(params_of_interest{pp})(thisidx,:), 1 );
     end
 end
 
@@ -118,8 +123,8 @@ for ss = 1:length(subj)
         thisidx = all_subj==ss & all_data.s_all.trialinfo(:,1)==2 & all_data.use_trial==1 & all_data.s_all.trialinfo(:,6)==distractor_bins(bb);
         for pp = 1:length(params_of_interest)
             % distractor bin x param x [radial; tangential] x subj
-            tmp_err(bb,pp,:,ss) = std( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
-            tmp_mu(bb,pp,:,ss) = mean( all_data.s_all.(params_of_interest{pp})(thisidx,:),  1 );
+            tmp_err(bb,pp,:,ss) = nanstd( all_data.s_all.(params_of_interest{pp})(thisidx,:), [], 1 );
+            tmp_mu(bb,pp,:,ss) = nanmean( all_data.s_all.(params_of_interest{pp})(thisidx,:),  1 );
 
         end
     end
@@ -152,14 +157,14 @@ for pp = 1:length(params_of_interest)
     end
     
     xlim([0 length(all_err)+1]);
-    ylim([0 2.5]);
+   % ylim([0 2.5]);
     set(gca,'XTick',1:length(all_err),'XTickLabel',cond_str','XTickLabelRotation',-45,'TickDir','out');
     xlabel('Condition');
     if pp == 1
         ylabel('Precision (avg std dev, \circ)');
     end
     title(param_str{pp});
-    ylim([0 2]);
+    ylim([0 2.5]);
 end
 
 
