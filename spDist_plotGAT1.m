@@ -36,7 +36,7 @@ for ss = 1:length(subj)
         
             
             % just one file to load
-            fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_fig5.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
+            fn = sprintf('%sspDist_reconstructions/%s_%s_%s_%s_%ichan%s_GATdist_gh.mat',root,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,nchan,vox_str);
             
             fprintf('loading %s...\n',fn);
             data = load(fn);

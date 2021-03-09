@@ -132,7 +132,7 @@ for ss = 1:length(subj)
             %%%inserting 
             for sessidx = 1:length(sess{ss})
               
-                fn = sprintf('%s/spDist_behav_92220/%s_%s_scored.mat',root,subj{ss},sess{ss}{sessidx});
+                fn = sprintf('%s/spDist_behav/%s_%s_scored.mat',root,subj{ss},sess{ss}{sessidx});
                 %fprintf('Loading scored eye data from %s\n',fn);
                 this_scored = load(fn);
                 this_data.s_all = this_scored.ii_sess;

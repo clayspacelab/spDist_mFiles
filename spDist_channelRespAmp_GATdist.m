@@ -12,20 +12,21 @@ function spDist_channelRespAmp_GATdist(subj,sess,ROIs,which_vox)
 
 tst_dir = 'spDist';
 
-root = '/share/data/spDist/'
-%root =  spDist_loadRoot;
+root =  spDist_loadRoot;
 
 if nargin < 1
    subj = {'AY','CC','EK','KD','MR','SF','XL'};
-        
+   
 end
 if nargin < 2
  sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};    
+
 end
 
 if nargin < 3
    % ROIs = {'V1','V2','V3','V3AB','hV4','VO1','VO2','LO1','LO2','TO1','TO2','IPS0','IPS1','IPS2','IPS3','sPCS','iPCS'};
     ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+  
 end
 
 
@@ -300,9 +301,9 @@ for ss = 1:length(subj)
         % save with VE marker when which_vox < 1, otherwise, number of
         % vox
         if which_vox < 1
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_allTPTs.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_VE%03.f_GATdist_gh.mat',root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,100*which_vox);
         else
-            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_allTPTs.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
+            fn2s = sprintf('%s/%s_reconstructions/%s_%s_%s_%s_%ichan_%ivox_GATdist_gh.mat'  ,root,tst_dir,subj{ss},horzcat(sess{ss}{:}),ROIs{vv},func_suffix,n_chan,    which_vox);
         end
         fprintf('saving to %s...\n',fn2s);
         
