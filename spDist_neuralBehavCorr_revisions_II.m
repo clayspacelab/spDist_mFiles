@@ -1,4 +1,4 @@
-function spDist_neuralBehavCorr(subj,sess,ROIs)
+function spDist_neuralBehavCorr_revisions_II(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -13,8 +13,8 @@ end
 
 if nargin < 2 || isempty(sess)
 
-    sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-  % sess = {{'spDist1','spDist2'}};
+  sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
+ % sess = {{'spDist1','spDist2'}};
 
 
 end
@@ -164,8 +164,11 @@ fprintf('neural and behave loaded...\n')
 
 all_recons_noflip = all_recons{1}; % simply reiterate, we are NOT flipping a thing 
 
+%delay_tpt_range = [0 .75; .75 1.5; 1.5 2.25; 2.25 3;3 3.75; 3.75 4.5;4.5 5.25; 5.25 6; 6 6.75; 6.75 7.5; 7.5 8.25; 8.25 9; 9 9.75; 9.75 10.5; 10.5 11.25; 11.25 12];
+%delay_tpt_range = [0 1.5; 1.5 3; 3 4.5;4.5  6; 6  7.5; 7.5  9; 9  10.5; 10.5  12];
 
-delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; %updated on nov 092020
+delay_tpt_range = [0 1.5;.75 2.25; 1.5 3; 2.25 3.75; 3 4.5; 3.75 5.25; 4.5 6; 5.25 6.75;6 7.5; 6.75 8.25;7.5  9; 8.25  9.75; 9 10.5; 9.75 11.25; 10.5 12]; 
+%delay_tpt_range = [3.75 5.25; 8.25 9.75; 10.5 12]; %updated on nov 092020
 %delay_tpt_range = [3.75 5.25; 8.25 9.75; 12 13.5] %test
 myTR = 0.75;
 
@@ -202,17 +205,29 @@ for cc= 1:length(cond)
             nruns = nruns+length(ru);
             for nr =1:nruns
                 if cc ==1 %%%%%% NOTE THIS COLLECTS THREE TRIALS IN MGS CONDITION %%%% NEED TO FIX!!!!
-                    thisidx = all_data_beh.use_trial==1 &  all_r ==ru(nr) & all_subj==ss & all_ROIs==vv & all_conds(:,1)==1;
+                    tmpidx = all_data_beh.use_trial==1 &  all_r ==ru(nr) & all_subj==ss & all_ROIs==vv & all_conds(:,1)==1;
+                    if sum(tmpidx) > 0
+                       a = find(tmpidx); 
+                       %b = randperm(length(find(tmpidx)));
+                       %c = a(b);
+                       thisidxtmp = zeros(length(tmpidx),1); 
+                       thisidxtmp(a(1))=1; 
+                       thisidx = thisidxtmp ==1;
+                    else
+                   thisidx = all_data_beh.use_trial==1 &  all_r ==ru(nr) & all_subj==ss & all_ROIs==vv & all_conds(:,1)==1; 
+                        
+                    end
+                
                 else
                     thisidx = all_data_beh.use_trial==1 &  all_r ==ru(nr) & all_subj==ss & all_ROIs==vv & all_conds(:,1)==2 & all_conds(:,6)==0 ;
                 end
                 
                 thisd(cc,vv,dd,ss,nr,:) = squeeze(mean(mean(all_recons_noflip(thisidx,:,delay_tpts{dd}),1),3));
                 
-                thisb(ss) = atan2d(sum(mean(mean(all_recons_noflip(thisidx,:, delay_tpts{dd}),1),3).*sind(angs)),...
+                thisb = atan2d(sum(mean(mean(all_recons_noflip(thisidx,:, delay_tpts{dd}),1),3).*sind(angs)),...
                     sum(mean(mean(all_recons_noflip(thisidx,:,delay_tpts{dd}),1),3).*cosd(angs)));
                 
-                store_b(cc,vv,dd,ss,nr) = thisb(ss);
+                store_b(cc,vv,dd,ss,nr) = thisb; %(ss);
 
             end
         end
@@ -254,7 +269,18 @@ for cc = 1:length(cond)
         for nr = 1:nruns
             
             if cc ==1
-                thisorigidx = all_data_beh.use_trial==1 &  all_ROIs ==1 & all_r==ru(nr) & all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==1;
+                tmpidx= all_data_beh.use_trial==1 &  all_ROIs ==1 & all_r==ru(nr) & all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==1;
+                if sum(tmpidx) > 0
+                    a = find(tmpidx);
+                    %b = randperm(length(find(tmpidx)));
+                    %c = a(b);
+                    thisidxtmp = zeros(length(tmpidx),1);
+                    thisidxtmp(a(1))=1;
+                    thisorigidx = thisidxtmp ==1;
+                else
+                    thisorigidx= all_data_beh.use_trial==1 &  all_ROIs ==1 & all_r==ru(nr) & all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==1;
+                end
+            
             else
                 thisorigidx = all_data_beh.use_trial==1 &  all_ROIs ==1 & all_r==ru(nr) & all_subj==ss & all_data_beh.s_all.trialinfo(:,1)==2  & all_data_beh.s_all.trialinfo(:,6)==0;                
             end
@@ -412,7 +438,7 @@ end
 
  
 
-%% figure  7C
+%% figure  7C - OG
 
 fish_theta_fig =  figure('Name','fish_theta;Figure7C');
 store_fish_ztheta= [];
@@ -498,6 +524,184 @@ end
 end 
 
 
+%% figure  7C - new, with mgs 
+
+fish_theta_fig =  figure('Name','fish_theta;test');
+store_fish_ztheta= [];
+pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+fish_z_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+
+figure
+for cc = 1:length(cond)
+    
+for vv=1:length(ROIs)
+    
+    for dd = 1:length(delay_tpts)
+        
+    for ss = 1:length(subj)
+        
+        thisb_neural_tmp = [];
+        thisb_behav_tmp = [];
+        thisb_neural = [];
+        thisb_behav = [];
+        thisb_behav_poldegtmp =[];
+        thisb_behav_polradtmp =[];
+        thisb_behav_poldeg =[];
+        thisb_behav_polrad =[];
+        
+        thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+        thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+        thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+        
+        
+        thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
+        thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); % OG
+       %thisb_neural_poldeg = thisb_neural_tmp(~isnan(thisb_behav_poldegtmp));
+        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));  % OG %
+        %thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_poldegtmp)); 
+
+        [rho_sg(cc,ss,vv,dd), pval_sg(cc,ss,vv,dd)] = corr(thisb_neural', thisb_behav');
+
+        fish_z(cc,ss,vv,dd)  = atanh(rho_sg(cc,ss,vv,dd));
+
+       [rho_sg_theta(cc,ss,vv,dd), pval_sg_theta(cc,ss,vv,dd)]=corr(thisb_neural', thisb_behav_poldeg'); %OG %
+        % [rho_sg_theta(cc,ss,vv,dd), pval_sg_theta(cc,ss,vv,dd)] =corr(thisb_neural_poldeg', thisb_behav_poldeg');
+        fish_z_theta(cc,ss,vv,dd)  = atanh(rho_sg_theta(cc,ss,vv,dd)); % identical
+        store_fish_ztheta = [store_fish_ztheta; atanh(rho_sg_theta(cc,ss,vv,dd)) cc ss vv dd ];
+        clear mysd
+    end
+
+%     
+    subplot(1,length(ROIs),vv)
+    hold on;
+    plot(dd+0.15,fish_z_theta(cc,:,vv,dd),'o','MarkerSize',4,'Markerfacecolor',dist_colors(cc,:), 'Color',dist_colors(cc,:));
+    hold on;
+    my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
+    plot(dd,mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',10)
+    plot(dd*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',2)
+    title(ROIs{vv})
+    ylim([-1 1])
+    xlim([0 length(delay_tpts)+1])
+    line([1 16], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-') % geh add y =0 baseline 
+
+    if vv==1
+    %set(gca,'Xtick',[0 length(delay_tpts)+1],'Xticklabel',{'','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16',''},'XTickLabelRotation',45,'TickDir','out');
+    ylabel('Fisher Z-transformed Rho')
+    xlabel('TR')
+    else
+    set(gcf,'position',[ 549   724   499   571])
+    end 
+    
+    [h_th,p_th(cc,vv,dd),~,stats_th] = ttest(fish_z_theta(cc,:,vv,dd));
+    realT_th(cc,vv,dd) = stats_th.tstat;
+    
+%     
+%    [p_th(cc,vv,dd),~,stats_th] = signrank(fish_z_theta(cc,:,vv,dd));
+%    realT_th(cc,vv,dd) = stats_th.signedrank;
+   
+%       [p_th(cc,vv,dd),~,stats_th] = signrank(rho_sg_theta(cc,:,vv,dd));
+%       realT_th(cc,vv,dd) = stats_th.signedrank;
+%     
+    
+
+     end
+
+end
+end 
+
+
+%% figure  7C - new
+
+fish_theta_fig =  figure('Name','fish_theta;test');
+store_fish_ztheta= [];
+pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+fish_z_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+my_xaxis = mean(delay_tpt_range,2); %take the middle of the delay tpt range we're using (since using two TRs just take mean)figure
+for cc = 2 %1:length(cond)
+    
+for vv=1:length(ROIs)
+    
+    for dd = 1:length(delay_tpts)
+        
+    for ss = 1:length(subj)
+        
+        thisb_neural_tmp = [];
+        thisb_behav_tmp = [];
+        thisb_neural = [];
+        thisb_behav = [];
+        thisb_behav_poldegtmp =[];
+        thisb_behav_polradtmp =[];
+        thisb_behav_poldeg =[];
+        thisb_behav_polrad =[];
+        
+        thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+        thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+        thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+        
+        
+        thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
+        thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); % OG
+       %thisb_neural_poldeg = thisb_neural_tmp(~isnan(thisb_behav_poldegtmp));
+        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));  % OG %
+        %thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_poldegtmp)); 
+
+        [rho_sg(cc,ss,vv,dd), pval_sg(cc,ss,vv,dd)] = corr(thisb_neural', thisb_behav');
+
+        fish_z(cc,ss,vv,dd)  = atanh(rho_sg(cc,ss,vv,dd));
+
+       [rho_sg_theta(cc,ss,vv,dd), pval_sg_theta(cc,ss,vv,dd)]=corr(thisb_neural', thisb_behav_poldeg'); %OG %
+        % [rho_sg_theta(cc,ss,vv,dd), pval_sg_theta(cc,ss,vv,dd)] =corr(thisb_neural_poldeg', thisb_behav_poldeg');
+        fish_z_theta(cc,ss,vv,dd)  = atanh(rho_sg_theta(cc,ss,vv,dd)); % identical
+        store_fish_ztheta = [store_fish_ztheta; atanh(rho_sg_theta(cc,ss,vv,dd)) cc ss vv dd ];
+        clear mysd
+    end
+
+% % OG    
+    subplot(1,length(ROIs),vv)
+%     hold on;
+%     plot(dd+0.15,fish_z_theta(cc,:,vv,dd),'o','MarkerSize',4,'Markerfacecolor',dist_colors(cc,:), 'Color',dist_colors(cc,:));
+     hold on;
+    my_sem_th = std(fish_z_theta(cc,:,vv,dd))/sqrt(length(subj));
+    plot(my_xaxis(dd),mean(fish_z_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',10)
+    plot(my_xaxis(dd)*[1 1],[mean(fish_z_theta(cc,:,vv,dd))+1.*my_sem_th, mean(fish_z_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',2)
+%    
+%     my_sem_th = std(rho_sg_theta(cc,:,vv,dd))/sqrt(length(subj));
+%     plot(my_xaxis(dd),mean(rho_sg_theta(cc,:,vv,dd)), 'o', 'color',dist_colors(cc,:),'markerfacecolor',dist_colors(cc,:),'markersize',10)
+%     plot(my_xaxis(dd)*[1 1],[mean(rho_sg_theta(cc,:,vv,dd))+1.*my_sem_th, mean(rho_sg_theta(cc,:,vv,dd))-1.*my_sem_th], '-', 'color',dist_colors(cc,:),'linewidth',2)
+%    
+title(ROIs{vv})
+    ylim([-0.2 0.5])
+    xlim([0 max(my_xaxis)+1])
+    line([0 max(xlim)], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-') % geh add y =0 baseline 
+
+    if vv==1
+    set(gca,'Xtick',[my_xaxis],'XticklabelRotation',45,'TickDir','out');
+    ylabel('Fisher Z-transformed Rho')
+    % ylabel('Rho')
+    xlabel('Time (s)')
+    else
+        set(gca,'Xtick',[0 4.5 12],'TickDir','out');
+    set(gcf,'position',[ 549   724   499   571])
+    end 
+    
+    [h_th,p_th(cc,vv,dd),~,stats_th] = ttest(fish_z_theta(cc,:,vv,dd));
+    realT_th(cc,vv,dd) = stats_th.tstat;
+    
+%     
+%    [p_th(cc,vv,dd),~,stats_th] = signrank(fish_z_theta(cc,:,vv,dd));
+%    realT_th(cc,vv,dd) = stats_th.signedrank;
+   
+%       [p_th(cc,vv,dd),~,stats_th] = signrank(rho_sg_theta(cc,:,vv,dd));
+%       realT_th(cc,vv,dd) = stats_th.signedrank;
+%     
+    
+
+     end
+
+end
+end 
 
 
 %%

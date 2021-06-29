@@ -32,10 +32,9 @@ end
 
 if nargin < 3 || isempty(ROIs)
     % all ROIs
-    % ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
-    %  ROIs = {'V1','V2','V3','V3AB','IPS0','IPS1','IPS2','IPS3','sPCS'};
+
     ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
-    %ROIs = {'V1V2V3','V3AB','IPS0IPS1','IPS2IPS3','sPCS'};
+ 
 end
 
 
@@ -53,7 +52,7 @@ end
 do_stats = 0;
 
 % inspect # voxels?
-make_vox_plot = 0;
+make_vox_plot = 1;
 
 % if so, save them?
 save_stats = 0; 
@@ -109,6 +108,16 @@ for ss = 1:length(subj)
                 
                 all_hrfs_in = nan(nblank,size(data.dt_all,3));
                 all_hrfs_out = nan(nblank,size(data.dt_all,3));
+                
+                all_vox_in = nan(nblank,1);
+                all_vox_out = nan(nblank,1);
+                
+                
+                all_vox_in_ecc = nan(nblank,1);
+                all_vox_out_ecc = nan(nblank,1);
+                
+                all_vox_in_sigma = nan(nblank,1);
+                all_vox_out_sigma = nan(nblank,1);
 
                 all_conds = nan(nblank,size(data.c_all,2));
                 
@@ -149,6 +158,18 @@ for ss = 1:length(subj)
                 idx = thisidx(pp);
                 all_hrfs_in(idx,:) = squeeze(nanmean(data.dt_allz(pp,which_vox_in,:),2))';
                 all_hrfs_out(idx,:) = squeeze(nanmean(data.dt_allz(pp,which_vox_out,:),2))';
+                all_vox_in(idx,:) = sum(which_vox_in);
+                all_vox_out(idx,:) = sum(which_vox_out);
+                
+                all_vox_in_ecc(idx,:) = mean(data.rf.ecc(which_vox_in));
+             
+                
+                all_vox_out_ecc(idx,:) = mean(data.rf.ecc(which_vox_out));
+                
+                all_vox_in_sigma(idx,:) = mean(data.rf.sigma(which_vox_in));
+                all_vox_out_sigma(idx,:) = mean(data.rf.sigma(which_vox_out));
+                
+                all_vox_out(idx,:) = sum(which_vox_out);
                 clear pol_diff tmp_rel idx
                 
             end
@@ -283,7 +304,6 @@ subj_col =lines(7);
 myd = {};
 myd{1} = vox_inn;
 myd{2} = vox_outn;
-
 dplot = nan(360,1);
 d_store=[];
 
@@ -293,16 +313,23 @@ for ss=1:length(subj)
     for vv =1:length(ROIs)
         
         
-        dtmpi = squeeze(myd{1}(ss,:,vv,:))';
-        di = dtmpi(~isnan(dtmpi));
+        dtmpi = squeeze(myd{1}(ss,:,vv,:))'; 
+        di = dtmpi(~isnan(dtmpi)); % get rid of nans which exist bc of preallocation for runs length(max_runs)
+        %di = di(di~=0);
         dtmpo = squeeze(myd{2}(ss,:,vv,:))';
         do = dtmpo(~isnan(dtmpo));
+        %do = do(do~=0);
         
         figure(4)
         subplot(length(subj),length(ROIs),(ss-1)*length(ROIs)+vv);
         hold on;
-        imagesc([di(:) do(:)])
-        xlim([0 3])
+        plot(di(:),'r-')
+        plot(do(:),'b--')
+      %  imagesc([di(:) do(:)])
+        d_store =[d_store; mean(di) mean(do) ss vv ]
+        voxtxt = sprintf('\n%s %s %.3f in, %.3f out', ss, vv, mean(di),mean(do));
+        fprintf('%s\n',voxtxt);
+        %xlim([0 3])
         clear dtmpi dtmpo
         
         
@@ -321,6 +348,116 @@ end
 
 
 end
+
+store_mu_in = nan(length(subj),length(ROIs)) ;
+store_mu_out = nan(length(subj),length(ROIs));
+for vv=1:length(ROIs)
+    for ss = 1:length(subj)
+        idx = d_store(:,4)==vv & d_store(:,3)==ss;
+        store_mu_in(ss,vv) = d_store(idx,1);
+        store_mu_out(ss,vv) = d_store(idx,2);
+        
+    end
+end
+  
+
+if alignment == 'targ_ang_all';
+    
+    
+    subjvoxplot = figure('Name','subjvoxplot');
+    
+    store_vox =[];
+    
+    store_vox_ecc =[];
+    
+    store_vox_sigma =[];
+    for vv = 1:length(ROIs)
+        for ss =1:length(subj)
+            thisidx = all_subj ==ss & all_ROIs == vv ; % condition is irrelevant here
+            vin(vv,ss) = mean(all_vox_in(thisidx,:));
+            vout(vv,ss) = mean(all_vox_out(thisidx,:));
+            
+            vin_ecc(vv,ss) = nanmean(all_vox_in_ecc(thisidx,:));
+            vout_ecc(vv,ss) = nanmean(all_vox_out_ecc(thisidx,:));
+            
+            vin_sigma(vv,ss) = nanmean(all_vox_in_sigma(thisidx,:));
+            vout_sigma(vv,ss) = nanmean(all_vox_out_sigma(thisidx,:));
+            
+            figure(subjvoxplot)
+            subplot(length(subj),length(ROIs),(ss-1)*length(ROIs)+vv);
+            plot(all_vox_in(thisidx,:),'r-')
+            hold on;
+            plot(all_vox_out(thisidx,:),'b-')
+            if vv==1
+                ylabel(sprintf('%s',subj{ss}))
+                xlabel('Trial')
+            else
+            end
+            
+            if ss==1
+                title(ROIs{vv})
+            else
+            end
+            
+        end
+        
+        store_vox =[store_vox; mean(vin(vv,:)) mean(vout(vv,:)) vv];
+        store_vox_ecc =[store_vox_ecc; mean(vin_ecc(vv,:)) mean(vout_ecc(vv,:)) vv];
+        store_vox_sigma =[store_vox_sigma; mean(vin_sigma(vv,:)) mean(vout_sigma(vv,:)) vv];
+    end
+elseif alignment == 'dist_ang_all';
+    
+    
+    subjvoxplot = figure('Name','subjvoxplot');
+    
+    store_vox =[];
+    store_vox =[];
+    store_vox_ecc =[];
+    store_vox_sigma=[];
+    
+    for cc = 2 % need to isolate distractor only trials here, otherwise MGS will incorrectly populate
+        for vv = 1:length(ROIs)
+            for ss =1:length(subj)
+                thisidx = all_subj ==ss & all_ROIs == vv & all_conds(:,1)==cu(cc);
+                vin(cc,vv,ss) = mean(all_vox_in(thisidx,:));
+                vout(cc,vv,ss) = mean(all_vox_out(thisidx,:));
+                
+                 vin_ecc(vv,ss) = nanmean(all_vox_in_ecc(thisidx,:));
+                 vout_ecc(vv,ss) = nanmean(all_vox_out_ecc(thisidx,:));
+            
+                   vin_sigma(vv,ss) = nanmean(all_vox_in_sigma(thisidx,:));
+                 vout_sigma(vv,ss) = nanmean(all_vox_out_sigma(thisidx,:));
+                
+                figure(subjvoxplot)
+                subplot(length(subj),length(ROIs),(ss-1)*length(ROIs)+vv);
+                plot(all_vox_in(thisidx,:),'r-')
+                hold on;
+                plot(all_vox_out(thisidx,:),'b-')
+                if vv==1
+                    ylabel(sprintf('%s',subj{ss}))
+                    xlabel('Trial')
+                else
+                end
+                
+                if ss==1
+                    title(ROIs{vv})
+                else
+                end
+                
+            end
+            
+            store_vox = [store_vox; mean(vin(cc,vv,:)) mean(vout(cc,vv,:)) vv];
+            store_vox_ecc =[store_vox_ecc; mean(vin_ecc(vv,:)) mean(vout_ecc(vv,:)) vv];
+            store_vox_sigma =[store_vox_sigma; mean(vin_sigma(vv,:)) mean(vout_sigma(vv,:)) vv];
+        end
+    end
+    
+    
+    
+end
+
+
+    
 %% plot within dist condition & between RF condition
 HRF_str ={'RFin','RFout','RFin-out'};
 %HRF_str ={'RFin','RFout','RFin-out','RF mod'};
