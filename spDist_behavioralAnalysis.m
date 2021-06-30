@@ -14,7 +14,7 @@ root = spDist_loadRoot;
 
 %load raw subject data 
 
-scatterplot_1BC = 1; % plot portions of figure that take quite a while? y/n 
+scatterplot_1BC = 0; % plot portions of figure that take quite a while? y/n 
 
 WHICH_EXCL = [13 20 21 22]; % use all exclusion criteria
 if ismember(WHICH_EXCL,13)
@@ -50,7 +50,7 @@ startidx = 1;
 for ss = 1:length(subj)
     for sessidx = 1:length(sess{ss})
         
-        fn = sprintf('%s/spDist_behav_92220/%s_%s_scored.mat',root,subj{ss},sess{ss}{sessidx});
+        fn = sprintf('%s/spDist_behav/%s_%s_scored.mat',root,subj{ss},sess{ss}{sessidx});
         fprintf('Loading scored eye data from %s\n',fn);
         this_scored = load(fn);
         

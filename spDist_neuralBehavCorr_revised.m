@@ -1,4 +1,4 @@
-function spDist_neuralBehavCorr(subj,sess,ROIs)
+function spDist_neuralBehavCorr_revised(subj,sess,ROIs)
 
 root = spDist_loadRoot;
 
@@ -7,21 +7,20 @@ task_dir = 'spDist';
 
 if nargin < 1 || isempty(subj)
    subj = {'AY','CC','EK','KD','MR','SF','XL'}; %alph
- %subj = {'AY','CC','EK','KD','MR','SF','XL'};
- %subj = {'KD'};
+
 end
 
 if nargin < 2 || isempty(sess)
 
     sess = {{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'},{'spDist1','spDist2'}};
-  % sess = {{'spDist1','spDist2'}};
+     % sess = {{'spDist1','spDist2'}};
 
 
 end
 
 if nargin < 3 || isempty(ROIs)
- ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
- %ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
+ROIs = {'V1V2V3','V3AB','hV4','LO1','IPS0IPS1','IPS2IPS3','sPCS'};
+%ROIs = {'V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS'};
 end
 
 
@@ -350,15 +349,32 @@ pval_group_theta = nan(length(cond),length(ROIs),1);
 rho_theta = nan(length(subj),length(ROIs),1);
 pval_theta = nan(length(subj),length(ROIs),1);
 subj_col = lines(7);
-
-figure('Name','individ subj;Figure7B');
+quartfitlinesubj =  figure('Name','quartfitlinesubj');
+individsubjFigure7B = figure('Name','individsubjFigure7B');
 
 for ss = 6
     hold on;
     for cc = 2 %1:length(cond)
         
         for vv = 1:length(ROIs)
-            
+%                 behav_store = [];
+%                 neural_store = [];
+%         
+%                 quart1 = [];
+%                 quart2 = [];
+%                 quart3 = [];
+%                 quart4 = [];
+%                 
+% 
+%                 quart1_behav_store =  [];
+%                 quart2_behav_store =  [];
+%                 quart3_behav_store =  [];
+%                 quart4_behav_store =  [];
+%                 
+%                 quart1_neural_store =  [];
+%                 quart2_neural_store =  [];
+%                 quart3_neural_store =  [];
+%                 quart4_neural_store =  [];
             for dd = 3 %1:length(delay_tpts)
                 
                 thisb_neural_tmp =[];
@@ -377,7 +393,48 @@ for ss = 6
                 thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp));
                 thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp));
                 thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
-              
+                
+                % NEW 
+%                 prc = prctile(thisb_neural,[25.00 50.00 75.00],'all');
+%                 behav_store = [behav_store thisb_behav_poldeg];
+%                 neural_store = [neural_store thisb_neural];
+%         
+%                 quart1 = find(thisb_neural < prc(1));
+%                 quart2 = find(prc(1) <= thisb_neural  & thisb_neural < prc(2));
+%                 quart3 = find(prc(2) <= thisb_neural  & thisb_neural  < prc(3));
+%                 quart4 = find(thisb_neural >= prc(3));
+%                 
+% 
+%                 quart1_behav_store =  [quart1_behav_store thisb_behav_poldeg(quart1)];
+%                 quart2_behav_store =  [quart2_behav_store thisb_behav_poldeg(quart2)];
+%                 quart3_behav_store =  [quart3_behav_store thisb_behav_poldeg(quart3)];
+%                 quart4_behav_store =  [quart4_behav_store thisb_behav_poldeg(quart4)];
+%                 
+%                 quart1_neural_store =  [quart1_neural_store thisb_neural(quart1)];
+%                 quart2_neural_store =  [quart2_neural_store thisb_neural(quart2)];
+%                 quart3_neural_store =  [quart3_neural_store thisb_neural(quart3)];
+%                 quart4_neural_store =  [quart4_neural_store thisb_neural(quart4)];
+%                 %
+%                 figure(quartfitlinesubj)
+%                 hold on;
+%                 subplot(1,length(ROIs),vv)
+%                 plot(neural_store',behav_store','ko','markersize',5)
+%                 %lsline
+%                 %text(max(xlim)-(.8*max(xlim)),max(ylim)-(1.9*max(ylim)),sprintf('r = %.2f',rho_quart_super(cc,vv,dd)),'FontSize',14)
+%                 hold on;
+%                 plot(quart1_neural_store,quart1_behav_store ,'ro','markersize',8)
+%                 plot(quart2_neural_store,quart2_behav_store ,'ko','markersize',8)
+%                 plot(quart3_neural_store,quart3_behav_store ,'go','markersize',8)
+%                 plot(quart4_neural_store,quart4_behav_store ,'bo','markersize',8)
+%                 ylim([-20 20])
+%                 xlim([-180 180])
+%                 if vv ==1
+%                     ylabel('Memory error,polar angle')
+%                     xlabel('Neural error,polar angle')
+%                 else
+%                 end
+%                 hold off;
+                figure(individsubjFigure7B)
                 subplot(1,length(ROIs),vv); hold on;
              
                 scatter(thisb_neural,thisb_behav_poldeg,30,subj_col(ss,:),'filled','MarkerFaceAlpha',.4)
@@ -419,8 +476,10 @@ store_fish_ztheta= [];
 pval_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 rho_sg_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
 fish_z_theta = nan(length(cond),length(subj),length(ROIs),length(delay_tpts));
+neural_tert = nan(2, length(subj)); 
 
-figure
+
+
 for cc = 2 %1:length(cond)
     
 for vv=1:length(ROIs)
@@ -445,8 +504,23 @@ for vv=1:length(ROIs)
         
         thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
         thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); % OG
+        
+        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
+        
+        % obtain the 33.33 % and 66.66% perc
+        
+        prc = prctile(thisb_behav_poldeg,[33.3333 66.6666],'all');
+        
+        tert1 = find(thisb_behav_poldeg < prc(1));
+        tert2 = find(prc(1) <= thisb_behav_poldeg & thisb_behav_poldeg <= prc(2));
+        tert3 = find(thisb_behav_poldeg > prc(2));
+        
+        neural_tert(1,ss) = mean(thisb_neural(tert1));
+        neural_tert(2,ss) = mean(thisb_neural(tert3));
+        
+        clear tert1 teart2 tert3 prc
        %thisb_neural_poldeg = thisb_neural_tmp(~isnan(thisb_behav_poldegtmp));
-        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));  % OG %
+        % OG %
         %thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_poldegtmp)); 
 
         [rho_sg(cc,ss,vv,dd), pval_sg(cc,ss,vv,dd)] = corr(thisb_neural', thisb_behav');
@@ -480,6 +554,10 @@ for vv=1:length(ROIs)
     set(gcf,'position',[ 549   724   499   571])
     %end 
     
+    
+    [htert(cc,vv,dd),ptert(cc,vv,dd),~,statstert] = ttest(neural_tert(1,:),neural_tert(2,:));
+    
+    
     [h_th,p_th(cc,vv,dd),~,stats_th] = ttest(fish_z_theta(cc,:,vv,dd));
     realT_th(cc,vv,dd) = stats_th.tstat;
     
@@ -499,6 +577,340 @@ end
 
 
 
+%% quartile testing 
+
+
+fitlinemuquart =  figure('Name','groupCorr;Figure7D');
+fisherfig =  figure('Name','fisherfig');
+
+for cc = 2 %1:length(cond)
+    
+for vv=1:length(ROIs)
+    
+    for dd = 3 %1:length(delay_tpts)
+        quart1_store = [];
+        quart4_store = [];
+        behav_quart = [];
+        behav_store = [];
+        neural_store = [];
+        behav_mustore = [];
+        neural_mustore = [];
+        
+        quart1_behav_store =  [];
+        quart2_behav_store =  [];
+        quart3_behav_store =  [];
+        quart4_behav_store =  [];
+        
+        quart1_neural_store =  [];
+        quart2_neural_store =  [];
+        quart3_neural_store =  [];
+        quart4_neural_store =  [];
+        
+         
+        quart1_behav_mu_store =  [];
+        quart2_behav_mu_store =  [];
+        quart3_behav_mu_store =  [];
+        quart4_behav_mu_store =  [];
+        
+        quart1_neural_mu_store =  [];
+        quart2_neural_mu_store =  [];
+        quart3_neural_mu_store =  [];
+        quart4_neural_mu_store =  [];
+        group_neural_mu_quart =[];
+        group_behav_mu_quart =[];
+        
+    for ss = 1:length(subj)
+        
+        thisb_neural_tmp = [];
+        thisb_behav_tmp = [];
+        thisb_neural = [];
+        thisb_behav = [];
+        thisb_behav_poldegtmp =[];
+        thisb_behav_polradtmp =[];
+        thisb_behav_poldeg =[];
+        thisb_behav_polrad =[];
+        
+        thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+        thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+        thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+        
+        
+        thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
+        thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); % OG
+        
+        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
+        
+        % obtain the 25, 50, & 75 perc for sorting 
+        
+        prc = prctile(thisb_neural,[25.00 50.00 75.00],'all');
+        
+        quart1 = find(thisb_neural < prc(1));
+        quart2 = find(prc(1) <= thisb_neural  & thisb_neural < prc(2));
+        quart3 = find(prc(2) <= thisb_neural  & thisb_neural  < prc(3));
+        quart4 = find(thisb_neural >= prc(3));
+        
+        behav_quart(1,ss) = mean(thisb_behav_poldeg(quart1));
+        behav_quart(2,ss) = mean(thisb_behav_poldeg(quart4));
+        quart1_store =  [quart1_store thisb_behav_poldeg(quart1)];
+        quart4_store =  [quart4_store thisb_behav_poldeg(quart4)];
+        
+        
+        behav_store = [behav_store thisb_behav_poldeg];
+        neural_store = [neural_store thisb_neural];
+        behav_mustore = [behav_mustore mean(thisb_behav_poldeg)];
+        neural_mustore = [neural_mustore mean(thisb_neural)];
+        
+        
+        quart1_behav_store =  [quart1_behav_store thisb_behav_poldeg(quart1)];
+        quart2_behav_store =  [quart2_behav_store thisb_behav_poldeg(quart2)];
+        quart3_behav_store =  [quart3_behav_store thisb_behav_poldeg(quart3)];
+        quart4_behav_store =  [quart4_behav_store thisb_behav_poldeg(quart4)];
+        
+        quart1_neural_store =  [quart1_neural_store thisb_neural(quart1)];
+        quart2_neural_store =  [quart2_neural_store thisb_neural(quart2)];
+        quart3_neural_store =  [quart3_neural_store thisb_neural(quart3)];
+        quart4_neural_store =  [quart4_neural_store thisb_neural(quart4)];
+        
+         
+        quart1_behav_mu_store =  [quart1_behav_mu_store mean(thisb_behav_poldeg(quart1))];
+        quart2_behav_mu_store =  [quart2_behav_mu_store mean(thisb_behav_poldeg(quart2))];
+        quart3_behav_mu_store =  [quart3_behav_mu_store mean(thisb_behav_poldeg(quart3))];
+        quart4_behav_mu_store =  [quart4_behav_mu_store mean(thisb_behav_poldeg(quart4))];
+        
+        quart1_neural_mu_store =  [quart1_neural_mu_store mean(thisb_neural(quart1))];
+        quart2_neural_mu_store =  [quart2_neural_mu_store mean(thisb_neural(quart2))];
+        quart3_neural_mu_store =  [quart3_neural_mu_store mean(thisb_neural(quart3))];
+        quart4_neural_mu_store =  [quart4_neural_mu_store mean(thisb_neural(quart4))];
+        
+
+        clear quart1 quart2 quart3 quart4 prc 
+
+    end
+    
+        [rho_quart_super(cc,vv,dd), pval_rho_quart_super(cc,vv,dd)] = corr(neural_store', behav_store'); 
+        fish_z_theta_quart_super(cc,vv,dd)  = atanh(rho_quart_super(cc,vv,dd));
+        
+        [rho_quart_super_mu(cc,vv,dd), pval_quart_super_mu(cc,vv,dd)] = corr(neural_mustore', behav_mustore'); 
+        fish_z_theta_quart_super_mu(cc,vv,dd)  = atanh(rho_quart_super_mu(cc,vv,dd));
+        
+        group_neural_mu_quart = [quart1_neural_mu_store quart2_neural_mu_store quart3_neural_mu_store quart4_neural_mu_store];
+        group_behav_mu_quart = [quart1_behav_mu_store quart2_behav_mu_store quart3_behav_mu_store quart4_behav_mu_store];
+        
+        [rho_group_mu_quart(cc,vv,dd), pval_rho_group_mu_quart(cc,vv,dd)] = corr( group_neural_mu_quart',group_behav_mu_quart'); 
+         [a, bp,l,u] = corrcoef( group_neural_mu_quart',group_behav_mu_quart'); 
+         ar(cc,vv,dd) = a(1,2);
+         bp(cc,vv,dd) = bp(1,2);
+         rl(cc,vv,dd) = l(1,2);
+         ru(cc,vv,dd) = u(1,2);
+         clear a bp l u 
+         fish_z_theta_quart_mu_quart(cc,vv,dd)  = atanh(rho_group_mu_quart(cc,vv,dd));
+
+         
+         figure(fisherfig);
+         bar(vv, rho_group_mu_quart(cc,vv,dd))
+         hold on;
+         plot([vv vv],[rl(cc,vv,dd) ru(cc,vv,dd)],'k-','linewidth',1)
+         % geh add y =0 baseline
+         
+         if length(ROIs)==7
+             set(gca,'Xtick',[0 1 2 3 4 5 6 7 8 ],'Xticklabel',{'','V1-V3','V3AB','hV4','LO1','IPS0-IPS1','IPS2-IPS3','sPCS',''},'XTickLabelRotation',45,'TickDir','out');
+             xlim([0.05 7.5])
+             line([0 8], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-')
+             ylabel('Rho')
+         else
+             set(gca,'Xtick',[0 1 2 3 4 5 6 7 8 9 10 11 12],'Xticklabel',{'','V1','V2','V3','V3AB','hV4','LO1','IPS0','IPS1','IPS2','IPS3','sPCS',''},'XTickLabelRotation',45,'TickDir','out');
+             xlim([0.05 11.5])
+             line([0 12], [0 0], 'color',[0 0 0],'linewidth',0.5,'linestyle','-')
+             
+         end
+         
+         set(gcf,'position',[ 549   724   499   571])
+         
+         
+         
+         figure(fitlinemuquart);
+         
+         subplot(1,length(ROIs),vv)
+         plot(group_neural_mu_quart,group_behav_mu_quart,'ko','markersize',8)
+         lsline
+         hold on;
+         
+         text(max(xlim)-(.8*max(xlim)),max(ylim)-(1.9*max(ylim)),sprintf('r = %.2f',rho_group_mu_quart(cc,vv,dd)),'FontSize',14)
+         plot(quart1_neural_mu_store,quart1_behav_mu_store,'ro','markersize',8,'markerfacecolor','r')
+         plot(quart2_neural_mu_store,quart2_behav_mu_store,'yo','markersize',8,'markerfacecolor','y')
+         plot(quart3_neural_mu_store,quart3_behav_mu_store,'go','markersize',8,'markerfacecolor','g')
+         plot(quart4_neural_mu_store,quart4_behav_mu_store,'bo','markersize',8,'markerfacecolor','b')
+         set(get(gcf,'Children'),'XLim',[-180 180],'YLim',[-10 10],'xtick',-180:90:180)
+         if vv ==1
+             ylabel('Memory error,polar angle')
+             xlabel('Neural error,polar angle')
+         else
+         end
+         title(ROIs{vv})
+         set(get(gcf,'Children'),'XLim',[-180 180],'YLim',[-10 10],'xtick',-180:90:180)
+         %         [rho_quart_super(cc,vv,dd), pval_rho_quart_super(cc,vv,dd)] = corr(neural_store', behav_store');
+         %         fish_z_theta_quart_super(cc,vv,dd)  = atanh(rho_quart_super(cc,vv,dd));
+         %         [rho_quart_super_mu(cc,vv,dd), pval_quart_super_mu(cc,vv,dd)] = corr(neural_mustore', behav_mustore');
+         %         fish_z_theta_quart_super_mu(cc,vv,dd)  = atanh(rho_quart_super_mu(cc,vv,dd));
+         
+         [~,pquart(cc,vv,dd),~,statsquart] = ttest(behav_quart(1,:),behav_quart(2,:));
+         realT_quart(cc,vv,dd) = statsquart.tstat;
+        
+        clear behav_quart
+
+     end
+
+end
+end 
+
+%% quartile shuffle
+iter =1000;
+quartfig =  figure('Name','quartfig');
+quartfigneural =  figure('Name','quartfigneural');
+pval_rho_group_mu_quart_shuff =nan(length(cond),length(ROIs),length(delay_tpts),iter);
+rho_group_mu_quart_shuff =nan(length(cond),length(ROIs),length(delay_tpts),iter);
+
+for xx =1:iter
+for cc = 2 %1:length(cond)
+    
+for vv=1:length(ROIs)
+    
+    for dd = 3 %1:length(delay_tpts)
+        quart1_store = [];
+        quart4_store = [];
+        neural_tert =[];
+        behav_quart =[];
+        
+            
+        quart1_behav_mu_store =  [];
+        quart2_behav_mu_store =  [];
+        quart3_behav_mu_store =  [];
+        quart4_behav_mu_store =  [];
+        
+        quart1_neural_mu_store =  [];
+        quart2_neural_mu_store =  [];
+        quart3_neural_mu_store =  [];
+        quart4_neural_mu_store =  [];
+        group_neural_mu_quart  =[];
+        group_behav_mu_quart =[];
+        
+    for ss = 1:length(subj)
+        
+        thisb_neural_tmp = [];
+        thisb_behav_tmp = [];
+        thisb_neural = [];
+        thisb_behav = [];
+        thisb_behav_poldegtmp =[];
+        thisb_behav_polradtmp =[];
+        thisb_behav_poldeg =[];
+        thisb_behav_polrad =[];
+        
+        thisb_neural_tmp(1,:) =  squeeze(store_b(cc,vv,dd,ss,:));
+        thisb_behav_tmp(1,:)=  squeeze(mu(2,ss,cc,:))';
+        thisb_behav_poldegtmp(1,:)=  dtheta_poldeg(ss,cc,:);
+        
+        
+        thisb_behav = thisb_behav_tmp(~isnan(thisb_behav_tmp)); 
+        thisb_neural = thisb_neural_tmp(~isnan(thisb_behav_tmp)); % OG
+        
+        thisb_behav_poldeg = thisb_behav_poldegtmp(~isnan(thisb_behav_tmp));
+        
+        % obtain the 33.33 % and 66.66% perc
+        shuff = randperm(length(thisb_behav_poldeg)');
+        shuff_behav = (thisb_behav_poldeg(shuff));
+        prc = prctile(thisb_neural,[25.00 50.00 75.00],'all');
+        
+        quart1 = find(thisb_neural < prc(1));
+        quart2 = find(prc(1) <= thisb_neural  & thisb_neural < prc(2));
+        quart3 = find(prc(2) <= thisb_neural  & thisb_neural  < prc(3));
+        quart4 = find(thisb_neural >= prc(3));
+        
+        
+        quart1_behav_mu_store =  [quart1_behav_mu_store mean(shuff_behav(quart1))];
+        quart2_behav_mu_store =  [quart2_behav_mu_store mean(shuff_behav(quart2))];
+        quart3_behav_mu_store =  [quart3_behav_mu_store mean(shuff_behav(quart3))];
+        quart4_behav_mu_store =  [quart4_behav_mu_store mean(shuff_behav(quart4))];
+        
+        quart1_neural_mu_store =  [quart1_neural_mu_store mean(thisb_neural(quart1))];
+        quart2_neural_mu_store =  [quart2_neural_mu_store mean(thisb_neural(quart2))];
+        quart3_neural_mu_store =  [quart3_neural_mu_store mean(thisb_neural(quart3))];
+        quart4_neural_mu_store =  [quart4_neural_mu_store mean(thisb_neural(quart4))];
+        
+        behav_quart(1,ss) = mean(shuff_behav(quart1));
+        behav_quart(2,ss) = mean(shuff_behav(quart4));
+%         quart1_store =  [quart1_store thisb_behav_poldeg(quart1)];
+%         quart4_store =  [quart4_store thisb_behav_poldeg(quart4)];       
+      
+        clear quart1 quart2 quart3 quart4 prc shuff shuff_behav
+
+    end
+    
+        group_neural_mu_quart = [quart1_neural_mu_store quart2_neural_mu_store quart3_neural_mu_store quart4_neural_mu_store];
+        group_behav_mu_quart = [quart1_behav_mu_store quart2_behav_mu_store quart3_behav_mu_store quart4_behav_mu_store];
+        [rho_group_mu_quart_shuff(cc,vv,dd,xx), pval_rho_group_mu_quart_shuff(cc,vv,dd,xx)] = corr( group_neural_mu_quart',group_behav_mu_quart'); 
+    
+        [~,pquart_shuff(cc,vv,dd),~,statsquart_shuff] = ttest(behav_quart(1,:),behav_quart(2,:));
+        store_Tquart(cc,vv,dd,xx) = statsquart_shuff.tstat;
+        
+        clear neural_tert
+
+     end
+
+end
+end 
+end
+
+
+% plot it
+figure;
+histogram(squeeze(rho_group_mu_quart_shuff(2,1,3,:)))
+hold on;
+line([rho_group_mu_quart(2,1,3)   rho_group_mu_quart(2,1,3)], [0 max(ylim)],'LineWidth',0.75,'color','r')
+p_two_quart = 2 * min ( mean( rho_group_mu_quart_shuff(2,1,3,:) <= rho_group_mu_quart(2,1,3) ), mean (rho_group_mu_quart_shuff(2,1,3,:) >= rho_group_mu_quart(2,1,3)));
+p_one_quart = mean( rho_group_mu_quart_shuff(2,1,3,:) >= rho_group_mu_quart(2,1,3) );
+title('Shuffled Rho')
+
+% TESTING IN PROGRESS - RETURN TO ORIGINAL OR UPDATE %
+% rho
+for cc=1:2
+    for vv=1:length(ROIs)
+        for dd =1:length(delay_tpts)
+            p_two_quartcheck(cc,vv,dd) = 2 * min ( mean( squeeze(rho_group_mu_quart_shuff(cc,vv,dd,:)) <= rho_group_mu_quart(cc,vv,dd) ), mean ( squeeze(rho_group_mu_quart_shuff(cc,vv,dd,:)) >= rho_group_mu_quart(cc,vv,dd)));
+            p_one_quartcheck(cc,vv,dd)  = mean ( squeeze(rho_group_mu_quart_shuff(cc,vv,dd,:)) >= rho_group_mu_quart(cc,vv,dd));
+        end
+    end
+end
+
+% figure;
+% histogram(squeeze(store_Tquart(2,1,3,:)))
+% hold on;
+% line([realT_quart(2,1,3)   realT_quart(2,1,3)], [0 max(ylim)],'LineWidth',0.75,'color','r')
+% p_two_quart = 2 * min ( mean( store_Tquart(2,1,3,:) <= realT_quart(2,1,3) ), mean ( store_Tquart(2,1,3,:) >= realT_quart(2,1,3)));
+% p_one_quart = mean( store_Tquart(2,1,3,:) <= realT_quart(2,1,3) );
+
+% for cc=1:2
+%     for vv=1:length(ROIs)
+%         for dd =1:length(delay_tpts)
+%             
+%             p_two_quartcheck(cc,vv,dd) = 2 * min ( mean( store_Tquart(cc,vv,dd,:) <= realT_quart(cc,vv,dd) ), mean ( store_Tquart(cc,vv,dd,:) >= realT_quart(cc,vv,dd)));
+%             %p_one_quartcheck(cc,vv,dd) = min ( mean( store_Tquart(cc,vv,dd,:) <= realT_quart(cc,vv,dd) ), mean ( store_Tquart(cc,vv,dd,:) >= realT_quart(cc,vv,dd))) ;
+%             p_one_quartcheck(cc,vv,dd) = mean( store_Tquart(cc,vv,dd,:) <= realT_quart(cc,vv,dd) );
+%             
+%         end
+%     end
+% end
+% 
+
+for cc=1:2
+    for vv=1:length(ROIs)
+        for dd =1:length(delay_tpts)
+            
+            [pfdr_two_quart(cc,:,dd), pmask_two_quart(cc,:,dd)] = fdr(p_two_quartcheck(cc,:,dd),0.05) %  two tail     
+            [pfdr_one_quart(cc,:,dd), pmask_one_quart(cc,:,dd)] = fdr(p_one_quartcheck(cc,:,dd),0.05)
+            
+        end
+    end
+end
 
 %%
 

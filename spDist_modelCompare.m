@@ -225,7 +225,7 @@ for yy = 1:length(n_files)
         
     end
 end
-%% Figure 6B
+%% Figure 6C
 %plot only like trn/tst combinations
 
 trn_epoch =[1 2 3];
@@ -324,7 +324,7 @@ match_xlim(get(gcf,'Children'));
 
 
 
-%% Figure 6C - old ver
+%% Figure 6C - plot no longer in use, but keep for stats 06292021
 %plot matched trn/tst GAT fidelty data, on same plot, plot independently trained fidelity data
 % plot fidelity plotting TRAIN as dv
 % which tpts are we plotting throughout?
@@ -523,7 +523,7 @@ for vv = 1:length(ROIs)
         thise = squeeze(std(thisd(:,cc,:),[],3))/sqrt(length(subj));
         plot(1:length(delay_tpts),thism,'o-','Color',model_colors(cc,:),'LineWidth',1.5,'MarkerSize',5,'MarkerFaceColor',model_colors(cc,:));
         %plot(1:length(delay_tpts),thism+[-1;1].*thise,'-','LineColor',model_colors(cc,:),'LineWidth',1.5);
-        plot([1;1].*(1:length(delay_tpts)),(thism+[-1 1].*thise).','-','Color',model_colors(cc,:),'LineWidth',1.5)
+      % this one  plot([1;1].*(1:length(delay_tpts)),(thism+[-1 1].*thise).','-','Color',model_colors(cc,:),'LineWidth',1.5)
     end
     
     for ee = 1:length(delay_tpts)
